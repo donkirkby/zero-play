@@ -1,3 +1,5 @@
+from typing import List
+
 import numpy as np
 
 
@@ -23,10 +25,25 @@ class TicTacToeGame:
     def get_valid_moves(board: np.ndarray) -> np.ndarray:
         return board.reshape(9) == 0
 
-    def display(self, board: np.ndarray) -> str:
-        return ''.join(''.join(self.DISPLAY_CHARS[board[i, j]+1]
-                               for j in range(3)) + '\n'
-                       for i in range(3))
+    def display(self, board: np.ndarray, show_coordinates: bool = False) -> str:
+        size = 3
+        header = '  ABC\n' if show_coordinates else ''
+        row_headers = [str(i+1) + ' ' if show_coordinates else ''
+                       for i in range(size)]
+        return header + ''.join(
+            row_headers[i] + ''.join(self.DISPLAY_CHARS[board[i, j]+1]
+                                     for j in range(3)) + '\n'
+            for i in range(3))
+
+    @staticmethod
+    def display_moves(moves: np.ndarray) -> List[str]:
+        size = 3
+        displays = []
+        for i, is_valid in enumerate(moves):
+            if is_valid:
+                i, j = i // size, i % size
+                displays.append(f'{i+1}{chr(j+65)}')
+        return displays
 
     def make_move(self, board: np.ndarray, move: int) -> np.ndarray:
         x_count = (board == self.X_PLAYER).sum()

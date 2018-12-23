@@ -40,6 +40,21 @@ X..
     assert expected_text == text
 
 
+def test_display_coordinates():
+    board = np.array([[1, 0, 0],
+                      [0, -1, 0],
+                      [0, 0, 0]])
+    expected_text = """\
+  ABC
+1 X..
+2 .O.
+3 ...
+"""
+    text = TicTacToeGame().display(board, show_coordinates=True)
+
+    assert expected_text == text
+
+
 def test_get_valid_moves():
     text = """\
 X..
@@ -52,6 +67,21 @@ X..
     moves = game.get_valid_moves(board)
 
     assert np.array_equal(expected_moves, moves)
+
+
+def test_display_moves():
+    text = """\
+XX.
+.OO
+XO.
+"""
+    expected_move_display = ['1C', '2A', '3C']
+    game = TicTacToeGame()
+    board = game.create_board(text)
+    moves = game.get_valid_moves(board)
+    move_display = game.display_moves(moves)
+
+    assert np.array_equal(expected_move_display, move_display)
 
 
 def test_make_move():
@@ -136,7 +166,7 @@ XXO
     assert expected_winner == winner
 
 
-def test():
+def test_diagonal_winner():
     text = """\
 OX.
 XOO

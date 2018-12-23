@@ -3,7 +3,7 @@ python:
     - "3.6"
 install:
     - "pip install pipenv"
-    - "pipenv install"
+    - "pipenv install --dev"
 script: "coverage run --source=zero_play -m pytest"
 
 after_success:
