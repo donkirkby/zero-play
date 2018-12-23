@@ -1,0 +1,9 @@
+language: python
+python:
+    - "3.6"
+install: "pipenv install"
+script: "coverage run --source=zero_play -m pytest"
+
+after_success:
+    - pip install codecov
+    - codecov
