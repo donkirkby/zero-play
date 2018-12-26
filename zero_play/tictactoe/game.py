@@ -1,5 +1,3 @@
-from typing import List
-
 import numpy as np
 
 
@@ -13,7 +11,12 @@ class TicTacToeGame:
     def create_board(text: str = None) -> np.ndarray:
         board = np.zeros((3, 3), dtype=int)
         if text:
-            for i, line in enumerate(text.splitlines()):
+            lines = text.splitlines()
+            if len(lines) == 4:
+                # Trim off coordinates.
+                lines = lines[1:]
+                lines = [line[2:] for line in lines]
+            for i, line in enumerate(lines):
                 for j, c in enumerate(line):
                     if c == 'X':
                         board[i, j] = 1
@@ -36,19 +39,37 @@ class TicTacToeGame:
             for i in range(3))
 
     @staticmethod
-    def display_moves(moves: np.ndarray) -> List[str]:
+    def display_move(move: int) -> str:
         size = 3
-        displays = []
-        for i, is_valid in enumerate(moves):
-            if is_valid:
-                i, j = i // size, i % size
-                displays.append(f'{i+1}{chr(j+65)}')
-        return displays
+        i, j = move // size, move % size
+        return f'{i+1}{chr(j+65)}'
 
-    def make_move(self, board: np.ndarray, move: int) -> np.ndarray:
+    @staticmethod
+    def parse_move(text: str) -> int:
+        size = 3
+        clean_text = text.upper().strip()
+        if len(clean_text) != 2:
+            raise ValueError('Move must have one number and one letter.')
+        y, x = map(ord, clean_text)
+        i, j = y-49, x-65
+        if i >= size:
+            raise ValueError(f'Row must be between 1 and {size}.')
+        if j >= size:
+            raise ValueError(f'Column must be between A and {chr(64+size)}.')
+        return i*size + j
+
+    def display_player(self, player: int) -> str:
+        if player == self.X_PLAYER:
+            return 'Player X'
+        return 'Player O'
+
+    def get_active_player(self, board: np.ndarray) -> int:
         x_count = (board == self.X_PLAYER).sum()
         y_count = (board == self.O_PLAYER).sum()
-        moving_player = self.X_PLAYER if x_count == y_count else self.O_PLAYER
+        return self.X_PLAYER if x_count == y_count else self.O_PLAYER
+
+    def make_move(self, board: np.ndarray, move: int) -> np.ndarray:
+        moving_player = self.get_active_player(board)
         new_board: np.ndarray = board.copy()
         i, j = move // 3, move % 3
         new_board[i, j] = moving_player

@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from zero_play.tictactoe.game import TicTacToeGame
 
@@ -17,6 +18,21 @@ def test_create_board_from_text():
 X..
 .O.
 ...
+"""
+    expected_board = np.array([[1, 0, 0],
+                               [0, -1, 0],
+                               [0, 0, 0]])
+    board = TicTacToeGame().create_board(text)
+
+    assert np.array_equal(expected_board, board)
+
+
+def test_create_board_with_coordinates():
+    text = """\
+  ABC
+1 X..
+2 .O.
+3 ...
 """
     expected_board = np.array([[1, 0, 0],
                                [0, -1, 0],
@@ -69,19 +85,54 @@ X..
     assert np.array_equal(expected_moves, moves)
 
 
-def test_display_moves():
-    text = """\
-XX.
-.OO
-XO.
-"""
-    expected_move_display = ['1C', '2A', '3C']
-    game = TicTacToeGame()
-    board = game.create_board(text)
-    moves = game.get_valid_moves(board)
-    move_display = game.display_moves(moves)
+@pytest.mark.parametrize('move,expected_display', [
+    (0, '1A'),
+    (2, '1C'),
+    (3, '2A'),
+    (7, '3B')
+])
+def test_display_move(move, expected_display):
+    display = TicTacToeGame().display_move(move)
 
-    assert np.array_equal(expected_move_display, move_display)
+    assert expected_display == display
+
+
+@pytest.mark.parametrize('text,expected_move', [
+    ('1A', 0),
+    ('1c', 2),
+    ('2A\n', 3),
+    ('3B', 7)
+])
+def test_parse_move(text, expected_move):
+    move = TicTacToeGame().parse_move(text)
+
+    assert expected_move == move
+
+
+@pytest.mark.parametrize('text,expected_message', [
+    ('4B', r'Row must be between 1 and 3\.'),
+    ('2D', r'Column must be between A and C\.'),
+    ('2BC', r'Move must have one number and one letter\.'),
+])
+def test_parse_move_fails(text, expected_message):
+    with pytest.raises(ValueError, match=expected_message):
+        TicTacToeGame().parse_move(text)
+
+
+def test_display_player_x():
+    expected_display = 'Player X'
+
+    display = TicTacToeGame().display_player(TicTacToeGame.X_PLAYER)
+
+    assert expected_display == display
+
+
+def test_display_player_o():
+    expected_display = 'Player O'
+
+    display = TicTacToeGame().display_player(TicTacToeGame.O_PLAYER)
+
+    assert expected_display == display
 
 
 def test_make_move():
@@ -122,6 +173,34 @@ OO.
     display = game.display(board2)
 
     assert expected_display == display
+
+
+def test_get_active_player_o():
+    text = """\
+XX.
+.O.
+...
+"""
+    expected_player = TicTacToeGame.O_PLAYER
+    game = TicTacToeGame()
+    board = game.create_board(text)
+    player = game.get_active_player(board)
+
+    assert expected_player == player
+
+
+def test_get_active_player_x():
+    text = """\
+XX.
+.OO
+...
+"""
+    expected_player = TicTacToeGame.X_PLAYER
+    game = TicTacToeGame()
+    board = game.create_board(text)
+    player = game.get_active_player(board)
+
+    assert expected_player == player
 
 
 def test_no_winner():
