@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class TicTacToeGame:
+class Connect4Game:
     DISPLAY_CHARS = 'O.X'
     NO_PLAYER = 0
     X_PLAYER = 1
@@ -9,13 +9,12 @@ class TicTacToeGame:
 
     @staticmethod
     def create_board(text: str = None) -> np.ndarray:
-        board = np.zeros((3, 3), dtype=int)
+        board = np.zeros((6, 7), dtype=int)
         if text:
             lines = text.splitlines()
-            if len(lines) == 4:
+            if len(lines) == 7:
                 # Trim off coordinates.
                 lines = lines[1:]
-                lines = [line[2:] for line in lines]
             for i, line in enumerate(lines):
                 for j, c in enumerate(line):
                     if c == 'X':
@@ -26,7 +25,8 @@ class TicTacToeGame:
 
     @staticmethod
     def get_valid_moves(board: np.ndarray) -> np.ndarray:
-        return board.reshape(9) == 0
+        # Any zero value in top row in a valid move
+        return board[0] == 0
 
     def is_ended(self, board: np.ndarray) -> bool:
         if self.get_winner(board) != self.NO_PLAYER:
@@ -35,34 +35,22 @@ class TicTacToeGame:
         return not valid_moves.any()
 
     def display(self, board: np.ndarray, show_coordinates: bool = False) -> str:
-        size = 3
-        header = '  ABC\n' if show_coordinates else ''
-        row_headers = [str(i+1) + ' ' if show_coordinates else ''
-                       for i in range(size)]
+        header = '1234567\n' if show_coordinates else ''
         return header + ''.join(
-            row_headers[i] + ''.join(self.DISPLAY_CHARS[board[i, j]+1]
-                                     for j in range(3)) + '\n'
-            for i in range(3))
+            ''.join(self.DISPLAY_CHARS[board[i, j]+1]
+                    for j in range(7)) + '\n'
+            for i in range(6))
 
     @staticmethod
     def display_move(move: int) -> str:
-        size = 3
-        i, j = move // size, move % size
-        return f'{i+1}{chr(j+65)}'
+        return str(move+1)
 
     @staticmethod
     def parse_move(text: str) -> int:
-        size = 3
-        clean_text = text.upper().strip()
-        if len(clean_text) != 2:
-            raise ValueError('Move must have one number and one letter.')
-        y, x = map(ord, clean_text)
-        i, j = y-49, x-65
-        if i >= size:
-            raise ValueError(f'Row must be between 1 and {size}.')
-        if j >= size:
-            raise ValueError(f'Column must be between A and {chr(64+size)}.')
-        return i*size + j
+        move_int = int(text)
+        if move_int < 1 or 7 < move_int:
+            raise ValueError('Move must be between 1 and 7.')
+        return move_int - 1
 
     def display_player(self, player: int) -> str:
         if player == self.X_PLAYER:
@@ -77,8 +65,11 @@ class TicTacToeGame:
     def make_move(self, board: np.ndarray, move: int) -> np.ndarray:
         moving_player = self.get_active_player(board)
         new_board: np.ndarray = board.copy()
-        i, j = move // 3, move % 3
-        new_board[i, j] = moving_player
+        available_idx, = np.where(new_board[:, move] == 0)
+        # if len(available_idx) == 0:
+        #     raise ValueError("Can't play column %s on board %s" % (column, self))
+
+        new_board[available_idx[-1]][move] = moving_player
         return new_board
 
     def get_winner(self, board: np.ndarray) -> int:
@@ -91,31 +82,34 @@ class TicTacToeGame:
     @staticmethod
     def is_win(board: np.ndarray, player: int) -> bool:
         """ Has the given player collected a triplet in any direction? """
-        size = 3
+        row_count = 6
+        column_count = 7
+        win_count = 4
         # check horizontal lines
-        for i in range(size):
+        for i in range(row_count):
             count = 0
-            for j in range(size):
+            for j in range(column_count):
                 if board[i, j] == player:
                     count += 1
-            if count == size:
+            if count >= win_count:
                 return True
         # check vertical lines
-        for j in range(size):
+        for j in range(column_count):
             count = 0
-            for i in range(size):
+            for i in range(row_count):
                 if board[i, j] == player:
                     count += 1
-            if count == size:
+            if count >= win_count:
                 return True
         # check two diagonal strips
-        count1 = count2 = 0
-        for d in range(size):
-            if board[d, d] == player:
-                count1 += 1
-            if board[d, size-d-1] == player:
-                count2 += 1
-        if count1 == size or count2 == size:
-            return True
+        for start_column in range(column_count-win_count):
+            count1 = count2 = 0
+            for d in range(row_count-start_column):
+                if board[d, start_column + d] == player:
+                    count1 += 1
+                if board[d, column_count - start_column - d - 1] == player:
+                    count2 += 1
+            if count1 >= win_count or count2 >= win_count:
+                return True
 
         return False

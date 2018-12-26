@@ -25,7 +25,7 @@ Player X:
     assert expected_output == out
 
 
-def test(monkeypatch, capsys):
+def test_winning_turn(monkeypatch, capsys):
     monkeypatch.setattr('sys.stdin', StringIO('1C\n'))
     player1_args = player2_args = Namespace(player=HumanPlayer)
     controller = PlayController(TicTacToeGame, player1_args, player2_args)
@@ -46,6 +46,36 @@ Player X:
 2 .O.
 3 O..
 Player X Wins.
+"""
+
+    is_finished = controller.take_turn()
+
+    assert is_finished
+    out, err = capsys.readouterr()
+    assert expected_output == out
+
+
+def test(monkeypatch, capsys):
+    monkeypatch.setattr('sys.stdin', StringIO('2A\n'))
+    player1_args = player2_args = Namespace(player=HumanPlayer)
+    controller = PlayController(TicTacToeGame, player1_args, player2_args)
+    controller.board = controller.game.create_board("""\
+  ABC
+1 XOX
+2 .OX
+3 OXO
+""")
+    expected_output = """\
+  ABC
+1 XOX
+2 .OX
+3 OXO
+Player X: 
+  ABC
+1 XOX
+2 XOX
+3 OXO
+The game is a draw.
 """
 
     is_finished = controller.take_turn()

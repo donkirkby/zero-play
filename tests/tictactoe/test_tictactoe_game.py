@@ -257,3 +257,45 @@ XXO
     winner = game.get_winner(board)
 
     assert expected_winner == winner
+
+
+def test_not_ended():
+    text = """\
+OX.
+XOO
+XOX
+"""
+    expected_is_ended = False
+    game = TicTacToeGame()
+    board = game.create_board(text)
+    is_ended = game.is_ended(board)
+
+    assert expected_is_ended == is_ended
+
+
+def test_winner_ended():
+    text = """\
+OX.
+XOO
+XXO
+"""
+    expected_is_ended = True
+    game = TicTacToeGame()
+    board = game.create_board(text)
+    is_ended = game.is_ended(board)
+
+    assert expected_is_ended == is_ended
+
+
+def test_draw_ended():
+    text = """\
+OXX
+XOO
+XOX
+"""
+    expected_is_ended = True
+    game = TicTacToeGame()
+    board = game.create_board(text)
+    is_ended = game.is_ended(board)
+
+    assert expected_is_ended == is_ended
