@@ -4,7 +4,7 @@ from importlib import import_module
 import numpy as np
 
 from zero_play.human_player import HumanPlayer
-from zero_play.tictactoe.game import TicTacToeGame
+from zero_play.game import Game
 
 
 def parse_args():
@@ -32,7 +32,7 @@ def imported_argument(full_class_name):
 
 class PlayController:
     def __init__(self, game_class, player1_args, player2_args):
-        self.game: TicTacToeGame = game_class()
+        self.game: Game = game_class()
         self.players = {1: player1_args.player(),
                         -1: player2_args.player()}
         self.board: np.ndarray = self.game.create_board()
