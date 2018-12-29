@@ -31,7 +31,7 @@ setup(name='zero_play',
       keywords='boardgames alphazero machine learning mcts',
       packages=['zero_play'],
       install_requires=['numpy'],
-      extras_require={'dev': ['matplotlib', 'pytest', 'coverage']},
+      extras_require={'dev': ['matplotlib', 'pytest', 'coverage', 'mypy']},
       entry_points={'console_scripts': ['zero_play=zero_play.command.play:main',
                                         'zero_train=zero_play.command.train:main']},
       project_urls={

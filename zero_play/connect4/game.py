@@ -48,35 +48,34 @@ class Connect4Game(Game):
         return new_board
 
     def is_win(self, board: np.ndarray, player: int) -> bool:
-        """ Has the given player collected a triplet in any direction? """
-        row_count = 6
-        column_count = 7
+        """ Has the given player collected four in a row in any direction? """
+        row_count, column_count = board.shape
         win_count = 4
-        # check horizontal lines
-        for i in range(row_count):
-            count = 0
-            for j in range(column_count):
-                if board[i, j] == player:
-                    count += 1
-            if count >= win_count:
-                return True
-        # check vertical lines
-        for j in range(column_count):
-            count = 0
-            for i in range(row_count):
-                if board[i, j] == player:
-                    count += 1
-            if count >= win_count:
-                return True
+        player_pieces = board == player
+        if self.is_horizontal_win(player_pieces, win_count):
+            return True
+        if self.is_horizontal_win(player_pieces.transpose(), win_count):
+            return True
         # check two diagonal strips
-        for start_column in range(column_count-win_count):
-            count1 = count2 = 0
-            for d in range(row_count-start_column):
-                if board[d, start_column + d] == player:
-                    count1 += 1
-                if board[d, column_count - start_column - d - 1] == player:
-                    count2 += 1
-            if count1 >= win_count or count2 >= win_count:
-                return True
+        for start_row in range(row_count-win_count):
+            for start_column in range(column_count-win_count):
+                count1 = count2 = 0
+                for d in range(win_count):
+                    if board[start_row + d, start_column + d] == player:
+                        count1 += 1
+                    if board[start_row + d, start_column + win_count - d] == player:
+                        count2 += 1
+                if count1 == win_count or count2 == win_count:
+                    return True
 
+        return False
+
+    @staticmethod
+    def is_horizontal_win(player_pieces: np.ndarray, win_count):
+        row_count, column_count = player_pieces.shape
+        for i in range(row_count):
+            for j in range(column_count-win_count):
+                count = player_pieces[i, j:j+win_count].sum()
+                if count >= win_count:
+                    return True
         return False

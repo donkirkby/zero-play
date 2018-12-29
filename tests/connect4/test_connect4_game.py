@@ -255,8 +255,8 @@ def test_no_winner():
 .......
 .......
 .......
-....O..
-..XXXO.
+...OO..
+X.XXXO.
 """
     game = Connect4Game()
     expected_winner = game.NO_PLAYER

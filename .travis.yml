@@ -4,7 +4,9 @@ python:
 install:
     - "pip install pipenv"
     - "pipenv install --dev"
-script: "coverage run --source=zero_play -m pytest"
+script:
+    - mypy zero_play
+    - coverage run --source=zero_play -m pytest
 
 after_success:
     - pip install codecov

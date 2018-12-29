@@ -299,3 +299,35 @@ XOX
     is_ended = game.is_ended(board)
 
     assert expected_is_ended == is_ended
+
+
+def test_create_hashable_board():
+    text = """\
+X.O
+OOO
+OOO
+"""
+    # "O" has value 0, "." has value  1, and "X" has value 2. First position
+    # multiplies that value by 1, next by 3, next by 9, and so on.
+    expected_hashable_board = 2*1 + 1*3
+
+    game = TicTacToeGame()
+    board = game.create_board(text)
+    hashable_board = game.create_hashable_board(board)
+
+    assert expected_hashable_board == hashable_board
+
+
+def test_parse_hashable_board():
+    hashable_board = 2*1 + 1*3
+    expected_display = """\
+X.O
+OOO
+OOO
+"""
+    game = TicTacToeGame()
+
+    board = game.parse_hashable_board(hashable_board)
+    display = game.display(board)
+
+    assert expected_display == display
