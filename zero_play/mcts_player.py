@@ -137,5 +137,5 @@ class MctsPlayer:
         if root.children is None:
             root.select_leaf()
         best_children = root.find_best_children()
-        child = choice(best_children)
+        child = np.random.choice(best_children)
         return child.move
