@@ -24,42 +24,6 @@ class Game(ABC):
         :return: an array where each value is the state of one board space.
             Typical states are NO_PLAYER, X_PLAYER, and O_PLAYER.
         """
-    
-    @staticmethod
-    def create_hashable_board(board: np.ndarray) -> typing.Hashable:
-        """ Create a hashable representation for a game board.
-        
-        :param board: an array of piece values, like the ones returned by
-            create_board().
-        :return: a hashable representation of board.
-        """
-        powers = np.arange(board.size).reshape(board.shape)
-        coefficients = 3 ** powers
-        piece_values = 1 + board
-        terms = piece_values * coefficients
-        h = terms.sum()
-        return int(h)
-
-    def parse_hashable_board(self,
-                             hashable_board: typing.Hashable) -> np.ndarray:
-        """ Parse a hashable board back into an array of piece values.
-
-        :param hashable_board: a hashable representation of a board.
-        :return: an array of piece values, like the ones returned by
-            create_board().
-        """
-        if not isinstance(hashable_board, int):
-            raise NotImplementedError(
-                'Override this method to support other hashable board types.')
-        board = self.create_board()
-        row_count, column_count = board.shape
-        for space_index in range(board.size):
-            piece_value = (hashable_board % 3) - 1
-            i = space_index // column_count
-            j = space_index % column_count
-            board[i, j] = piece_value
-            hashable_board //= 3
-        return board
 
     @abstractmethod
     def get_valid_moves(self, board: np.ndarray) -> np.ndarray:

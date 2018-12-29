@@ -5,29 +5,6 @@ from zero_play.mcts_player import SearchNode, MctsPlayer
 from zero_play.tictactoe.game import TicTacToeGame
 
 
-def test_key():
-    game = TicTacToeGame()
-    board = game.create_board()
-    expected_key = game.create_hashable_board(board)
-
-    node = SearchNode(game, board)
-    key = node.key
-
-    assert expected_key == key
-
-
-def test_hash():
-    game = TicTacToeGame()
-    board = game.create_board()
-    expected_key = game.create_hashable_board(board)
-    expected_hash = hash(expected_key)
-
-    node = SearchNode(game, board)
-    node_hash = hash(node)
-
-    assert expected_hash == node_hash
-
-
 def test_repr():
     game = TicTacToeGame()
     board_text = """\
@@ -169,6 +146,8 @@ O..
 """)
     iteration_count = 1000
     expected_value_total = iteration_count / 3
+    expected_low = expected_value_total * 0.9
+    expected_high = expected_value_total * 1.1
     player = MctsPlayer(game)
 
     value_total = 0
@@ -176,7 +155,7 @@ O..
         value = player.simulate(start_board)
         value_total += value
 
-    assert expected_value_total*0.9 < value_total < expected_value_total*1.1
+    assert expected_low < value_total < expected_high
 
 
 def test_simulate_wins_and_losses():
@@ -188,6 +167,8 @@ XO.
 """)
     iteration_count = 2000
     expected_value_total = -iteration_count / 3
+    expected_low = expected_value_total * 1.1
+    expected_high = expected_value_total * 0.9
     player = MctsPlayer(game)
 
     value_total = 0
@@ -195,7 +176,7 @@ XO.
         value = player.simulate(start_board)
         value_total += value
 
-    assert expected_value_total*1.1 < value_total < expected_value_total*0.9
+    assert expected_low < value_total < expected_high
 
 
 def test_choose_move():
@@ -235,8 +216,10 @@ def test_choose_move_no_iterations():
 OXOXO..
 XOXOXOO
 """)
-    test_count = 2000
+    test_count = 4000
     expected_count = test_count/7
+    expected_low = expected_count * 0.9
+    expected_high = expected_count * 1.1
     move_counts = Counter()
     for _ in range(test_count):
         player = MctsPlayer(game, iteration_count=0)
@@ -244,4 +227,4 @@ XOXOXOO
         move = player.choose_move(start_board)
         move_counts[move] += 1
 
-    assert expected_count * 0.9 < move_counts[2] < expected_count * 1.1
+    assert expected_low < move_counts[2] < expected_high

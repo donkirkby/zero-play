@@ -23,8 +23,9 @@ class SearchNode:
         """
         self.game = game
         if board is None:
-            board = game.create_board()
-        self.key = game.create_hashable_board(board)
+            self.board = game.create_board()
+        else:
+            self.board = board
         self.parent = parent
         self.move = move
         self.children: typing.Optional[typing.List[SearchNode]] = None
@@ -32,17 +33,13 @@ class SearchNode:
         self.simulation_count = 0
 
     def __repr__(self):
-        board = self.game.parse_hashable_board(self.key)
-        board_repr = " ".join(repr(board).split())
+        board_repr = " ".join(repr(self.board).split())
         board_repr = board_repr.replace('[ ', '[')
         return f"SearchNode({self.game!r}, {board_repr})"
 
-    def __hash__(self):
-        return hash(self.key)
-
     def __eq__(self, other):
         if isinstance(other, SearchNode):
-            return self.key == other.key
+            return np.array_equal(self.board, other.board)
         return NotImplemented
 
     def select_leaf(self):
@@ -66,11 +63,10 @@ class SearchNode:
         return best_child.select_leaf()
 
     def find_all_children(self) -> typing.List['SearchNode']:
-        board = self.game.parse_hashable_board(self.key)
         children = []
-        for move, is_valid in enumerate(self.game.get_valid_moves(board)):
+        for move, is_valid in enumerate(self.game.get_valid_moves(self.board)):
             if is_valid:
-                child_board = self.game.make_move(board, move)
+                child_board = self.game.make_move(self.board, move)
                 children.append(SearchNode(self.game,
                                            child_board,
                                            self,
@@ -134,8 +130,7 @@ class MctsPlayer:
         root = SearchNode(self.game, board)
         for _ in range(self.iteration_count):
             leaf = root.select_leaf()
-            board = self.game.parse_hashable_board(leaf.key)
-            value = self.simulate(board)
+            value = self.simulate(leaf.board)
             leaf.record_value(value)
         if root.children is None:
             root.select_leaf()
