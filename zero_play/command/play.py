@@ -5,6 +5,7 @@ import numpy as np
 
 from zero_play.human_player import HumanPlayer
 from zero_play.game import Game
+from zero_play.mcts_player import MctsPlayer
 
 
 def parse_args():
@@ -33,16 +34,15 @@ def imported_argument(full_class_name):
 class PlayController:
     def __init__(self, game_class, player1_args, player2_args):
         self.game: Game = game_class()
-        self.players = {1: player1_args.player(),
-                        -1: player2_args.player()}
+        self.players = {1: player1_args.player(self.game),
+                        -1: player2_args.player(self.game)}
         self.board: np.ndarray = self.game.create_board()
 
     def take_turn(self):
         self.display_board()
-        valid_moves = self.game.get_valid_moves(self.board)
         player_number = self.game.get_active_player(self.board)
         player = self.players[player_number]
-        move = player.choose_move(self.game, self.board, valid_moves)
+        move = player.choose_move(self.board)
         print()
         self.board = self.game.make_move(self.board, move)
         winner = self.game.get_winner(self.board)
@@ -62,7 +62,8 @@ class PlayController:
 
 def main():
     args = parse_args()
-    player1_args = player2_args = Namespace(player=HumanPlayer)
+    player1_args = Namespace(player=MctsPlayer)
+    player2_args = Namespace(player=HumanPlayer)
     controller = PlayController(args.game, player1_args, player2_args)
     while not controller.take_turn():
         pass

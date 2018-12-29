@@ -107,6 +107,32 @@ XO.
     assert expected_leaf == leaf
 
 
+def test_select_no_children():
+    game = TicTacToeGame()
+    start_board = game.create_board("""\
+XOX
+OOX
+.XO
+""")
+    expected_leaf_board = game.create_board("""\
+XOX
+OOX
+XXO
+""")
+    expected_leaf = SearchNode(game, expected_leaf_board)
+
+    start_node = SearchNode(game, start_board)
+    leaf1 = start_node.select_leaf()
+    leaf1.record_value(1)
+    leaf2 = start_node.select_leaf()
+    leaf2.record_value(1)
+    leaf3 = start_node.select_leaf()
+
+    assert start_node == leaf1
+    assert expected_leaf == leaf2
+    assert expected_leaf == leaf3
+
+
 def test_simulate_finished_game():
     game = TicTacToeGame()
     start_board = game.create_board("""\

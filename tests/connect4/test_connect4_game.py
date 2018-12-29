@@ -283,6 +283,23 @@ def test_horizontal_winner():
     assert expected_winner == winner
 
 
+def test_horizontal_end_winner():
+    text = """\
+.......
+.......
+.......
+.......
+...OO..
+..OXXXX
+"""
+    game = Connect4Game()
+    expected_winner = game.X_PLAYER
+    board = game.create_board(text)
+    winner = game.get_winner(board)
+
+    assert expected_winner == winner
+
+
 def test_longer_winner():
     text = """\
 .......
@@ -339,6 +356,23 @@ def test_diagonal2_winner():
 ..XOXOX
 ..OXOXO
 ..OXXXO
+"""
+    game = Connect4Game()
+    expected_winner = game.X_PLAYER
+    board = game.create_board(text)
+    winner = game.get_winner(board)
+
+    assert expected_winner == winner
+
+
+def test_diagonal2_bottom_winner():
+    text = """\
+.......
+.......
+....X..
+...XO..
+..XOO..
+.XOXOX.
 """
     game = Connect4Game()
     expected_winner = game.X_PLAYER

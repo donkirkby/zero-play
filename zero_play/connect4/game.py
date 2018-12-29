@@ -57,8 +57,8 @@ class Connect4Game(Game):
         if self.is_horizontal_win(player_pieces.transpose(), win_count):
             return True
         # check two diagonal strips
-        for start_row in range(row_count-win_count):
-            for start_column in range(column_count-win_count):
+        for start_row in range(row_count - win_count + 1):
+            for start_column in range(column_count - win_count):
                 count1 = count2 = 0
                 for d in range(win_count):
                     if board[start_row + d, start_column + d] == player:
@@ -74,7 +74,7 @@ class Connect4Game(Game):
     def is_horizontal_win(player_pieces: np.ndarray, win_count):
         row_count, column_count = player_pieces.shape
         for i in range(row_count):
-            for j in range(column_count-win_count):
+            for j in range(column_count-win_count+1):
                 count = player_pieces[i, j:j+win_count].sum()
                 if count >= win_count:
                     return True

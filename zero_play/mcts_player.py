@@ -47,6 +47,8 @@ class SearchNode:
             return self
         if self.children is None:
             self.children = self.find_all_children()
+        if not self.children:
+            return self
 
         # No neural network yet, so evenly distribute the prior values.
         prior = 1 / len(self.children)

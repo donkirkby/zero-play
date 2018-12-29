@@ -55,7 +55,7 @@ Player X Wins.
     assert expected_output == out
 
 
-def test(monkeypatch, capsys):
+def test_draw(monkeypatch, capsys):
     monkeypatch.setattr('sys.stdin', StringIO('2A\n'))
     player1_args = player2_args = Namespace(player=HumanPlayer)
     controller = PlayController(TicTacToeGame, player1_args, player2_args)
