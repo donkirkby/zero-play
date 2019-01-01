@@ -1,10 +1,10 @@
 import math
 import typing
-from random import choice
 
 import numpy as np
 
 from zero_play.game import Game
+from zero_play.player import Player
 
 
 class SearchNode:
@@ -97,7 +97,7 @@ class SearchNode:
         return best_children
 
 
-class MctsPlayer:
+class MctsPlayer(Player):
     """ Use Monte Carlo Tree Search to choose moves in a game.
 
     This is based on the general discussion of MCTS in Wikipedia:
@@ -107,8 +107,10 @@ class MctsPlayer:
     The original AlphaZero paper:
     https://deepmind.com/blog/alphago-zero-learning-scratch/
     """
-    def __init__(self, game: Game, iteration_count=800):
-        self.game = game
+    def __init__(self, game: Game,
+                 player_number: int = Game.X_PLAYER,
+                 iteration_count: int = 800):
+        super().__init__(game, player_number)
         self.iteration_count = iteration_count
 
     def simulate(self, start_board: np.ndarray):

@@ -10,7 +10,13 @@ def test_choose_move(monkeypatch, capsys):
     player = HumanPlayer(game)
     board = game.create_board()
     expected_move = 0
-    expected_prompt = "Player X: "
+    expected_prompt = """\
+  ABC
+1 ...
+2 ...
+3 ...
+Player X: 
+"""
 
     move = player.choose_move(board)
 
@@ -31,7 +37,7 @@ def test_choose_move_player_o(monkeypatch, capsys):
 """
     board = game.create_board(board_text)
     expected_move = 0
-    expected_prompt = 'Player O: '
+    expected_prompt = board_text + 'Player O: \n'
 
     move = player.choose_move(board)
 
@@ -52,9 +58,9 @@ def test_invalid_moves(monkeypatch, capsys):
 """
     board = game.create_board(board_text)
     expected_move = 4
-    expected_prompt = 'Player O: ' \
-                      '1x is not a valid move, choose another: ' \
-                      '1b is not a valid move, choose another: '
+    expected_prompt = board_text + 'Player O: ' \
+                                   '1x is not a valid move, choose another: ' \
+                                   '1b is not a valid move, choose another: \n'
 
     move = player.choose_move(board)
 

@@ -16,3 +16,15 @@ board positions than Tic Tac Toe.
 Basic Monte Carlo Tree Search is now working! There's no neural network yet.
 I ended up just using a tree structure for the search nodes, so I don't need
 all the hash tables that alpha-zero-general used.
+
+I plotted the win rates of two MCTS players with different numbers of search
+iterations, and the pattern was as expected. The more searching, the higher the
+win rate. You can see that there's a slight advantage for the first player, and
+player 1's win rate is 64% when both players search with 128 simulations.
+
+The gradient isn't as smooth when both players use fewer than 10 simulations,
+but they're basically making random moves at that point.
+
+![MCTS win rate]
+
+[MCTS win rate]: 2018/connect-4-wins-mcts.png

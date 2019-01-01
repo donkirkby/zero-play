@@ -34,30 +34,29 @@ def imported_argument(full_class_name):
 class PlayController:
     def __init__(self, game_class, player1_args, player2_args):
         self.game: Game = game_class()
-        self.players = {1: player1_args.player(self.game),
-                        -1: player2_args.player(self.game)}
-        self.board: np.ndarray = self.game.create_board()
+        self.players = {
+            Game.X_PLAYER: player1_args.player(self.game, Game.X_PLAYER),
+            Game.O_PLAYER: player2_args.player(self.game, Game.O_PLAYER)}
+        self.board: np.ndarray = None
+        self.start_game()
 
-    def take_turn(self):
-        self.display_board()
+    def start_game(self):
+        self.board = self.game.create_board()
+
+    def take_turn(self) -> bool:
+        """ Take one turn in the game, and return True if the game is over. """
         player_number = self.game.get_active_player(self.board)
         player = self.players[player_number]
         move = player.choose_move(self.board)
-        print()
         self.board = self.game.make_move(self.board, move)
-        winner = self.game.get_winner(self.board)
         if not self.game.is_ended(self.board):
             return False
 
-        self.display_board()
-        if winner == self.game.NO_PLAYER:
-            print('The game is a draw.')
-        else:
-            print(self.game.display_player(winner), 'Wins.')
-        return True
+        other_player = self.players[-player_number]
+        player.end_game(self.board, other_player)
+        other_player.end_game(self.board, player)
 
-    def display_board(self):
-        print(self.game.display(self.board, show_coordinates=True), end='')
+        return True
 
 
 def main():

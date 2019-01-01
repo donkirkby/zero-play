@@ -1,0 +1,1 @@
+This folder holds data files that don't get committed to source control.
