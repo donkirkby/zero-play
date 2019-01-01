@@ -1,5 +1,5 @@
-from argparse import Namespace, ArgumentParser, ArgumentDefaultsHelpFormatter, ArgumentTypeError
-from importlib import import_module
+import typing
+from argparse import Namespace, ArgumentParser, ArgumentDefaultsHelpFormatter
 
 import numpy as np
 
@@ -11,28 +11,12 @@ from zero_play.mcts_player import MctsPlayer
 def parse_args():
     parser = ArgumentParser(description='Pit two players against each other.',
                             formatter_class=ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--game',
-                        default='zero_play.tictactoe.game.TicTacToeGame',
-                        type=imported_argument)
+    Game.add_argument(parser)
     return parser.parse_args()
 
 
-def imported_argument(full_class_name):
-    module_name, class_name = full_class_name.rsplit('.', 1)
-    try:
-        module = import_module(module_name)
-    except ImportError as ex:
-        raise ArgumentTypeError("can't import " + module_name) from ex
-    try:
-        return getattr(module, class_name)
-    except AttributeError:
-        raise ArgumentTypeError("attribute {} not found on module {}".format(
-            class_name,
-            module_name))
-
-
 class PlayController:
-    def __init__(self, game_class, player1_args, player2_args):
+    def __init__(self, game_class: typing.Type[Game], player1_args, player2_args):
         self.game: Game = game_class()
         self.players = {
             Game.X_PLAYER: player1_args.player(self.game, Game.X_PLAYER),
@@ -61,9 +45,10 @@ class PlayController:
 
 def main():
     args = parse_args()
+    game_class = Game.load(args.game)
     player1_args = Namespace(player=MctsPlayer)
     player2_args = Namespace(player=HumanPlayer)
-    controller = PlayController(args.game, player1_args, player2_args)
+    controller = PlayController(game_class, player1_args, player2_args)
     while not controller.take_turn():
         pass
 

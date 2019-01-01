@@ -4,6 +4,8 @@ from zero_play.game import Game
 
 
 class Connect4Game(Game):
+    name = 'Connect 4'
+
     def create_board(self, text: str = None) -> np.ndarray:
         board = np.zeros((6, 7), dtype=int)
         if text:

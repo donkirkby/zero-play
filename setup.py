@@ -36,8 +36,13 @@ setup(name='zero_play',
                               'pytest',
                               'coverage',
                               'mypy']},
-      entry_points={'console_scripts': ['zero_play=zero_play.command.play:main',
-                                        'zero_train=zero_play.command.train:main']},
+      entry_points={
+          'console_scripts': ['zero_play=zero_play.command.play:main',
+                              'zero_train=zero_play.command.train:main'],
+          # The game entry point lets you add rules for new games.
+          # The zero_play.game.Game class is a useful base class.
+          'zero_play.game': ['tictactoe=zero_play.tictactoe.game:TicTacToeGame',
+                             'connect4=zero_play.connect4.game:Connect4Game']},
       project_urls={
           'Bug Reports': 'https://github.com/donkirkby/zero-play/issues',
           'Source': 'https://github.com/donkirkby/zero-play'})

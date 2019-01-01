@@ -4,6 +4,8 @@ from zero_play.game import Game
 
 
 class TicTacToeGame(Game):
+    name = 'Tic Tac Toe'
+
     def create_board(self, text: str = None) -> np.ndarray:
         board = np.zeros((3, 3), dtype=int)
         if text:

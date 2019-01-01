@@ -1,7 +1,8 @@
 import logging
 import os
 import sqlite3
-from argparse import Namespace
+import typing
+from argparse import Namespace, ArgumentParser, ArgumentDefaultsHelpFormatter
 from multiprocessing import Process, Queue
 from queue import Empty
 from sqlite3 import OperationalError
@@ -12,7 +13,6 @@ from matplotlib.animation import FuncAnimation
 import seaborn as sn
 
 from zero_play.command.play import PlayController
-from zero_play.connect4.game import Connect4Game
 from zero_play.game import Game
 from zero_play.mcts_player import MctsPlayer
 
@@ -20,22 +20,25 @@ logger = logging.getLogger(__name__)
 
 
 class Plotter:
-    def __init__(self, start_thread=True):
+    def __init__(self, db_path, start_thread=True, game_class=None):
         self.x = 2 << np.arange(7)
         self.y = 2 << np.arange(7)
         self.x_coords, self.y_coords = np.meshgrid(self.x, self.y)
         self.counts = np.zeros(self.y_coords.shape)
         self.y_wins = np.zeros(self.y_coords.shape)
         self.result_queue = Queue()
-        db_path = os.path.abspath(os.path.join(__file__, '../../../data/strengths.db'))
-        logger.debug(db_path)
         self.conn = sqlite3.connect(db_path)
         self.conn.row_factory = sqlite3.Row
         self.load_history()
         self.has_reported = False
+        self.game_name = game_class().name
         if start_thread:
             game_thread = Process(target=run_games,
-                                  args=(self.result_queue, self.x, self.y, self.counts.copy()),
+                                  args=(game_class,
+                                        self.result_queue,
+                                        self.x,
+                                        self.y,
+                                        self.counts.copy()),
                                   daemon=True)
             game_thread.start()
         sn.set()
@@ -102,7 +105,8 @@ class Plotter:
         self.artists.append(self.contour)
         # self.artists.append(plt.clabel(self.contour))
         self.artists.append(plt.title(
-            f'Player 1 Win Rates After {int(self.counts.sum())} Games of Connect 4'))
+            f'Player 1 Win Rates After {int(self.counts.sum())} '
+            f'Games of {self.game_name}'))
         colorbar = plt.colorbar(cax=self.colorbar_axes)
         self.artists.append(colorbar)
         _, self.colorbar_axes = plt.gcf().get_axes()
@@ -176,10 +180,10 @@ INTO    games
             it.iternext()
 
 
-def run_games(result_queue: Queue, x_values, y_values, counts):
+def run_games(game_class: typing.Type[Game], result_queue: Queue, x_values, y_values, counts):
     player1_args = Namespace(player=MctsPlayer)
     player2_args = Namespace(player=MctsPlayer)
-    controller = PlayController(Connect4Game, player1_args, player2_args)
+    controller = PlayController(game_class, player1_args, player2_args)
     player1: MctsPlayer = controller.players[Game.X_PLAYER]
     player2: MctsPlayer = controller.players[Game.O_PLAYER]
     game_count = 0
@@ -214,14 +218,20 @@ def main():
     logging.basicConfig(level=logging.INFO,
                         format="%(asctime)s[%(levelname)s]:%(name)s:%(message)s")
     logger.setLevel(logging.DEBUG)
+    parser = ArgumentParser(description='Plot player strengths.',
+                            formatter_class=ArgumentDefaultsHelpFormatter)
+    Game.add_argument(parser)
+    args = parser.parse_args()
+    game_class = Game.load(args.game)
     figure = plt.figure()
-    plotter = Plotter(start_thread)
+    db_path = os.path.abspath(os.path.join(
+        __file__,
+        f'../../../data/{args.game}-strengths.db'))
+    logger.debug(db_path)
+    plotter = Plotter(db_path, start_thread, game_class)
     # noinspection PyUnusedLocal
     animation = FuncAnimation(figure, plotter.update, interval=30000)
     plt.show()
 
 
 main()
-
-# ani = FuncAnimation(fig, update, frames=np.linspace(0, 2*np.pi, 128),
-#                     init_func=init, blit=True, interval=0)
