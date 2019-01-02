@@ -20,7 +20,7 @@ class HumanPlayer(Player):
         while True:
             move_text = input(prompt)
             try:
-                move = self.game.parse_move(move_text)
+                move = self.game.parse_move(move_text, board)
                 if moves[move]:
                     print()
                     return move

@@ -133,7 +133,8 @@ def test_display_move(move, expected_display):
     (' 7', 6)
 ])
 def test_parse_move(text, expected_move):
-    move = Connect4Game().parse_move(text)
+    game = Connect4Game()
+    move = game.parse_move(text, game.create_board())
 
     assert expected_move == move
 
@@ -143,8 +144,9 @@ def test_parse_move(text, expected_move):
     ('2B', r"invalid literal for int\(\) with base 10: '2B'"),
 ])
 def test_parse_move_fails(text, expected_message):
+    game = Connect4Game()
     with pytest.raises(ValueError, match=expected_message):
-        Connect4Game().parse_move(text)
+        game.parse_move(text, game.create_board())
 
 
 def test_display_player_x():

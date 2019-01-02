@@ -28,3 +28,22 @@ but they're basically making random moves at that point.
 ![MCTS win rate]
 
 [MCTS win rate]: 2018/connect-4-wins-mcts.png
+
+### 2 Jan 2019 ###
+I added an entry point in `setup.py` for other projects to define game rules.
+Using that entry point within the Zero Play library, I plotted the win rates of
+two MCTS players playing Tic Tac Toe:
+
+![Tic Tac Toe win rate]
+
+You can seee the same general trends as in Connect 4. I'm not sure what's
+happening in the bottom right.
+
+Using the same entry point in my [Shibumi project], I converted the Spline game
+to use the new Zero Play library, and plotted the win rates:
+
+![Spline win rate]
+
+[Tic Tac Toe win rate]: 2019/tictactoe-wins.png
+[Shibumi project]: https://github.com/donkirkby/shibumi-games
+[Spline win rate]: 2019/spline-wins.png

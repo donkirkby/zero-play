@@ -104,7 +104,8 @@ def test_display_move(move, expected_display):
     ('3B', 7)
 ])
 def test_parse_move(text, expected_move):
-    move = TicTacToeGame().parse_move(text)
+    game = TicTacToeGame()
+    move = game.parse_move(text, game.create_board())
 
     assert expected_move == move
 
@@ -115,8 +116,9 @@ def test_parse_move(text, expected_move):
     ('2BC', r'Move must have one number and one letter\.'),
 ])
 def test_parse_move_fails(text, expected_message):
+    game = TicTacToeGame()
     with pytest.raises(ValueError, match=expected_message):
-        TicTacToeGame().parse_move(text)
+        game.parse_move(text, game.create_board())
 
 
 def test_display_player_x():

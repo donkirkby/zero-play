@@ -40,7 +40,7 @@ class TicTacToeGame(Game):
         i, j = move // size, move % size
         return f'{i+1}{chr(j+65)}'
 
-    def parse_move(self, text: str) -> int:
+    def parse_move(self, text: str, board: np.ndarray) -> int:
         size = 3
         clean_text = text.upper().strip()
         if len(clean_text) != 2:

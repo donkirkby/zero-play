@@ -74,10 +74,12 @@ class Game(ABC):
         """
 
     @abstractmethod
-    def parse_move(self, text: str) -> int:
+    def parse_move(self, text: str, board: np.ndarray) -> int:
         """ Parse a human-readable description into a move index.
 
         :param text: the move description, typically coordinates
+        :param board: an array of piece values, like the ones returned by
+            create_board().
         :return: the index of a move in the result of get_valid_moves().
         :raise: ValueError if text is invalid.
         """

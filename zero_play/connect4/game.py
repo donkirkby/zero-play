@@ -35,7 +35,7 @@ class Connect4Game(Game):
     def display_move(self, move: int) -> str:
         return str(move+1)
 
-    def parse_move(self, text: str) -> int:
+    def parse_move(self, text: str, board: np.ndarray) -> int:
         move_int = int(text)
         if move_int < 1 or 7 < move_int:
             raise ValueError('Move must be between 1 and 7.')
