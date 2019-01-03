@@ -85,18 +85,6 @@ X..
     assert np.array_equal(expected_moves, moves)
 
 
-@pytest.mark.parametrize('move,expected_display', [
-    (0, '1A'),
-    (2, '1C'),
-    (3, '2A'),
-    (7, '3B')
-])
-def test_display_move(move, expected_display):
-    display = TicTacToeGame().display_move(move)
-
-    assert expected_display == display
-
-
 @pytest.mark.parametrize('text,expected_move', [
     ('1A', 0),
     ('1c', 2),

@@ -116,17 +116,6 @@ def test_get_valid_moves():
     assert np.array_equal(expected_moves, moves)
 
 
-@pytest.mark.parametrize('move,expected_display', [
-    (0, '1'),
-    (2, '3'),
-    (6, '7')
-])
-def test_display_move(move, expected_display):
-    display = Connect4Game().display_move(move)
-
-    assert expected_display == display
-
-
 @pytest.mark.parametrize('text,expected_move', [
     ('1', 0),
     ('3\n', 2),

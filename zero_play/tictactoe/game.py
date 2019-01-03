@@ -35,11 +35,6 @@ class TicTacToeGame(Game):
                                      for j in range(3)) + '\n'
             for i in range(3))
 
-    def display_move(self, move: int) -> str:
-        size = 3
-        i, j = move // size, move % size
-        return f'{i+1}{chr(j+65)}'
-
     def parse_move(self, text: str, board: np.ndarray) -> int:
         size = 3
         clean_text = text.upper().strip()

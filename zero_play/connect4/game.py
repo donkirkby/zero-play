@@ -32,9 +32,6 @@ class Connect4Game(Game):
                     for j in range(7)) + '\n'
             for i in range(6))
 
-    def display_move(self, move: int) -> str:
-        return str(move+1)
-
     def parse_move(self, text: str, board: np.ndarray) -> int:
         move_int = int(text)
         if move_int < 1 or 7 < move_int:

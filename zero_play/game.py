@@ -41,8 +41,7 @@ class Game(ABC):
             create_board().
         :return: an array with one boolean entry for every possible game move.
             True if that move is allowed from the given board, otherwise
-            False. Each move's index is the move value to pass to make_move()
-            or display_move().
+            False. Each move's index is the move value to pass to make_move().
         """
 
     def is_ended(self, board: np.ndarray) -> bool:
@@ -62,15 +61,6 @@ class Game(ABC):
             labels.
         :return: display text. Typically, this should be valid text for passing
             to create_board().
-        """
-
-    @abstractmethod
-    def display_move(self, move: int) -> str:
-        """ Create human-readable display text for the given move.
-
-        :param move: the index of a move in the result of get_valid_moves().
-        :return: display text. Typically, this should be the coordinates, and
-            it should be valid text for passing to parse_move().
         """
 
     @abstractmethod
