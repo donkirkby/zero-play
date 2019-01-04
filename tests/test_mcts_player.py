@@ -82,8 +82,8 @@ def test_select_second_child():
     expected_leaf = SearchNode(game, expected_leaf_board)
 
     node = SearchNode(game)
-    node.select_leaf().record_value(1)
-    node.select_leaf().record_value(1)
+    node.select_leaf().record_value(0)
+    node.select_leaf().record_value(0)
 
     leaf = node.select_leaf()
 
@@ -102,7 +102,27 @@ XO.
 
     node = SearchNode(game)
     for _ in range(10):
-        node.select_leaf().record_value(1)
+        node.select_leaf().record_value(0)
+
+    leaf = node.select_leaf()
+
+    assert expected_leaf == leaf
+
+
+def test_select_good_grandchild():
+    game = TicTacToeGame()
+    node = SearchNode(game)
+    node.select_leaf().record_value(0)  # Root node returns itself.
+    node.select_leaf().record_value(0)  # Move 0 AT 1A, value is a tie.
+    node.select_leaf().record_value(1)  # Move 1 AT 1B, value is a win.
+    # Expect it to exploit the win at 1B, and try the first grandchild at 1A.
+    expected_leaf_board = game.create_board("""\
+  ABC
+1 OX.
+2 ...
+3 ...
+""")
+    expected_leaf = SearchNode(game, expected_leaf_board)
 
     leaf = node.select_leaf()
 

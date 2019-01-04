@@ -56,9 +56,9 @@ class SearchNode:
         best_score = float('-inf')
         best_child = None
         for child in self.children:
-            score = (self.exploration_weight * prior *
-                     math.sqrt(self.simulation_count) /
-                     (1+child.simulation_count))
+            score = child.win_rate + (self.exploration_weight * prior *
+                                      math.sqrt(self.simulation_count) /
+                                      (1+child.simulation_count))
             if score > best_score:
                 best_score = score
                 best_child = child
