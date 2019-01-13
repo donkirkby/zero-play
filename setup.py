@@ -47,7 +47,12 @@ setup(name='zero_play',
           # The player entry point lets you add new ways to choose moves.
           # The zero_play.player.Player class is a useful base class.
           'zero_play.player': ['human=zero_play.human_player:HumanPlayer',
-                               'mcts=zero_play.mcts_player:MctsPlayer']},
+                               'mcts=zero_play.mcts_player:MctsPlayer'],
+          # The heuristic entry point lets you add new ways to evaluate boards.
+          # Playout is general purpose, and the others are custom neural
+          # networks for each game.
+          'zero_play.heuristic': ['playout=zero_play.playout:Playout',
+                                  'connect4=zero_play.connect4.neural_net:NeuralNet']},
       project_urls={
           'Bug Reports': 'https://github.com/donkirkby/zero-play/issues',
           'Source': 'https://github.com/donkirkby/zero-play'})

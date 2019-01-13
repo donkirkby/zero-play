@@ -26,8 +26,8 @@ def main():
                         help='the number of search iterations')
     parser.add_argument('--training_size',
                         type=int,
-                        default=200,
-                        help='the number of search iterations')
+                        default=230,
+                        help='the number of examples to generate')
     args = parser.parse_args()
     game = parser.load_argument(args, 'game')
     checkpoint_path = Path(f'data/{args.game}-nn')

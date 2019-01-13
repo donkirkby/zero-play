@@ -62,6 +62,11 @@ def create_parser():
         help="the player to use, pass two names if they're different",
         action='entry_point',
         dest='player')
+    parser.add_argument('--heuristic',
+                        default=['playout'],
+                        nargs='*',
+                        help='heuristic for evaluating boards',
+                        action='entry_point')
     return parser
 
 

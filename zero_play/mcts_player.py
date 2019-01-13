@@ -206,13 +206,11 @@ class MctsPlayer(Player):
     def __init__(self, game: Game,
                  player_number: int = Game.X_PLAYER,
                  mcts_iterations: typing.Sequence[int] = tuple(DEFAULT_ITERATIONS),
-                 heuristic: Heuristic = None):
-        super().__init__(game, player_number)
+                 heuristic: typing.List[Heuristic] = None):
+        super().__init__(game, player_number, heuristic)
         self.iteration_count = get_player_argument(mcts_iterations,
                                                    player_number)
-        if heuristic is None:
-            heuristic = Playout(game)
-        self.search_manager = SearchManager(game, heuristic)
+        self.search_manager = SearchManager(game, self.heuristic)
 
     def choose_move(self, board: np.ndarray) -> int:
         """ Choose a move for the given board.
