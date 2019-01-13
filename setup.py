@@ -37,9 +37,7 @@ setup(name='zero_play',
                               'coverage',
                               'mypy']},
       entry_points={
-          'console_scripts': ['zero_play=zero_play.command.play:main',
-                              'zero_train=zero_play.command.train:main',
-                              'zero_strengths=zero_play.command.plot_strengths:main [dev]'],
+          'console_scripts': ['zero_play=zero_play.zero_play:main'],
           # The game entry point lets you add rules for new games.
           # The zero_play.game.Game class is a useful base class.
           'zero_play.game': ['tictactoe=zero_play.tictactoe.game:TicTacToeGame',

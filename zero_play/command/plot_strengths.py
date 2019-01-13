@@ -2,7 +2,7 @@ import logging
 import os
 import sqlite3
 import typing
-from argparse import ArgumentDefaultsHelpFormatter
+from argparse import ArgumentDefaultsHelpFormatter, Namespace
 from multiprocessing import Process, Queue
 from queue import Empty
 from sqlite3 import OperationalError
@@ -15,7 +15,7 @@ import seaborn as sn
 from zero_play.command.play import PlayController
 from zero_play.game import Game
 from zero_play.mcts_player import MctsPlayer
-from zero_play.zero_play import CommandParser
+from zero_play.command_parser import CommandParser
 
 logger = logging.getLogger(__name__)
 
@@ -214,18 +214,24 @@ def run_games(controller: PlayController, result_queue: Queue, x_values, y_value
                 game_count += 1
 
 
-def main():
-    logging.basicConfig(level=logging.INFO,
-                        format="%(asctime)s[%(levelname)s]:%(name)s:%(message)s")
-    logger.setLevel(logging.DEBUG)
-    parser = CommandParser(description='Plot player strengths.',
-                           formatter_class=ArgumentDefaultsHelpFormatter)
+def create_parser(subparsers):
+    parser: CommandParser = subparsers.add_parser(
+        'plot',
+        description='Plot player strengths.',
+        formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.set_defaults(handle=handle, parser=parser)
     parser.add_argument('game',
                         default='tictactoe',
                         help='the game to play',
                         action='entry_point')
 
-    args = parser.parse_args()
+
+def handle(args: Namespace):
+    logging.basicConfig(level=logging.INFO,
+                        format="%(asctime)s[%(levelname)s]:%(name)s:%(message)s")
+    logger.setLevel(logging.DEBUG)
+
+    parser = args.parser
     parser.add_argument(
         '-p', '--player',
         default='mcts',
@@ -238,7 +244,7 @@ def main():
     if __name__ == '__live_coding__':
         controller = None
     else:
-        controller = PlayController(parser, args)
+        controller = PlayController(args)
 
     figure = plt.figure()
     db_path = os.path.abspath(os.path.join(
@@ -249,7 +255,3 @@ def main():
     # noinspection PyUnusedLocal
     animation = FuncAnimation(figure, plotter.update, interval=30000)
     plt.show()
-
-
-if __name__ == '__main__':
-    main()

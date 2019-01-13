@@ -9,8 +9,7 @@ from zero_play.command.play import get_player_argument
 from zero_play.game import Game
 from zero_play.heuristic import Heuristic
 from zero_play.player import Player
-from zero_play.playout import Playout
-from zero_play.zero_play import EntryPointArgument
+from zero_play.command_parser import EntryPointArgument
 
 logger = logging.getLogger(__name__)
 

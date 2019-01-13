@@ -4,7 +4,7 @@ from pkg_resources import EntryPoint
 
 from zero_play.human_player import HumanPlayer
 from zero_play.tictactoe.game import TicTacToeGame
-from zero_play.zero_play import CommandParser, EntryPointArgument
+from zero_play.command_parser import CommandParser, EntryPointArgument
 
 
 class DummyGame:
@@ -63,11 +63,11 @@ def test_extra_attributes():
     assert player.game is game
 
 
-@patch('zero_play.zero_play.iter_entry_points')
+@patch('zero_play.command_parser.iter_entry_points')
 @patch('pkg_resources.EntryPoint.require', new=Mock())
 def test_duplicate_entry_name(mock_entry_points):
     mock_entry_points.return_value = [
-        EntryPoint.parse('dummy=test_parser:DummyGame'),
+        EntryPoint.parse('dummy=test_command_parser:DummyGame'),
         EntryPoint.parse('dummy=zero_play.tictactoe.game:TicTacToeGame')]
     parser = CommandParser(prog='zero_play')
     parser.add_argument('game', action='entry_point')
@@ -87,11 +87,11 @@ optional arguments:
     assert expected_help_text == help_text
 
 
-@patch('zero_play.zero_play.iter_entry_points')
+@patch('zero_play.command_parser.iter_entry_points')
 @patch('pkg_resources.EntryPoint.require', new=Mock())
 def test_load_duplicate(mock_entry_points):
     mock_entry_points.return_value = [
-        EntryPoint.parse('dummy=test_parser:DummyGame'),
+        EntryPoint.parse('dummy=test_command_parser:DummyGame'),
         EntryPoint.parse('dummy=zero_play.tictactoe.game:TicTacToeGame')]
     parser = CommandParser()
     parser.add_argument('game', action='entry_point')
@@ -102,11 +102,11 @@ def test_load_duplicate(mock_entry_points):
     assert isinstance(game, TicTacToeGame)
 
 
-@patch('zero_play.zero_play.iter_entry_points')
+@patch('zero_play.command_parser.iter_entry_points')
 @patch('pkg_resources.EntryPoint.require', new=Mock())
 def test_extra_argument_help(mock_entry_points):
     mock_entry_points.return_value = [
-        EntryPoint.parse('dummy=test_parser:DummyGame'),
+        EntryPoint.parse('dummy=test_command_parser:DummyGame'),
         EntryPoint.parse('tictactoe=zero_play.tictactoe.game:TicTacToeGame')]
     parser = CommandParser(prog='zero_play')
     parser.add_argument('game', action='entry_point')
@@ -126,11 +126,11 @@ optional arguments:
     assert expected_help_text == help_text
 
 
-@patch('zero_play.zero_play.iter_entry_points')
+@patch('zero_play.command_parser.iter_entry_points')
 @patch('pkg_resources.EntryPoint.require', new=Mock())
 def test_extra_argument_ignored(mock_entry_points):
     mock_entry_points.return_value = [
-        EntryPoint.parse('dummy=test_parser:DummyGame'),
+        EntryPoint.parse('dummy=test_command_parser:DummyGame'),
         EntryPoint.parse('tictactoe=zero_play.tictactoe.game:TicTacToeGame')]
     parser = CommandParser()
     parser.add_argument('game', action='entry_point')
@@ -141,11 +141,11 @@ def test_extra_argument_ignored(mock_entry_points):
     assert not hasattr(game, 'size')
 
 
-@patch('zero_play.zero_play.iter_entry_points')
+@patch('zero_play.command_parser.iter_entry_points')
 @patch('pkg_resources.EntryPoint.require', new=Mock())
 def test_extra_argument_assigned(mock_entry_points):
     mock_entry_points.return_value = [
-        EntryPoint.parse('dummy=test_parser:DummyGame'),
+        EntryPoint.parse('dummy=test_command_parser:DummyGame'),
         EntryPoint.parse('tictactoe=zero_play.tictactoe.game:TicTacToeGame')]
     parser = CommandParser()
     parser.add_argument('game', action='entry_point')

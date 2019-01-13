@@ -1,21 +1,22 @@
 import logging
-from argparse import ArgumentDefaultsHelpFormatter
+from argparse import ArgumentDefaultsHelpFormatter, Namespace
 from itertools import count
 from pathlib import Path
 from random import shuffle
 
 from zero_play.connect4.neural_net import NeuralNet
 from zero_play.mcts_player import SearchManager
-from zero_play.zero_play import CommandParser
+from zero_play.command_parser import CommandParser
 
 logger = logging.getLogger(__name__)
 
 
-def main():
-    logging.basicConfig(level=logging.DEBUG,
-                        format="%(asctime)s %(levelname)s:%(name)s: %(message)s")
-    parser = CommandParser(description='Pit two players against each other.',
-                           formatter_class=ArgumentDefaultsHelpFormatter)
+def create_parser(subparsers):
+    parser: CommandParser = subparsers.add_parser(
+        'train',
+        description='Train a neural network.',
+        formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.set_defaults(handle=handle, parser=parser)
     parser.add_argument('game',
                         default='tictactoe',
                         help='the game to train for',
@@ -28,7 +29,12 @@ def main():
                         type=int,
                         default=230,
                         help='the number of examples to generate')
-    args = parser.parse_args()
+
+
+def handle(args: Namespace):
+    logging.basicConfig(level=logging.DEBUG,
+                        format="%(asctime)s %(levelname)s:%(name)s: %(message)s")
+    parser = args.parser
     game = parser.load_argument(args, 'game')
     checkpoint_path = Path(f'data/{args.game}-nn')
     checkpoint_path.mkdir(parents=True, exist_ok=True)
@@ -47,6 +53,3 @@ def main():
         neural_net.save_checkpoint(folder=checkpoint_path,
                                    filename=filename)
         search_manager.reset()
-
-
-main()

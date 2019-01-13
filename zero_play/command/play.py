@@ -1,16 +1,15 @@
 import typing
-from argparse import ArgumentDefaultsHelpFormatter, Namespace
+from argparse import Namespace, ArgumentDefaultsHelpFormatter
 
 import numpy as np
 
 from zero_play.game import Game
-from zero_play.zero_play import CommandParser
+from zero_play.command_parser import CommandParser
 
 
 class PlayController:
-    def __init__(self, parser: CommandParser, args: Namespace = None):
-        if args is None:
-            args = parser.parse_args()
+    def __init__(self, args: Namespace):
+        parser: CommandParser = args.parser
         self.game: Game = parser.load_argument(args, 'game')
         player_names = args.player
         self.players = {
@@ -48,9 +47,12 @@ class PlayController:
         return True
 
 
-def create_parser():
-    parser = CommandParser(description='Pit two players against each other.',
-                           formatter_class=ArgumentDefaultsHelpFormatter)
+def create_parser(subparsers):
+    parser: CommandParser = subparsers.add_parser(
+        'play',
+        description='Pit two players against each other.',
+        formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.set_defaults(handle=handle, parser=parser)
     parser.add_argument('game',
                         default='tictactoe',
                         help='the game to play',
@@ -67,7 +69,6 @@ def create_parser():
                         nargs='*',
                         help='heuristic for evaluating boards',
                         action='entry_point')
-    return parser
 
 
 def get_player_argument(values: typing.Sequence, player_number: int):
@@ -82,13 +83,7 @@ def get_player_argument(values: typing.Sequence, player_number: int):
     return values[i]
 
 
-def main():
-    parser = create_parser()
-    args = parser.parse_args()
-    controller = PlayController(parser, args)
+def handle(args: Namespace):
+    controller = PlayController(args)
     while not controller.take_turn():
         pass
-
-
-if __name__ == '__main__':
-    main()
