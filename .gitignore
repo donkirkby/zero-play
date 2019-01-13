@@ -105,4 +105,5 @@ venv.bak/
 
 /.idea/
 
-/data/*.db
+/data/*
+!/data/README.md

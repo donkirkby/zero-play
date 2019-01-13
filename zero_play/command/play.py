@@ -1,26 +1,31 @@
 import typing
-from argparse import Namespace, ArgumentParser, ArgumentDefaultsHelpFormatter
+from argparse import ArgumentDefaultsHelpFormatter, Namespace
 
 import numpy as np
 
-from zero_play.human_player import HumanPlayer
 from zero_play.game import Game
-from zero_play.mcts_player import MctsPlayer
-
-
-def parse_args():
-    parser = ArgumentParser(description='Pit two players against each other.',
-                            formatter_class=ArgumentDefaultsHelpFormatter)
-    Game.add_argument(parser)
-    return parser.parse_args()
+from zero_play.zero_play import CommandParser
 
 
 class PlayController:
-    def __init__(self, game_class: typing.Type[Game], player1_args, player2_args):
-        self.game: Game = game_class()
+    def __init__(self, parser: CommandParser, args: Namespace = None):
+        if args is None:
+            args = parser.parse_args()
+        self.game: Game = parser.load_argument(args, 'game')
+        player_names = args.player
         self.players = {
-            Game.X_PLAYER: player1_args.player(self.game, Game.X_PLAYER),
-            Game.O_PLAYER: player2_args.player(self.game, Game.O_PLAYER)}
+            Game.X_PLAYER: parser.load_argument(
+                args,
+                'player',
+                get_player_argument(player_names, Game.X_PLAYER),
+                game=self.game,
+                player_number=Game.X_PLAYER),
+            Game.O_PLAYER: parser.load_argument(
+                args,
+                'player',
+                get_player_argument(player_names, Game.O_PLAYER),
+                game=self.game,
+                player_number=Game.O_PLAYER)}
         self.board: np.ndarray = None
         self.start_game()
 
@@ -43,12 +48,39 @@ class PlayController:
         return True
 
 
+def create_parser():
+    parser = CommandParser(description='Pit two players against each other.',
+                           formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument('game',
+                        default='tictactoe',
+                        help='the game to play',
+                        action='entry_point')
+    parser.add_argument(
+        '-p', '--players',
+        default=['human', 'mcts'],
+        nargs='*',
+        help="the player to use, pass two names if they're different",
+        action='entry_point',
+        dest='player')
+    return parser
+
+
+def get_player_argument(values: typing.Sequence, player_number: int):
+    """ Get the right argument for a player from a list of values.
+
+    If there's only one value, then both players get it.
+    """
+    if player_number == Game.X_PLAYER:
+        i = 0
+    else:
+        i = -1
+    return values[i]
+
+
 def main():
-    args = parse_args()
-    game_class = Game.load(args.game)
-    player1_args = Namespace(player=MctsPlayer)
-    player2_args = Namespace(player=HumanPlayer)
-    controller = PlayController(game_class, player1_args, player2_args)
+    parser = create_parser()
+    args = parser.parse_args()
+    controller = PlayController(parser, args)
     while not controller.take_turn():
         pass
 

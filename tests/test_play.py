@@ -1,15 +1,16 @@
-from argparse import Namespace
 from io import StringIO
 
-from zero_play.command.play import PlayController
+from zero_play.command.play import PlayController, create_parser
+from zero_play.game import Game
 from zero_play.human_player import HumanPlayer
-from zero_play.tictactoe.game import TicTacToeGame
+from zero_play.mcts_player import MctsPlayer
 
 
 def test_take_turn(monkeypatch, capsys):
     monkeypatch.setattr('sys.stdin', StringIO('2b\n'))
-    player1_args = player2_args = Namespace(player=HumanPlayer)
-    controller = PlayController(TicTacToeGame, player1_args, player2_args)
+    parser = create_parser()
+    args = parser.parse_args(['tictactoe'])
+    controller = PlayController(parser, args)
     expected_output = """\
   ABC
 1 ...
@@ -27,8 +28,9 @@ Player X:
 
 def test_winning_turn(monkeypatch, capsys):
     monkeypatch.setattr('sys.stdin', StringIO('1C\n'))
-    player1_args = player2_args = Namespace(player=HumanPlayer)
-    controller = PlayController(TicTacToeGame, player1_args, player2_args)
+    parser = create_parser()
+    args = parser.parse_args(['tictactoe'])
+    controller = PlayController(parser, args)
     controller.board = controller.game.create_board("""\
   ABC
 1 XX.
@@ -57,8 +59,9 @@ Player X Wins.
 
 def test_draw(monkeypatch, capsys):
     monkeypatch.setattr('sys.stdin', StringIO('2A\n'))
-    player1_args = player2_args = Namespace(player=HumanPlayer)
-    controller = PlayController(TicTacToeGame, player1_args, player2_args)
+    parser = create_parser()
+    args = parser.parse_args(['tictactoe'])
+    controller = PlayController(parser, args)
     controller.board = controller.game.create_board("""\
   ABC
 1 XOX
@@ -83,3 +86,13 @@ The game is a draw.
     assert is_finished
     out, err = capsys.readouterr()
     assert expected_output == out
+
+
+def test_different_players(monkeypatch, capsys):
+    monkeypatch.setattr('sys.stdin', StringIO('2A\n'))
+    parser = create_parser()
+    args = parser.parse_args(['tictactoe', '--players', 'human', 'mcts'])
+    controller = PlayController(parser, args)
+
+    assert isinstance(controller.players[Game.X_PLAYER], HumanPlayer)
+    assert isinstance(controller.players[Game.O_PLAYER], MctsPlayer)

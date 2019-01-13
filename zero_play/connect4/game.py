@@ -57,12 +57,13 @@ class Connect4Game(Game):
             return True
         # check two diagonal strips
         for start_row in range(row_count - win_count + 1):
-            for start_column in range(column_count - win_count):
+            for start_column in range(column_count - win_count + 1):
                 count1 = count2 = 0
                 for d in range(win_count):
                     if board[start_row + d, start_column + d] == player:
                         count1 += 1
-                    if board[start_row + d, start_column + win_count - d] == player:
+                    if board[start_row + d,
+                             start_column + win_count - d - 1] == player:
                         count2 += 1
                 if count1 == win_count or count2 == win_count:
                     return True

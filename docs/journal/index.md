@@ -47,3 +47,27 @@ to use the new Zero Play library, and plotted the win rates:
 [Tic Tac Toe win rate]: 2019/tictactoe-wins.png
 [Shibumi project]: https://github.com/donkirkby/shibumi-games
 [Spline win rate]: 2019/spline-wins.png
+
+### 4 Jan 2019 ###
+I found a bug in the MCTS code that selects which nodes to expand. It wasn't
+taking advantage of the win rates to explore the more successful positions.
+
+With that fixed, the problems at low iterations have gone away:
+
+![Fixed Connect 4 win rate]
+
+![Fixed Spline win rate]
+
+![Fixed Tic Tac Toe win rate]
+
+I'm not sure what's happening with high simulation count for Tic Tac Toe's
+first player, but everything else looks beautiful now.
+
+[Fixed Connect 4 win rate]: 2019/connect4-win-rate.png
+[Fixed Spline win rate]: 2019/spline-win-rate.png
+[Fixed Tic Tac Toe win rate]: 2019/tictactoe-win-rate.png
+
+### 12 Jan 2019 ###
+Added the first version of code to train a neural network, and I added a system
+so that game and player classes from other projects can add arguments to the
+command line. See the `CommandParser` class in `zero_play.py`.

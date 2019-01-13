@@ -371,3 +371,20 @@ def test_diagonal2_bottom_winner():
     winner = game.get_winner(board)
 
     assert expected_winner == winner
+
+
+def test_diagonal2_left_winner():
+    text = """\
+.......
+.......
+...O...
+..OX...
+.OXX...
+OXXO...
+"""
+    game = Connect4Game()
+    expected_winner = game.O_PLAYER
+    board = game.create_board(text)
+    winner = game.get_winner(board)
+
+    assert expected_winner == winner

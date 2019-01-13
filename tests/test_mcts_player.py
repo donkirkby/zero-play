@@ -1,10 +1,28 @@
+import typing
 from collections import Counter
 
 import numpy as np
 
 from zero_play.connect4.game import Connect4Game
-from zero_play.mcts_player import SearchNode, MctsPlayer
+from zero_play.heuristic import Heuristic
+from zero_play.mcts_player import SearchNode, MctsPlayer, SearchManager
+from zero_play.playout import Playout
 from zero_play.tictactoe.game import TicTacToeGame
+
+
+class FirstChoiceHeuristic(Heuristic):
+    def analyse(self, board: np.ndarray) -> typing.Tuple[float, np.ndarray]:
+        valid_moves = self.game.get_valid_moves(board)
+        if self.game.is_ended(board):
+            opponent = -self.game.get_active_player(board)
+            value = -1.0 if self.game.is_win(board, opponent) else 1.0
+            policy = np.ones_like(valid_moves) / len(valid_moves)
+        else:
+            value = 1.0
+            first_valid = np.nonzero(valid_moves)[0][0]
+            policy = np.zeros_like(valid_moves)
+            policy[first_valid] = 1.0
+        return value, policy
 
 
 def test_repr():
@@ -73,7 +91,7 @@ def test_select_first_child():
     leaf = node.select_leaf()
 
     assert expected_leaf == leaf
-    assert 1.0 == node.win_rate
+    assert 1.0 == node.average_value
 
 
 def test_select_second_child():
@@ -88,7 +106,7 @@ def test_select_second_child():
     leaf = node.select_leaf()
 
     assert expected_leaf == leaf
-    assert 0 == node.win_rate
+    assert 0 == node.average_value
 
 
 def test_select_grandchild():
@@ -155,80 +173,6 @@ XXO
     assert expected_leaf == leaf3
 
 
-def test_simulate_finished_game():
-    game = TicTacToeGame()
-    start_board = game.create_board("""\
-XXX
-OO.
-...
-""")
-    expected_value = 1
-    player = MctsPlayer(game)
-
-    value = player.simulate(start_board)
-
-    assert expected_value == value
-
-
-def test_simulate_finished_game_for_o_player():
-    game = TicTacToeGame()
-    start_board = game.create_board("""\
-XX.
-OOO
-.X.
-""")
-    expected_value = 1
-    player = MctsPlayer(game)
-
-    value = player.simulate(start_board)
-
-    assert expected_value == value
-
-
-def test_simulate_wins():
-    np.random.seed(0)
-    game = TicTacToeGame()
-    start_board = game.create_board("""\
-XOX
-XO.
-O..
-""")
-    iteration_count = 100
-    expected_value_total = iteration_count / 3
-    expected_low = expected_value_total * 0.9
-    expected_high = expected_value_total * 1.1
-    player = MctsPlayer(game)
-
-    value_total = 0
-    for _ in range(iteration_count):
-        value = player.simulate(start_board)
-        value_total += value
-
-    assert expected_low < value_total < expected_high
-
-
-def test_simulate_wins_and_losses():
-    np.random.seed(0)
-    game = TicTacToeGame()
-    start_board = game.create_board("""\
-XOX
-XO.
-..O
-""")
-    iteration_count = 200
-    expected_value_total = -iteration_count / 3
-    expected_low = expected_value_total * 1.1
-    expected_high = expected_value_total * 0.9
-    player = MctsPlayer(game)
-
-    value_total = 0
-    for _ in range(iteration_count):
-        value = player.simulate(start_board)
-        value_total += value
-
-    assert expected_low < value_total < expected_high
-
-
 def test_choose_move():
     np.random.seed(0)
     game = Connect4Game()
@@ -248,7 +192,7 @@ XOXOXOO
 OXOXO..
 XOXOXOO
 """
-    player = MctsPlayer(game, iteration_count=200)
+    player = MctsPlayer(game, mcts_iterations=[200])
 
     move = player.choose_move(start_board)
     board = game.make_move(start_board, move)
@@ -274,9 +218,102 @@ XOXOXOO
     expected_high = expected_count * 1.1
     move_counts = Counter()
     for _ in range(test_count):
-        player = MctsPlayer(game, iteration_count=0)
+        player = MctsPlayer(game, mcts_iterations=[0])
 
         move = player.choose_move(start_board)
         move_counts[move] += 1
 
     assert expected_low < move_counts[2] < expected_high
+
+
+def test_analyse_finished_game():
+    game = TicTacToeGame()
+    board = game.create_board("""\
+OXO
+XXO
+XOX
+""")
+    heuristic = Playout(game)
+    expected_value = 0  # A tie
+    expected_policy = [1/9] * 9
+
+    value, policy = heuristic.analyse(board)
+
+    assert expected_value == value
+    assert expected_policy == policy.tolist()
+
+
+def test_search_manager_reuses_node():
+    game = TicTacToeGame()
+    manager = SearchManager(game, Playout(game))
+    board1 = game.create_board()
+    manager.search(board1, iterations=10)
+    move = manager.get_best_move()
+    board2 = game.make_move(board1, move)
+    node = manager.current_node
+
+    first_value_count = node.value_count
+    manager.search(board2, iterations=10)
+    second_value_count = node.value_count
+
+    assert first_value_count > 0
+    assert first_value_count + 10 == second_value_count
+
+
+def test_search_manager_with_opponent():
+    """ Like when opponent is not sharing the SearchManager. """
+    game = TicTacToeGame()
+    manager = SearchManager(game, Playout(game))
+    board1 = game.create_board()
+    manager.search(board1, iterations=10)
+    node = manager.current_node.children[0]  # Didn't call get_best_move().
+    move = 0
+    board2 = game.make_move(board1, move)
+
+    first_value_count = node.value_count
+    manager.search(board2, iterations=10)
+    second_value_count = node.value_count
+
+    assert first_value_count > 0
+    assert first_value_count + 10 == second_value_count
+
+
+def test_create_training_data():
+    game = TicTacToeGame()
+    manager = SearchManager(game, FirstChoiceHeuristic(game))
+    expected_data = [
+        [game.create_board(), np.array([1., 0., 0., 0., 0., 0., 0., 0., 0.]), -1.],
+        [game.create_board("""\
+X..
+...
+...
+"""), np.array([0., 1., 0., 0., 0., 0., 0., 0., 0.]), 1.],
+        [game.create_board("""\
+XO.
+...
+...
+"""), np.array([0., 0., 1., 0., 0., 0., 0., 0., 0.]), -1.],
+        [game.create_board("""\
+XOX
+...
+...
+"""), np.array([0., 0., 0., 1., 0., 0., 0., 0., 0.]), 1.],
+        [game.create_board("""\
+XOX
+O..
+...
+"""), np.array([0., 0., 0., 0., 1., 0., 0., 0., 0.]), -1.],
+        [game.create_board("""\
+XOX
+OX.
+...
+"""), np.array([0., 0., 0., 0., 0., 1., 0., 0., 0.]), 1.],
+        [game.create_board("""\
+XOX
+OXO
+...
+"""), np.array([0., 0., 0., 0., 0., 0., 1., 0., 0.]), -1.]]
+
+    training_data = manager.create_training_data(iterations=1, min_size=1)
+
+    assert repr(expected_data) == repr(training_data)

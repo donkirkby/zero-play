@@ -2,7 +2,7 @@ import logging
 import os
 import sqlite3
 import typing
-from argparse import Namespace, ArgumentParser, ArgumentDefaultsHelpFormatter
+from argparse import ArgumentDefaultsHelpFormatter
 from multiprocessing import Process, Queue
 from queue import Empty
 from sqlite3 import OperationalError
@@ -15,26 +15,30 @@ import seaborn as sn
 from zero_play.command.play import PlayController
 from zero_play.game import Game
 from zero_play.mcts_player import MctsPlayer
+from zero_play.zero_play import CommandParser
 
 logger = logging.getLogger(__name__)
 
 
 class Plotter:
-    def __init__(self, db_path, start_thread=True, game_class=None):
+    def __init__(self,
+                 db_path,
+                 game_name: str,
+                 controller: PlayController = None):
         self.x = 2 << np.arange(7)
         self.y = 2 << np.arange(7)
         self.x_coords, self.y_coords = np.meshgrid(self.x, self.y)
         self.counts = np.zeros(self.y_coords.shape)
         self.y_wins = np.zeros(self.y_coords.shape)
-        self.result_queue = Queue()
+        self.result_queue: Queue = Queue()
         self.conn = sqlite3.connect(db_path)
         self.conn.row_factory = sqlite3.Row
         self.load_history()
         self.has_reported = False
-        self.game_name = game_class().name
-        if start_thread:
+        self.game_name = game_name
+        if controller is not None:
             game_thread = Process(target=run_games,
-                                  args=(game_class,
+                                  args=(controller,
                                         self.result_queue,
                                         self.x,
                                         self.y,
@@ -46,7 +50,7 @@ class Plotter:
         plt.xlabel('Player 2 MCTS simulation count')
         plt.xscale('log')
         plt.yscale('log')
-        self.artists = []
+        self.artists: typing.List[plt.Artist] = []
         self.contour = None
         self.colorbar_axes = None
         self.create_contour()
@@ -180,10 +184,7 @@ INTO    games
             it.iternext()
 
 
-def run_games(game_class: typing.Type[Game], result_queue: Queue, x_values, y_values, counts):
-    player1_args = Namespace(player=MctsPlayer)
-    player2_args = Namespace(player=MctsPlayer)
-    controller = PlayController(game_class, player1_args, player2_args)
+def run_games(controller: PlayController, result_queue: Queue, x_values, y_values, counts):
     player1: MctsPlayer = controller.players[Game.X_PLAYER]
     player2: MctsPlayer = controller.players[Game.O_PLAYER]
     game_count = 0
@@ -214,21 +215,37 @@ def run_games(game_class: typing.Type[Game], result_queue: Queue, x_values, y_va
 
 
 def main():
-    start_thread = __name__ != '__live_coding__'
     logging.basicConfig(level=logging.INFO,
                         format="%(asctime)s[%(levelname)s]:%(name)s:%(message)s")
     logger.setLevel(logging.DEBUG)
-    parser = ArgumentParser(description='Plot player strengths.',
-                            formatter_class=ArgumentDefaultsHelpFormatter)
-    Game.add_argument(parser)
+    parser = CommandParser(description='Plot player strengths.',
+                           formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument('game',
+                        default='tictactoe',
+                        help='the game to play',
+                        action='entry_point')
+
     args = parser.parse_args()
-    game_class = Game.load(args.game)
+    parser.add_argument(
+        '-p', '--player',
+        default='mcts',
+        nargs='*',
+        help="the player to use",
+        action='entry_point')
+    args.player = ['mcts']
+    args.mcts_iterations = MctsPlayer.DEFAULT_ITERATIONS
+
+    if __name__ == '__live_coding__':
+        controller = None
+    else:
+        controller = PlayController(parser, args)
+
     figure = plt.figure()
     db_path = os.path.abspath(os.path.join(
         __file__,
         f'../../../data/{args.game}-strengths.db'))
     logger.debug(db_path)
-    plotter = Plotter(db_path, start_thread, game_class)
+    plotter = Plotter(db_path, args.game, controller)
     # noinspection PyUnusedLocal
     animation = FuncAnimation(figure, plotter.update, interval=30000)
     plt.show()

@@ -1,10 +1,6 @@
-import typing
 from abc import ABC, abstractmethod
-from argparse import ArgumentParser
-from itertools import count
 
 import numpy as np
-from pkg_resources import iter_entry_points, EntryPoint
 
 
 class Game(ABC):
@@ -127,33 +123,3 @@ class Game(ABC):
         :param player: the player number to check.
         :return: True if the player has won.
         """
-
-    @classmethod
-    def add_argument(cls, parser: ArgumentParser):
-        """ Add an argument for choosing the game to a parser. """
-        choices = {name for name, entry_point in cls.rename_entry_points()}
-
-        parser.add_argument('-g', '--game',
-                            default='tictactoe',
-                            help='the game to play',
-                            choices=sorted(choices))
-
-    @classmethod
-    def rename_entry_points(cls) -> typing.Iterator[typing.Tuple[str,
-                                                                 EntryPoint]]:
-        """ Choose a unique name for each game. """
-        names: typing.Set[str] = set()
-        for entry_point in iter_entry_points('zero_play.game'):
-            for i in count(1):
-                name = entry_point.name if i == 1 else f'{entry_point.name}-{i}'
-                if name not in names:
-                    names.add(name)
-                    yield name, entry_point
-                    break
-
-    @classmethod
-    def load(cls, game_name: str) -> typing.Type['Game']:
-        for name, entry_point in cls.rename_entry_points():
-            if name == game_name:
-                return entry_point.load()
-        raise ValueError(f'Unknown game: {game_name!r}.')

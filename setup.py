@@ -30,7 +30,7 @@ setup(name='zero_play',
           'Programming Language :: Python :: 3.7'],
       keywords='boardgames alphazero machine learning mcts',
       packages=['zero_play'],
-      install_requires=['numpy'],
+      install_requires=['numpy', 'tensorflow'],
       extras_require={'dev': ['seaborn',
                               'matplotlib',
                               'pytest',
@@ -43,7 +43,11 @@ setup(name='zero_play',
           # The game entry point lets you add rules for new games.
           # The zero_play.game.Game class is a useful base class.
           'zero_play.game': ['tictactoe=zero_play.tictactoe.game:TicTacToeGame',
-                             'connect4=zero_play.connect4.game:Connect4Game']},
+                             'connect4=zero_play.connect4.game:Connect4Game'],
+          # The player entry point lets you add new ways to choose moves.
+          # The zero_play.player.Player class is a useful base class.
+          'zero_play.player': ['human=zero_play.human_player:HumanPlayer',
+                               'mcts=zero_play.mcts_player:MctsPlayer']},
       project_urls={
           'Bug Reports': 'https://github.com/donkirkby/zero-play/issues',
           'Source': 'https://github.com/donkirkby/zero-play'})
