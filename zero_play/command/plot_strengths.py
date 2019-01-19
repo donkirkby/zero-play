@@ -80,11 +80,14 @@ class WinCounter(dict):
                  source: 'WinCounter' = None):
         super().__init__()
         if source is not None:
-            self.player_levels = source.player_levels[:]
-            self.opponent_levels = source.opponent_levels[:]
+            self.player_levels: typing.List[int] = source.player_levels[:]
+            self.opponent_levels: typing.List[int] = source.opponent_levels[:]
             for key, match_up in source.items():
                 self[key] = MatchUp(source=match_up)
         else:
+            assert player_levels is not None
+            assert opponent_min is not None
+            assert opponent_max is not None
             self.player_levels = player_levels[:]
             self.opponent_levels = []
             opponent_level = opponent_min
@@ -100,12 +103,14 @@ class WinCounter(dict):
                     self[match_up.key] = match_up
 
     def find_next_matchup(self) -> MatchUp:
-        best_matchup = None
+        best_matchup: typing.Optional[MatchUp] = None
         lowest_count = None
         for matchup in self.values():
             if best_matchup is None or matchup.count < lowest_count:
                 best_matchup = matchup
                 lowest_count = matchup.count
+
+        assert best_matchup is not None
         return best_matchup
 
     def build_series(self):
@@ -160,7 +165,7 @@ class Plotter:
     def __init__(self,
                  db_path,
                  game_name: str,
-                 controller: PlayController,
+                 controller: typing.Optional[PlayController],
                  player_levels: typing.List[int],
                  opponent_min: int,
                  opponent_max: int):
