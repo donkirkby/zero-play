@@ -5,26 +5,36 @@ import numpy as np
 
 from zero_play.game import Game
 from zero_play.command_parser import CommandParser
+from zero_play.player import Player, get_player_argument
 
 
 class PlayController:
-    def __init__(self, args: Namespace):
-        parser: CommandParser = args.parser
-        self.game: Game = parser.load_argument(args, 'game')
-        player_names = args.player
-        self.players = {
-            Game.X_PLAYER: parser.load_argument(
-                args,
-                'player',
-                get_player_argument(player_names, Game.X_PLAYER),
-                game=self.game,
-                player_number=Game.X_PLAYER),
-            Game.O_PLAYER: parser.load_argument(
-                args,
-                'player',
-                get_player_argument(player_names, Game.O_PLAYER),
-                game=self.game,
-                player_number=Game.O_PLAYER)}
+    def __init__(self, args: Namespace = None, game: Game = None, players: typing.List[Player] = None):
+        if args is None:
+            assert game is not None
+            assert players is not None
+            self.game = game
+            x_player, o_player = players
+            x_player.player_number = game.X_PLAYER
+            o_player.player_number = game.O_PLAYER
+            self.players = {Game.X_PLAYER: x_player, Game.O_PLAYER: o_player}
+        else:
+            parser: CommandParser = args.parser
+            self.game: Game = parser.load_argument(args, 'game')
+            player_names = args.player
+            self.players = {
+                Game.X_PLAYER: parser.load_argument(
+                    args,
+                    'player',
+                    get_player_argument(player_names, Game.X_PLAYER),
+                    game=self.game,
+                    player_number=Game.X_PLAYER),
+                Game.O_PLAYER: parser.load_argument(
+                    args,
+                    'player',
+                    get_player_argument(player_names, Game.O_PLAYER),
+                    game=self.game,
+                    player_number=Game.O_PLAYER)}
         self.board: np.ndarray = None
         self.start_game()
 
@@ -45,6 +55,36 @@ class PlayController:
         other_player.end_game(self.board, player)
 
         return True
+
+    def play(self, games: int = 1, flip: bool = False):
+        current_x = original_x = self.players[self.game.X_PLAYER]
+        current_o = original_o = self.players[self.game.O_PLAYER]
+        wins = {original_x: 0,
+                original_o: 0}
+        ties = 0
+        for i in range(games):
+            if i and flip:
+                current_x = self.players[self.game.O_PLAYER]
+                current_o = self.players[self.game.X_PLAYER]
+                current_x.player_number = self.game.X_PLAYER
+                current_o.player_number = self.game.O_PLAYER
+                self.players[self.game.X_PLAYER] = current_x
+                self.players[self.game.O_PLAYER] = current_o
+            while not self.take_turn():
+                pass
+            if self.game.is_win(self.board, self.game.X_PLAYER):
+                wins[current_x] += 1
+            elif self.game.is_win(self.board, self.game.O_PLAYER):
+                wins[current_o] += 1
+            else:
+                ties += 1
+            self.start_game()
+        original_x.player_number = self.game.X_PLAYER
+        original_o.player_number = self.game.O_PLAYER
+        self.players[self.game.X_PLAYER] = original_x
+        self.players[self.game.O_PLAYER] = original_o
+
+        return wins[original_x], ties, wins[original_o]
 
 
 def create_parser(subparsers):
@@ -71,19 +111,6 @@ def create_parser(subparsers):
                         action='entry_point')
 
 
-def get_player_argument(values: typing.Sequence, player_number: int):
-    """ Get the right argument for a player from a list of values.
-
-    If there's only one value, then both players get it.
-    """
-    if player_number == Game.X_PLAYER:
-        i = 0
-    else:
-        i = -1
-    return values[i]
-
-
 def handle(args: Namespace):
     controller = PlayController(args)
-    while not controller.take_turn():
-        pass
+    controller.play()

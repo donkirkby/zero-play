@@ -5,10 +5,9 @@ import typing
 
 import numpy as np
 
-from zero_play.command.play import get_player_argument
 from zero_play.game import Game
 from zero_play.heuristic import Heuristic
-from zero_play.player import Player
+from zero_play.player import Player, get_player_argument
 from zero_play.command_parser import EntryPointArgument
 
 logger = logging.getLogger(__name__)

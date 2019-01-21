@@ -3,10 +3,21 @@ from abc import ABCMeta, abstractmethod
 
 import numpy as np
 
-from zero_play.command.play import get_player_argument
 from zero_play.game import Game
 from zero_play.heuristic import Heuristic
 from zero_play.playout import Playout
+
+
+def get_player_argument(values: typing.Sequence, player_number: int):
+    """ Get the right argument for a player from a list of values.
+
+    If there's only one value, then both players get it.
+    """
+    if player_number == Game.X_PLAYER:
+        i = 0
+    else:
+        i = -1
+    return values[i]
 
 
 class Player(metaclass=ABCMeta):

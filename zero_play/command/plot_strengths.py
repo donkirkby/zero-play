@@ -174,7 +174,6 @@ class Plotter:
         self.conn = sqlite3.connect(db_path)
         self.conn.row_factory = sqlite3.Row
         self.load_history()
-        self.has_reported = False
         self.game_name = game_name
         if controller is not None:
             self.game_name = controller.game.name
@@ -218,14 +217,11 @@ class Plotter:
         self.artists.append(plt.title(
             f'Win Rates After {total_games} '
             f'Games of {self.game_name}'))
-        if not self.has_reported:
-            print(self.win_counter.build_summary(), end='')
-            self.has_reported = True
         if not self.plot_lines:
             plt.ylabel(f'Win and tie rates')
             plt.xlabel('Opponent MCTS simulation count')
             plt.xscale('log')
-            plt.ylim(0, 1)
+            plt.ylim(-0.01, 1.01)
             for name, rates in all_series:
                 line, = plt.plot(opponent_levels, rates, label=name)
                 self.plot_lines.append(
@@ -271,13 +267,7 @@ FROM    games;""")
                     match_up.p1_wins = wins1
                     match_up.ties = ties
                     match_up.p2_wins = wins2
-                if strength1 != strength2:
-                    match_up: MatchUp = self.win_counter.get((strength2,
-                                                              strength1))
-                    if match_up is not None:
-                        match_up.p1_wins = wins2
-                        match_up.ties = ties
-                        match_up.p2_wins = wins1
+        print(self.win_counter.build_summary(), end='')
 
     def write_history(self):
         for match_up in self.win_counter.values():
@@ -327,8 +317,10 @@ INTO    games
 def run_games(controller: PlayController,
               result_queue: Queue,
               win_counter: WinCounter):
-    player1: MctsPlayer = controller.players[Game.X_PLAYER]
-    player2: MctsPlayer = controller.players[Game.O_PLAYER]
+    player1 = controller.players[Game.X_PLAYER]
+    player2 = controller.players[Game.O_PLAYER]
+    assert isinstance(player1, MctsPlayer)
+    assert isinstance(player2, MctsPlayer)
 
     while True:
         match_up = win_counter.find_next_matchup()
