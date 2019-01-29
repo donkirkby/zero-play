@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+import numpy as np
+
 from zero_play.connect4.game import Connect4Game
 from zero_play.connect4.neural_net import NeuralNet
 
@@ -27,9 +29,11 @@ XXXX...
 
 def test_train():
     training_path = Path(__file__).parent / 'training_data.json'
-    training_data = json.loads(training_path.read_text())
+    boards_list, outputs_list = json.loads(training_path.read_text())
+    boards = np.expand_dims(np.array(boards_list), -1)
+    outputs = np.array(outputs_list)
 
     game = Connect4Game()
     neural_net = NeuralNet(game)
 
-    neural_net.train(training_data)
+    neural_net.train(boards, outputs)
