@@ -4,7 +4,8 @@ from csv import DictWriter
 from datetime import datetime
 from itertools import count
 from pathlib import Path
-from random import shuffle
+
+import numpy as np
 
 from zero_play.command.play import PlayController
 from zero_play.connect4.neural_net import NeuralNet
@@ -56,12 +57,14 @@ def handle(args: Namespace):
     checkpoint_path = Path(f'data/{args.game}-nn')
     checkpoint_path.mkdir(parents=True, exist_ok=True)
     history_path = checkpoint_path.parent / f'{args.game}-history.csv'
-    writer = DictWriter(history_path.open('w'), ['wins_vs_base',
-                                                 'ties_vs_base',
-                                                 'wins_vs_best',
-                                                 'ties_vs_best',
-                                                 'date'])
-    writer.writeheader()
+    history_file = history_path.open('a')
+    writer = DictWriter(history_file, ['wins_vs_base',
+                                       'ties_vs_base',
+                                       'wins_vs_best',
+                                       'ties_vs_best',
+                                       'date'])
+    if not history_file.tell():
+        writer.writeheader()
     best_net = NeuralNet(game)
     neural_net = NeuralNet(game)
     training_player = MctsPlayer(game, heuristic=[neural_net])
@@ -70,8 +73,13 @@ def handle(args: Namespace):
                              game.O_PLAYER,
                              mcts_iterations=[args.base_iterations],
                              heuristic=[Playout(game)])
-    best_file_name = 'checkpoint-00.pth.tar'
-    best_net.save_checkpoint(checkpoint_path, best_file_name)
+
+    best_file_name = 'best.h5'
+    try:
+        best_net.load_checkpoint(checkpoint_path, best_file_name)
+    except OSError:
+        best_net.save_checkpoint(checkpoint_path, best_file_name)
+
     base_controller = PlayController(game=game,
                                      players=[training_player, base_player])
     best_controller = PlayController(game=game,
@@ -79,15 +87,13 @@ def handle(args: Namespace):
     search_manager = SearchManager(game, neural_net)
     for i in count():
         logger.info('Creating training data.')
-        training_data = search_manager.create_training_data(
+        boards, outputs = search_manager.create_training_data(
             args.mcts_iterations,
-            min_size=args.training_size)
+            data_size=args.training_size)
 
-        shuffle(training_data)
-
-        filename = f'checkpoint-{i:02d}.pth.tar'
+        filename = f'checkpoint-{i:02d}.h5'
         logger.info('Training for %s.', filename)
-        neural_net.train(training_data)
+        neural_net.train(np.expand_dims(boards, -1), outputs)
 
         logger.info('Testing.')
         wins_vs_base, base_ties, base_wins = base_controller.play(
@@ -101,11 +107,28 @@ def handle(args: Namespace):
                              wins_vs_best=wins_vs_best/args.comparison_games,
                              ties_vs_best=best_ties/args.comparison_games,
                              date=datetime.now()))
-        if wins_vs_best / (wins_vs_best + best_wins) < args.min_win_rate:
+        history_file.flush()
+        win_rate_vs_base = calculate_win_rate(wins_vs_base, base_wins)
+        win_rate_vs_best = calculate_win_rate(wins_vs_best, best_wins)
+        if win_rate_vs_best < args.min_win_rate:
+            decision = 'Rejected'
             neural_net.load_checkpoint(checkpoint_path, best_file_name)
         else:
-            logger.info('accepted %s', filename)
+            decision = 'Accepted'
             neural_net.save_checkpoint(checkpoint_path, filename)
             best_net.load_checkpoint(checkpoint_path, filename)
-            best_file_name = filename
+            best_net.save_checkpoint(checkpoint_path, best_file_name)
+        logger.info('%s %s with wins %f over base and %f over best.',
+                    decision,
+                    filename,
+                    win_rate_vs_base,
+                    win_rate_vs_best)
         search_manager.reset()
+
+
+def calculate_win_rate(wins_vs_other, other_wins):
+    total_wins = wins_vs_other + other_wins
+    if total_wins:
+        win_rate_vs_base = wins_vs_other / total_wins
+        return win_rate_vs_base
+    return 0.5

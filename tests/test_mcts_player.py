@@ -281,39 +281,42 @@ def test_search_manager_with_opponent():
 def test_create_training_data():
     game = TicTacToeGame()
     manager = SearchManager(game, FirstChoiceHeuristic(game))
-    expected_data = [
-        [game.create_board(), np.array([1., 0., 0., 0., 0., 0., 0., 0., 0.]), -1.],
+    expected_boards, expected_outputs = zip(*[
+        [game.create_board(), np.array([1., 0., 0., 0., 0., 0., 0., 0., 0., -1.])],
         [game.create_board("""\
 X..
 ...
 ...
-"""), np.array([0., 1., 0., 0., 0., 0., 0., 0., 0.]), 1.],
+"""), np.array([0., 1., 0., 0., 0., 0., 0., 0., 0., 1.])],
         [game.create_board("""\
 XO.
 ...
 ...
-"""), np.array([0., 0., 1., 0., 0., 0., 0., 0., 0.]), -1.],
+"""), np.array([0., 0., 1., 0., 0., 0., 0., 0., 0., -1.])],
         [game.create_board("""\
 XOX
 ...
 ...
-"""), np.array([0., 0., 0., 1., 0., 0., 0., 0., 0.]), 1.],
+"""), np.array([0., 0., 0., 1., 0., 0., 0., 0., 0., 1.])],
         [game.create_board("""\
 XOX
 O..
 ...
-"""), np.array([0., 0., 0., 0., 1., 0., 0., 0., 0.]), -1.],
+"""), np.array([0., 0., 0., 0., 1., 0., 0., 0., 0., -1.])],
         [game.create_board("""\
 XOX
 OX.
 ...
-"""), np.array([0., 0., 0., 0., 0., 1., 0., 0., 0.]), 1.],
+"""), np.array([0., 0., 0., 0., 0., 1., 0., 0., 0., 1.])],
         [game.create_board("""\
 XOX
 OXO
 ...
-"""), np.array([0., 0., 0., 0., 0., 0., 1., 0., 0.]), -1.]]
+"""), np.array([0., 0., 0., 0., 0., 0., 1., 0., 0., -1.])]])
+    expected_boards = np.stack(expected_boards)
+    expected_outputs = np.stack(expected_outputs)
 
-    training_data = manager.create_training_data(iterations=1, min_size=1)
+    boards, outputs = manager.create_training_data(iterations=1, data_size=7)
 
-    assert repr(expected_data) == repr(training_data)
+    assert repr(expected_boards) == repr(boards)
+    assert repr(expected_outputs) == repr(outputs)

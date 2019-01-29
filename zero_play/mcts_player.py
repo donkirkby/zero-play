@@ -141,12 +141,15 @@ class SearchManager:
         assert self.current_node.move is not None
         return self.current_node.move
 
-    def create_training_data(self, iterations: int, min_size: int):
-        data = []
+    def create_training_data(self, iterations: int, data_size: int):
         game_states = []
-        root_node = self.current_node
         self.search(self.current_node.board, iterations=1)  # One extra to start.
         report_size = 0
+        board_shape = self.current_node.board.shape
+        boards = np.zeros((data_size,) + board_shape, int)
+        move_count = self.game.get_valid_moves(self.current_node.board).size
+        outputs = np.zeros((data_size, move_count + 1))
+        data_count = 0
         while True:
             self.search(self.current_node.board, iterations)
             assert self.current_node.children is not None
@@ -166,21 +169,22 @@ class SearchManager:
             if self.game.is_ended(self.current_node.board):
                 final_value, _ = self.heuristic.analyse(self.current_node.board)
                 final_player = -self.game.get_active_player(self.current_node.board)
-                for entry in game_states:
+                for board, move_weights in game_states:
                     value = final_value
-                    if self.game.get_active_player(entry[0]) != final_player:
+                    if self.game.get_active_player(board) != final_player:
                         value *= -1
-                    entry.append(value)
+                    boards[data_count] = board
+                    outputs[data_count, :move_count] = move_weights
+                    outputs[data_count, -1] = value
+                    data_count += 1
+                    if data_count >= data_size:
+                        return boards, outputs
 
-                data.extend(game_states)
-                data_count = len(data)
                 if data_count > report_size:
                     logger.debug('Created %d training examples so far.', data_count)
                     report_size = data_count * 2
-                if data_count >= min_size:
-                    return data
                 game_states.clear()
-                self.current_node = root_node
+                self.reset()
 
 
 class MctsPlayer(Player):
