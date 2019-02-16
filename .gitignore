@@ -105,5 +105,6 @@ venv.bak/
 
 /.idea/
 
+/logs
 /data/*
 !/data/README.md

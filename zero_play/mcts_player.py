@@ -214,6 +214,17 @@ class MctsPlayer(Player):
                                                    player_number)
         self.search_manager = SearchManager(game, self.heuristic)
 
+    @property
+    def heuristic(self):
+        return self._heuristic
+
+    @heuristic.setter
+    def heuristic(self, value):
+        self._heuristic = value
+        search_manager = getattr(self, 'search_manager', None)
+        if search_manager is not None:
+            search_manager.heuristic = value
+
     def choose_move(self, board: np.ndarray) -> int:
         """ Choose a move for the given board.
 

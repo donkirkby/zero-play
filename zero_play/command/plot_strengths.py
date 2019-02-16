@@ -1,4 +1,5 @@
 import logging
+import re
 from io import StringIO
 
 import numpy as np
@@ -15,37 +16,61 @@ from matplotlib.animation import FuncAnimation
 import seaborn as sn
 
 from zero_play.command.play import PlayController
+from zero_play.connect4.neural_net import NeuralNet
 from zero_play.game import Game
 from zero_play.mcts_player import MctsPlayer
 from zero_play.command_parser import CommandParser
+from zero_play.playout import Playout
 
 logger = logging.getLogger(__name__)
 
 
 class MatchUp:
     def __init__(self,
-                 p1_iterations: int = None,
-                 p2_iterations: int = None,
+                 p1_definition: typing.Union[int, str] = None,
+                 p2_definition: typing.Union[int, str] = None,
                  source: 'MatchUp' = None):
         if source is None:
-            self.p1_iterations = p1_iterations
-            self.p2_iterations = p2_iterations
+            self.p1_iterations, self.p1_neural_net = MatchUp.parse_definition(
+                p1_definition)
+            self.p2_iterations, self.p2_neural_net = MatchUp.parse_definition(
+                p2_definition)
             self.p1_wins = 0
             self.ties = 0
             self.p2_wins = 0
         else:
             self.p1_iterations = source.p1_iterations
+            self.p1_neural_net = source.p1_neural_net
             self.p2_iterations = source.p2_iterations
+            self.p2_neural_net = source.p2_neural_net
             self.p1_wins = source.p1_wins
             self.ties = source.ties
             self.p2_wins = source.p2_wins
 
+    @staticmethod
+    def parse_definition(definition):
+        match = re.fullmatch(r'(\d+)(nn)?', str(definition))
+        return int(match.group(1)), bool(match.group(2))
+
+    @staticmethod
+    def format_definition(iterations, neural_net):
+        if neural_net:
+            return f'{iterations}nn'
+        return iterations
+
     def __repr__(self):
-        return f'MatchUp({self.p1_iterations}, {self.p2_iterations})'
+        p1_definition = self.format_definition(self.p1_iterations,
+                                               self.p1_neural_net)
+        p2_definition = self.format_definition(self.p2_iterations,
+                                               self.p2_neural_net)
+        return f'MatchUp({p1_definition!r}, {p2_definition!r})'
 
     @property
     def key(self):
-        return self.p1_iterations, self.p2_iterations
+        return (self.p1_iterations,
+                self.p1_neural_net,
+                self.p2_iterations,
+                self.p2_neural_net)
 
     @property
     def count(self):
@@ -77,29 +102,35 @@ class WinCounter(dict):
                  player_levels: typing.List[int] = None,
                  opponent_min: int = None,
                  opponent_max: int = None,
-                 source: 'WinCounter' = None):
+                 source: 'WinCounter' = None,
+                 player_definitions: typing.List[typing.Union[str, int]] = None):
         super().__init__()
         if source is not None:
-            self.player_levels: typing.List[int] = source.player_levels[:]
+            self.player_definitions: typing.List[
+                typing.Union[str, int]] = source.player_definitions[:]
             self.opponent_levels: typing.List[int] = source.opponent_levels[:]
             for key, match_up in source.items():
                 self[key] = MatchUp(source=match_up)
         else:
-            assert player_levels is not None
+            if player_levels is not None:
+                player_definitions = []
+                for player_level in player_levels:
+                    player_definitions.append(player_level)
+            assert player_definitions is not None
             assert opponent_min is not None
             assert opponent_max is not None
-            self.player_levels = player_levels[:]
+            self.player_definitions = player_definitions[:]
             self.opponent_levels = []
             opponent_level = opponent_min
             while opponent_level <= opponent_max:
                 self.opponent_levels.append(opponent_level)
                 opponent_level <<= 1
 
-            for player_level in player_levels:
+            for player_definition in player_definitions:
                 for opponent_level in self.opponent_levels:
-                    match_up = MatchUp(player_level, opponent_level)
+                    match_up = MatchUp(player_definition, opponent_level)
                     self[match_up.key] = match_up
-                    match_up = MatchUp(opponent_level, player_level)
+                    match_up = MatchUp(opponent_level, player_definition)
                     self[match_up.key] = match_up
 
     def find_next_matchup(self) -> MatchUp:
@@ -115,21 +146,25 @@ class WinCounter(dict):
 
     def build_series(self):
         all_series = []
-        for player_level in self.player_levels:
-            series = (f'wins as 1 with {player_level}',
-                      [self[(player_level, opponent_level)].p1_win_rate
+        for player_definition in self.player_definitions:
+            series = (f'wins as 1 with {player_definition}',
+                      [self[MatchUp.parse_definition(player_definition) +
+                            MatchUp.parse_definition(opponent_level)].p1_win_rate
                        for opponent_level in self.opponent_levels])
             all_series.append(series)
-            series = (f'ties as 1 with {player_level}',
-                      [self[(player_level, opponent_level)].tie_rate
+            series = (f'ties as 1 with {player_definition}',
+                      [self[MatchUp.parse_definition(player_definition) +
+                            MatchUp.parse_definition(opponent_level)].tie_rate
                        for opponent_level in self.opponent_levels])
             all_series.append(series)
-            series = (f'wins as 2 with {player_level}',
-                      [self[(opponent_level, player_level)].p2_win_rate
+            series = (f'wins as 2 with {player_definition}',
+                      [self[MatchUp.parse_definition(opponent_level) +
+                            MatchUp.parse_definition(player_definition)].p2_win_rate
                        for opponent_level in self.opponent_levels])
             all_series.append(series)
-            series = (f'ties as 2 with {player_level}',
-                      [self[(opponent_level, player_level)].tie_rate
+            series = (f'ties as 2 with {player_definition}',
+                      [self[MatchUp.parse_definition(opponent_level) +
+                            MatchUp.parse_definition(player_definition)].tie_rate
                        for opponent_level in self.opponent_levels])
             all_series.append(series)
         return all_series
@@ -138,20 +173,22 @@ class WinCounter(dict):
         summary = StringIO()
         all_series = self.build_series()
         print('opponent levels', np.array(self.opponent_levels), file=summary)
-        for i, player_level in enumerate(self.player_levels):
+        for i, player_definition in enumerate(self.player_definitions):
             for j in range(2):
                 if j:
-                    counts = [self[(opponent_level, player_level)].count
+                    counts = [self[MatchUp.parse_definition(opponent_level) +
+                                   MatchUp.parse_definition(player_definition)].count
                               for opponent_level in self.opponent_levels]
                     print('counts as 2 with',
-                          player_level,
+                          player_definition,
                           np.array(counts),
                           file=summary)
                 else:
-                    counts = [self[(player_level, opponent_level)].count
+                    counts = [self[MatchUp.parse_definition(player_definition) +
+                                   MatchUp.parse_definition(opponent_level)].count
                               for opponent_level in self.opponent_levels]
                     print('counts as 1 with',
-                          player_level,
+                          player_definition,
                           np.array(counts),
                           file=summary)
                 for k in range(i * 4 + j * 2, i * 4 + (j + 1) * 2):
@@ -166,10 +203,12 @@ class Plotter:
                  db_path,
                  game_name: str,
                  controller: typing.Optional[PlayController],
-                 player_levels: typing.List[int],
+                 player_definitions: typing.List[typing.Union[str, int]],
                  opponent_min: int,
                  opponent_max: int):
-        self.win_counter = WinCounter(player_levels, opponent_min, opponent_max)
+        self.win_counter = WinCounter(player_definitions=player_definitions,
+                                      opponent_min=opponent_min,
+                                      opponent_max=opponent_max)
         self.result_queue: Queue = Queue()
         self.conn = sqlite3.connect(db_path)
         self.conn.row_factory = sqlite3.Row
@@ -199,8 +238,11 @@ class Plotter:
         # logger.debug('Plotter.update() found %d messages.', len(messages))
         if not messages:
             return
-        for p1_iterations, p2_iterations, result in messages:
-            match_up: MatchUp = self.win_counter[(p1_iterations, p2_iterations)]
+        for p1_iterations, p1_nn, p2_iterations, p2_nn, result in messages:
+            match_up: MatchUp = self.win_counter[(p1_iterations,
+                                                  p1_nn,
+                                                  p2_iterations,
+                                                  p2_nn)]
             match_up.record_result(result)
         self.write_history()
 
@@ -239,8 +281,10 @@ class Plotter:
 CREATE
 TABLE   games
         (
-        strength1,
-        strength2,
+        iters1,
+        iters2,
+        nn1,
+        nn2,
         wins1,
         ties,
         wins2
@@ -250,8 +294,10 @@ TABLE   games
             # Table already exists.
             pass
         cursor = self.conn.execute("""\
-SELECT  strength1,
-        strength2,
+SELECT  iters1,
+        iters2,
+        nn1,
+        nn2,
         wins1,
         ties,
         wins2
@@ -260,9 +306,11 @@ FROM    games;""")
             rows = cursor.fetchmany()
             if not rows:
                 break
-            for strength1, strength2, wins1, ties, wins2 in rows:
-                match_up: MatchUp = self.win_counter.get((strength1,
-                                                          strength2))
+            for iters1, iters2, nn1, nn2, wins1, ties, wins2 in rows:
+                match_up: MatchUp = self.win_counter.get((iters1,
+                                                          nn1,
+                                                          iters2,
+                                                          nn2))
                 if match_up is not None:
                     match_up.p1_wins = wins1
                     match_up.ties = ties
@@ -277,22 +325,28 @@ UPDATE  games
 SET     wins1 = ?,
         ties = ?,
         wins2 = ?
-WHERE   strength1 = ?
-AND     strength2 = ?;
+WHERE   iters1 = ?
+AND     nn1 = ?
+AND     iters2 = ?
+AND     nn2 = ?;
 """,
                 [match_up.p1_wins,
                  match_up.ties,
                  match_up.p2_wins,
                  match_up.p1_iterations,
-                 match_up.p2_iterations]).rowcount
+                 match_up.p1_neural_net,
+                 match_up.p2_iterations,
+                 match_up.p2_neural_net]).rowcount
             if update_count == 0:
                 self.conn.execute(
                     """\
 INSERT
 INTO    games
         (
-        strength1,
-        strength2,
+        iters1,
+        nn1,
+        iters2,
+        nn2,
         wins1,
         ties,
         wins2
@@ -303,11 +357,15 @@ INTO    games
         ?,
         ?,
         ?,
+        ?,
+        ?,
         ?
         )
 """,
                     [match_up.p1_iterations,
+                     match_up.p1_neural_net,
                      match_up.p2_iterations,
+                     match_up.p2_neural_net,
                      match_up.p1_wins,
                      match_up.ties,
                      match_up.p2_wins])
@@ -321,11 +379,22 @@ def run_games(controller: PlayController,
     player2 = controller.players[Game.O_PLAYER]
     assert isinstance(player1, MctsPlayer)
     assert isinstance(player2, MctsPlayer)
+    nn = NeuralNet(controller.game)
+    nn.load_checkpoint(filename='best.h5')
+    playout = Playout(controller.game)
 
     while True:
         match_up = win_counter.find_next_matchup()
         player1.iteration_count = match_up.p1_iterations
+        if match_up.p1_neural_net:
+            player1.heuristic = nn
+        else:
+            player1.heuristic = playout
         player2.iteration_count = match_up.p2_iterations
+        if match_up.p2_neural_net:
+            player2.heuristic = nn
+        else:
+            player2.heuristic = playout
         # logger.debug(f'checking params {i}, {j} ({x}, {y}) with {counts[i, j]} counts')
         controller.start_game()
         while not controller.take_turn():
@@ -333,13 +402,13 @@ def run_games(controller: PlayController,
 
         result = controller.game.get_winner(controller.board)
 
-        logger.debug('Result of pitting %d vs %d: %s.',
-                     player1.iteration_count,
-                     player2.iteration_count,
+        logger.debug('Result of pitting %s vs %s: %s.',
+                     match_up.format_definition(match_up.p1_iterations,
+                                                match_up.p1_neural_net),
+                     match_up.format_definition(match_up.p2_iterations,
+                                                match_up.p2_neural_net),
                      result)
-        result_queue.put((player1.iteration_count,
-                          player2.iteration_count,
-                          result))
+        result_queue.put(match_up.key + (result,))
         match_up.record_result(result)
 
 
@@ -353,10 +422,10 @@ def create_parser(subparsers):
                         default='tictactoe',
                         help='the game to play',
                         action='entry_point')
-    parser.add_argument('--player_iterations',
+    parser.add_argument('--player_definitions',
                         nargs='*',
-                        help='list of search iterations to plot for the player',
-                        type=int,
+                        help='list of definitions for player strength: number '
+                             'of iterations, plus "nn" for neural net',
                         default=[8, 64, 512])
     parser.add_argument('--opponent_min',
                         help='minimum search iterations for the opponent',
@@ -366,6 +435,8 @@ def create_parser(subparsers):
                         help='minimum search iterations for the opponent',
                         type=int,
                         default=512)
+    parser.add_argument('--checkpoint',
+                        help='checkpoint file to load for neural net')
 
 
 def handle(args: Namespace):
@@ -396,7 +467,7 @@ def handle(args: Namespace):
     plotter = Plotter(db_path,
                       args.game,
                       controller,
-                      args.player_iterations,
+                      args.player_definitions,
                       args.opponent_min,
                       args.opponent_max)
     # noinspection PyUnusedLocal

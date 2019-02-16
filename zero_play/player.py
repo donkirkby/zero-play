@@ -30,6 +30,14 @@ class Player(metaclass=ABCMeta):
         self.player_number = player_number
         self.heuristic = get_player_argument(heuristic, player_number)
 
+    @property
+    def heuristic(self):
+        return self._heuristic
+
+    @heuristic.setter
+    def heuristic(self, value):
+        self._heuristic = value
+
     @abstractmethod
     def choose_move(self, board: np.ndarray) -> int:
         """ Choose a move for the given board.

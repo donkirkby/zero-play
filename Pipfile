@@ -4,10 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-"e1839a8" = {editable = true, path = "."}
+e1839a8 = {editable = true,path = "."}
+zero-play = {editable = true,extras = ["gpu"],path = "."}
 
 [dev-packages]
-"e1839a8" = {editable = true, extras = ["dev"], path = "."}
+e1839a8 = {editable = true,extras = ["dev"],path = "."}
 
 [requires]
 python_version = "3.6"

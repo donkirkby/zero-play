@@ -4,8 +4,16 @@ from zero_play.command.plot_strengths import MatchUp, WinCounter
 
 
 def test_key():
-    match_up = MatchUp(p1_iterations=8, p2_iterations=64)
-    expected_key = (8, 64)
+    match_up = MatchUp(p1_definition=8, p2_definition=64)
+    expected_key = (8, False, 64, False)
+
+    key = match_up.key
+    assert expected_key == key
+
+
+def test_text_definition_key():
+    match_up = MatchUp(p1_definition='8nn', p2_definition='64')
+    expected_key = (8, True, 64, False)
 
     key = match_up.key
     assert expected_key == key
@@ -37,18 +45,27 @@ def test_matchup_repr():
     assert expected_repr == repr_text
 
 
+def test_matchup_repr_with_nn():
+    expected_repr = "MatchUp('2nn', 256)"
+    match_up = MatchUp('2nn', 256)
+
+    repr_text = repr(match_up)
+
+    assert expected_repr == repr_text
+
+
 def test_keys():
-    expected_keys = {(4, 2),
-                     (2, 4),
-                     (4, 4),
-                     (4, 8),
-                     (8, 4),
-                     (16, 2),
-                     (2, 16),
-                     (16, 4),
-                     (4, 16),
-                     (16, 8),
-                     (8, 16)}
+    expected_keys = {(4, False, 2, False),
+                     (2, False, 4, False),
+                     (4, False, 4, False),
+                     (4, False, 8, False),
+                     (8, False, 4, False),
+                     (16, False, 2, False),
+                     (2, False, 16, False),
+                     (16, False, 4, False),
+                     (4, False, 16, False),
+                     (16, False, 8, False),
+                     (8, False, 16, False)}
 
     counter = WinCounter(player_levels=[4, 16], opponent_min=2, opponent_max=8)
 
@@ -92,10 +109,10 @@ def test_find_next_by_p2_wins():
 
 def test_build_series():
     counter = WinCounter(player_levels=[4, 16], opponent_min=2, opponent_max=8)
-    counter[(2, 4)].p1_wins = 3
-    counter[(2, 4)].p2_wins = 1
-    counter[(16, 8)].p1_wins = 4
-    counter[(16, 8)].ties = 1
+    counter[(2, False, 4, False)].p1_wins = 3
+    counter[(2, False, 4, False)].p2_wins = 1
+    counter[(16, False, 8, False)].p1_wins = 4
+    counter[(16, False, 8, False)].ties = 1
     expected_opponent_levels = [2, 4, 8]
     expected_series = [('wins as 1 with 4', [0., 0., 0.]),
                        ('ties as 1 with 4', [0., 0., 0.]),
@@ -113,12 +130,12 @@ def test_build_series():
     assert expected_series == series
 
 
-def test():
+def test_summary():
     counter = WinCounter(player_levels=[4, 16], opponent_min=2, opponent_max=8)
-    counter[(2, 4)].p1_wins = 3
-    counter[(2, 4)].p2_wins = 1
-    counter[(16, 8)].p1_wins = 4
-    counter[(16, 8)].ties = 1
+    counter[(2, False, 4, False)].p1_wins = 3
+    counter[(2, False, 4, False)].p2_wins = 1
+    counter[(16, False, 8, False)].p1_wins = 4
+    counter[(16, False, 8, False)].ties = 1
     expected_summary = """\
 opponent levels [2 4 8]
 counts as 1 with 4 [0 0 0]
@@ -142,10 +159,10 @@ ties as 2 with 16 [0 0 0]
 
 def test_copy():
     counter1 = WinCounter(player_levels=[4, 16], opponent_min=2, opponent_max=8)
-    counter1[(2, 4)].p1_wins = 3
+    counter1[(2, False, 4, False)].p1_wins = 3
 
     counter2 = WinCounter(source=counter1)
-    counter1[(16, 8)].p1_wins = 5
+    counter1[(16, False, 8, False)].p1_wins = 5
 
-    assert 3 == counter2[(2, 4)].p1_wins
-    assert 0 == counter2[(16, 8)].p1_wins
+    assert 3 == counter2[(2, False, 4, False)].p1_wins
+    assert 0 == counter2[(16, False, 8, False)].p1_wins
