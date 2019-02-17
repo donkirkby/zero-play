@@ -85,13 +85,19 @@ class NeuralNet(Heuristic):
         file_path = folder_path / filename
         self.model = load_model(file_path)
 
-    def train(self, boards: np.ndarray, outputs: np.ndarray):
+    def train(self, boards: np.ndarray, outputs: np.ndarray, log_dir=None):
         """ Train the model on some sample data.
 
         :param boards: Each entry is a board position.
         :param outputs: Each entry is an array of policy values for the moves,
             as well as the estimated value of the board position.
+        :param log_dir: Directory for TensorBoard logs. None disables logging.
         """
+
+        if log_dir is None:
+            callbacks = None
+        else:
+            callbacks = [TensorBoard(log_dir)]
 
         self.model.fit(boards,
                        outputs,
@@ -99,5 +105,5 @@ class NeuralNet(Heuristic):
                        initial_epoch=self.epochs_completed,
                        epochs=self.epochs_completed+self.epochs_to_train,
                        validation_split=0.2,
-                       callbacks=[TensorBoard()])
+                       callbacks=callbacks)
         self.epochs_completed += self.epochs_to_train

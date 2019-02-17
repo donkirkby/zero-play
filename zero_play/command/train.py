@@ -93,7 +93,7 @@ def handle(args: Namespace):
 
         filename = f'checkpoint-{i:02d}.h5'
         logger.info('Training for %s.', filename)
-        neural_net.train(np.expand_dims(boards, -1), outputs)
+        neural_net.train(np.expand_dims(boards, -1), outputs, './logs')
 
         logger.info('Testing.')
         wins_vs_base, base_ties, base_wins = base_controller.play(

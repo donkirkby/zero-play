@@ -1,5 +1,5 @@
-# Zero Play #
-## Teach a computer to play any game. ##
+# Zero Play
+## Teach a computer to play any game.
 The zero play library is based on the ideas in the [AlphaGo Zero paper] and the
 example Python code in the [alpha-zero-general project]. The goal of this
 project is to make a reusable Python library that other projects can build on
