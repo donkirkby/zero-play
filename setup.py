@@ -42,7 +42,8 @@ setup(name='zero_play',
           # The game entry point lets you add rules for new games.
           # The zero_play.game.Game class is a useful base class.
           'zero_play.game': ['tictactoe=zero_play.tictactoe.game:TicTacToeGame',
-                             'connect4=zero_play.connect4.game:Connect4Game'],
+                             'connect4=zero_play.connect4.game:Connect4Game',
+                             'othello=zero_play.othello.game:OthelloGame'],
           # The player entry point lets you add new ways to choose moves.
           # The zero_play.player.Player class is a useful base class.
           'zero_play.player': ['human=zero_play.human_player:HumanPlayer',

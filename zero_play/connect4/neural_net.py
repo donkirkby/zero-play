@@ -66,7 +66,6 @@ class NeuralNet(Heuristic):
         if self.game.is_ended(board):
             return self.analyse_end_game(board)
 
-        # noinspection PyArgumentList
         outputs = self.model.predict(board.reshape(1, 6, 7, 1))
 
         policy = outputs[0, :-1]

@@ -1,6 +1,11 @@
+from multiprocessing import Queue
+
 import pytest
 
-from zero_play.command.plot_strengths import MatchUp, WinCounter
+from zero_play.command.play import PlayController
+from zero_play.command.plot_strengths import MatchUp, WinCounter, run_games
+from zero_play.mcts_player import MctsPlayer
+from zero_play.tictactoe.game import TicTacToeGame
 
 
 def test_key():
@@ -166,3 +171,24 @@ def test_copy():
 
     assert 3 == counter2[(2, False, 4, False)].p1_wins
     assert 0 == counter2[(16, False, 8, False)].p1_wins
+
+
+def test_run_games():
+    counter = WinCounter(player_levels=[4, 8], opponent_min=4, opponent_max=8)
+    game = TicTacToeGame()
+    controller = PlayController(game=game, players=[MctsPlayer(game),
+                                                    MctsPlayer(game)])
+    result_queue = Queue()
+    run_games(controller, result_queue, counter, game_count=4)
+    expected_keys = [(4, False, 4, False),
+                     (4, False, 8, False),
+                     (8, False, 4, False),
+                     (8, False, 8, False)]
+
+    result_keys = []
+    while not result_queue.empty():
+        iterations1, neural_net1, iterations2, neural_net2, result = \
+            result_queue.get_nowait()
+        result_keys.append((iterations1, neural_net1, iterations2, neural_net2))
+
+    assert expected_keys == result_keys

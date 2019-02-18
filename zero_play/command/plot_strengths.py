@@ -205,7 +205,8 @@ class Plotter:
                  controller: typing.Optional[PlayController],
                  player_definitions: typing.List[typing.Union[str, int]],
                  opponent_min: int,
-                 opponent_max: int):
+                 opponent_max: int,
+                 neural_net_path: str):
         self.win_counter = WinCounter(player_definitions=player_definitions,
                                       opponent_min=opponent_min,
                                       opponent_max=opponent_max)
@@ -219,7 +220,8 @@ class Plotter:
             game_thread = Process(target=run_games,
                                   args=(controller,
                                         self.result_queue,
-                                        WinCounter(source=self.win_counter)),
+                                        WinCounter(source=self.win_counter),
+                                        neural_net_path),
                                   daemon=True)
             game_thread.start()
         sn.set()
@@ -374,16 +376,19 @@ INTO    games
 
 def run_games(controller: PlayController,
               result_queue: Queue,
-              win_counter: WinCounter):
+              win_counter: WinCounter,
+              checkpoint_path: str = None,
+              game_count: int = None):
     player1 = controller.players[Game.X_PLAYER]
     player2 = controller.players[Game.O_PLAYER]
     assert isinstance(player1, MctsPlayer)
     assert isinstance(player2, MctsPlayer)
     nn = NeuralNet(controller.game)
-    nn.load_checkpoint(filename='best.h5')
+    if checkpoint_path:
+        nn.load_checkpoint(filename=checkpoint_path)
     playout = Playout(controller.game)
 
-    while True:
+    while game_count is None or game_count > 0:
         match_up = win_counter.find_next_matchup()
         player1.iteration_count = match_up.p1_iterations
         if match_up.p1_neural_net:
@@ -410,6 +415,8 @@ def run_games(controller: PlayController,
                      result)
         result_queue.put(match_up.key + (result,))
         match_up.record_result(result)
+        if game_count:
+            game_count -= 1
 
 
 def create_parser(subparsers):
@@ -463,13 +470,17 @@ def handle(args: Namespace):
     db_path = os.path.abspath(os.path.join(
         __file__,
         f'../../../data/{args.game}-strengths.db'))
+    neural_net_path = os.path.abspath(os.path.join(
+        __file__,
+        f'../../../data/{args.game}-nn/best.h5'))
     logger.debug(db_path)
     plotter = Plotter(db_path,
                       args.game,
                       controller,
                       args.player_definitions,
                       args.opponent_min,
-                      args.opponent_max)
+                      args.opponent_max,
+                      neural_net_path)
     # noinspection PyUnusedLocal
     animation = FuncAnimation(figure, plotter.update, interval=30000)
     plt.show()

@@ -82,7 +82,8 @@ to install multiple driver versions: one that's compatible with my display
 and the operating system, and another that's compatible with Tensorflow. After
 a bunch of investigation I described in this [GPU question] on Stack Overflow,
 I figured out that I had two driver versions squished together in one location.
-With a bunch of clean up, I got it working again.
+With a bunch of clean up, I got it working again. The GPU version is about 12
+times faster than the CPU version.
 
 As for actually using the neural network, it's not very impressive yet. I
 found a new way to display the skill of a player, by comparing it to several
