@@ -383,20 +383,21 @@ def run_games(controller: PlayController,
     player2 = controller.players[Game.O_PLAYER]
     assert isinstance(player1, MctsPlayer)
     assert isinstance(player2, MctsPlayer)
-    nn = NeuralNet(controller.game)
-    if checkpoint_path:
-        nn.load_checkpoint(filename=checkpoint_path)
+
+    nn = None
     playout = Playout(controller.game)
 
     while game_count is None or game_count > 0:
         match_up = win_counter.find_next_matchup()
         player1.iteration_count = match_up.p1_iterations
         if match_up.p1_neural_net:
+            nn = nn or load_neural_net(controller.game, checkpoint_path)
             player1.heuristic = nn
         else:
             player1.heuristic = playout
         player2.iteration_count = match_up.p2_iterations
         if match_up.p2_neural_net:
+            nn = nn or load_neural_net(controller.game, checkpoint_path)
             player2.heuristic = nn
         else:
             player2.heuristic = playout
@@ -417,6 +418,13 @@ def run_games(controller: PlayController,
         match_up.record_result(result)
         if game_count:
             game_count -= 1
+
+
+def load_neural_net(game, checkpoint_path):
+    nn = NeuralNet(game)
+    if checkpoint_path:
+        nn.load_checkpoint(filename=checkpoint_path)
+    return nn
 
 
 def create_parser(subparsers):

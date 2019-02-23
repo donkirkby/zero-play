@@ -60,6 +60,10 @@ class Game(ABC):
         """
 
     @abstractmethod
+    def get_spaces(self, board: np.ndarray) -> np.ndarray:
+        """ Extract the board spaces from the complete game state. """
+
+    @abstractmethod
     def parse_move(self, text: str, board: np.ndarray) -> int:
         """ Parse a human-readable description into a move index.
 
@@ -123,3 +127,16 @@ class Game(ABC):
         :param player: the player number to check.
         :return: True if the player has won.
         """
+
+
+# noinspection PyAbstractClass
+class GridGame(Game):
+    def __init__(self, board_height: int, board_width: int):
+        super(GridGame, self).__init__()
+        self.board_height = board_height
+        self.board_width = board_width
+
+    def get_spaces(self, board: np.ndarray) -> np.ndarray:
+        return board[:self.board_height*self.board_width].reshape(
+            self.board_height,
+            self.board_width)

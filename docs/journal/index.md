@@ -1,8 +1,9 @@
 # Project Journal
 ### 21 Dec 2018
 I found the [alpha-zero-general project] very helpful to learn the ideas in the
-[AlphaGo Zero paper], but I have some different ideas for the project
-structure and API. I've decided to write a new library using the same ideas.
+[AlphaGo Zero paper]. (Use the link at the bottom of the page.) I have some
+different ideas for the project structure and API, so I've decided to write a
+new library using the same ideas.
 
 [alpha-zero-general project]: https://github.com/suragnair/alpha-zero-general
 [AlphaGo Zero paper]: https://deepmind.com/blog/alphago-zero-learning-scratch/
@@ -120,3 +121,21 @@ their neural network is actually helpful.
 
 [GPU tutorial]: https://blog.kovalevskyi.com/multiple-version-of-cuda-libraries-on-the-same-machine-b9502d50ae77
 [GPU question]: https://stackoverflow.com/q/54567427/4794
+
+### 22 Feb 2019
+I tried running the alpha-zero-general project's Connect 4 player against my
+basic player without a neural network, and it was at least no worse than my
+basic player.
+
+![Connect 4 win rates in alpha-zero-general]
+
+Something must be wrong with my neural network or my training, so I'm reading
+the original [AlphaGo Zero paper]. (The link at the bottom of the page gives
+free access.) One difference I noticed is that I haven't implemented the idea
+of temperature in my loss function.
+
+Also, their loss function uses mean squared error for the values, but cross
+entropy for the move policies. I use mean squared error for everything. I don't
+know if I can mix things like that in the high-level API I'm using.
+
+[Connect 4 win rates in alpha-zero-general]: 2019/connect4-general-nn.png

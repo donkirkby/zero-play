@@ -30,7 +30,7 @@ XXXX...
 def test_train():
     training_path = Path(__file__).parent / 'training_data.json'
     boards_list, outputs_list = json.loads(training_path.read_text())
-    boards = np.expand_dims(np.array(boards_list), -1)
+    boards = np.array(boards_list)
     outputs = np.array(outputs_list)
 
     game = Connect4Game()

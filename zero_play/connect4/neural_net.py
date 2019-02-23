@@ -9,18 +9,20 @@ from tensorflow.python.keras.callbacks import TensorBoard
 from tensorflow.python.keras.layers import Dense, Conv2D, Dropout, Flatten
 from tensorflow.python.keras.models import load_model
 
-from zero_play.game import Game
+from zero_play.game import GridGame
 from zero_play.heuristic import Heuristic
 
 logger = logging.getLogger(__name__)
 
 
 class NeuralNet(Heuristic):
-    def __init__(self, game: Game):
+    def __init__(self, game: GridGame):
         super().__init__(game)
         # game params
-        self.board_x, self.board_y = 7, 6
-        self.action_size = 7
+        self.board_height = game.board_height
+        self.board_width = game.board_width
+        example_board = game.create_board()
+        self.action_size = len(game.get_valid_moves(example_board))
         self.epochs_completed = 0
         self.epochs_to_train = 100
         args = Namespace(lr=0.001,
@@ -40,7 +42,7 @@ class NeuralNet(Heuristic):
                          kernel_size,
                          padding='same',
                          activation='relu',
-                         input_shape=(6, 7, 1),
+                         input_shape=(self.board_height, self.board_width, 1),
                          activity_regularizer=regularizer))
         model.add(Conv2D(num_channels,
                          kernel_size,
@@ -66,21 +68,33 @@ class NeuralNet(Heuristic):
         if self.game.is_ended(board):
             return self.analyse_end_game(board)
 
-        outputs = self.model.predict(board.reshape(1, 6, 7, 1))
+        outputs = self.model.predict(self.game.get_spaces(board).reshape(
+            1,
+            self.board_height,
+            self.board_width,
+            1))
 
         policy = outputs[0, :-1]
         value = outputs[0, -1]
 
         return value, policy
 
-    def save_checkpoint(self, folder='data/connect4-nn', filename='checkpoint.pth.tar'):
-        folder_path = Path(folder)
+    def get_path(self, folder):
+        if folder is not None:
+            folder_path = Path(folder)
+        else:
+            game_name = self.game.name.replace(' ', '-').lower()
+            folder_path = Path('data') / game_name
+        return folder_path
+
+    def save_checkpoint(self, folder=None, filename='checkpoint.h5'):
+        folder_path = self.get_path(folder)
         file_path = folder_path / filename
         folder_path.mkdir(parents=True, exist_ok=True)
         self.model.save(file_path)
 
-    def load_checkpoint(self, folder='data/connect4-nn', filename='checkpoint.pth.tar'):
-        folder_path = Path(folder)
+    def load_checkpoint(self, folder=None, filename='checkpoint.h5'):
+        folder_path = self.get_path(folder)
         file_path = folder_path / filename
         self.model = load_model(file_path)
 
@@ -98,7 +112,7 @@ class NeuralNet(Heuristic):
         else:
             callbacks = [TensorBoard(log_dir)]
 
-        self.model.fit(boards,
+        self.model.fit(np.expand_dims(boards, -1),
                        outputs,
                        verbose=0,
                        initial_epoch=self.epochs_completed,

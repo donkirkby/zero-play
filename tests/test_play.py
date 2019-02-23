@@ -18,6 +18,9 @@ class FirstPlayerWinsGame(Game):
             text = '.' * self.board_size
         return np.array([self.DISPLAY_CHARS.index(c) - 1 for c in text])
 
+    def get_spaces(self, board: np.ndarray) -> np.ndarray:
+        return board
+
     def get_valid_moves(self, board: np.ndarray) -> np.ndarray:
         return board == 0
 

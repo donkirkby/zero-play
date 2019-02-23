@@ -1,10 +1,13 @@
 import numpy as np
 
-from zero_play.game import Game
+from zero_play.game import GridGame
 
 
-class TicTacToeGame(Game):
+class TicTacToeGame(GridGame):
     name = 'Tic Tac Toe'
+
+    def __init__(self):
+        super(TicTacToeGame, self).__init__(board_height=3, board_width=3)
 
     def create_board(self, text: str = None) -> np.ndarray:
         board = np.zeros((3, 3), dtype=int)

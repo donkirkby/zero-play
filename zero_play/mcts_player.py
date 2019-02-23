@@ -145,7 +145,7 @@ class SearchManager:
         game_states = []
         self.search(self.current_node.board, iterations=1)  # One extra to start.
         report_size = 0
-        board_shape = self.current_node.board.shape
+        board_shape = self.game.get_spaces(self.current_node.board).shape
         boards = np.zeros((data_size,) + board_shape, int)
         move_count = self.game.get_valid_moves(self.current_node.board).size
         outputs = np.zeros((data_size, move_count + 1))
@@ -173,7 +173,7 @@ class SearchManager:
                     value = final_value
                     if self.game.get_active_player(board) != final_player:
                         value *= -1
-                    boards[data_count] = board
+                    boards[data_count] = self.game.get_spaces(board)
                     outputs[data_count, :move_count] = move_weights
                     outputs[data_count, -1] = value
                     data_count += 1

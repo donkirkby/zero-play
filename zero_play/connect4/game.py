@@ -1,16 +1,19 @@
 import numpy as np
 
-from zero_play.game import Game
+from zero_play.game import GridGame
 
 
-class Connect4Game(Game):
+class Connect4Game(GridGame):
     name = 'Connect 4'
 
+    def __init__(self, board_height: int = 6, board_width: int = 7):
+        super(Connect4Game, self).__init__(board_height, board_width)
+
     def create_board(self, text: str = None) -> np.ndarray:
-        board = np.zeros((6, 7), dtype=int)
+        board = np.zeros((self.board_height, self.board_width), dtype=int)
         if text:
             lines = text.splitlines()
-            if len(lines) == 7:
+            if len(lines) == self.board_height+1:
                 # Trim off coordinates.
                 lines = lines[1:]
             for i, line in enumerate(lines):
@@ -29,13 +32,13 @@ class Connect4Game(Game):
         header = '1234567\n' if show_coordinates else ''
         return header + ''.join(
             ''.join(self.DISPLAY_CHARS[board[i, j]+1]
-                    for j in range(7)) + '\n'
-            for i in range(6))
+                    for j in range(self.board_width)) + '\n'
+            for i in range(self.board_height))
 
     def parse_move(self, text: str, board: np.ndarray) -> int:
         move_int = int(text)
-        if move_int < 1 or 7 < move_int:
-            raise ValueError('Move must be between 1 and 7.')
+        if move_int < 1 or self.board_width < move_int:
+            raise ValueError(f'Move must be between 1 and {self.board_width}.')
         return move_int - 1
 
     def make_move(self, board: np.ndarray, move: int) -> np.ndarray:

@@ -5,8 +5,6 @@ from datetime import datetime
 from itertools import count
 from pathlib import Path
 
-import numpy as np
-
 from zero_play.command.play import PlayController
 from zero_play.connect4.neural_net import NeuralNet
 from zero_play.mcts_player import SearchManager, MctsPlayer
@@ -93,7 +91,7 @@ def handle(args: Namespace):
 
         filename = f'checkpoint-{i:02d}.h5'
         logger.info('Training for %s.', filename)
-        neural_net.train(np.expand_dims(boards, -1), outputs, './logs')
+        neural_net.train(boards, outputs, './logs')
 
         logger.info('Testing.')
         wins_vs_base, base_ties, base_wins = base_controller.play(

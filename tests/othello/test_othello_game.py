@@ -1,6 +1,8 @@
 import numpy as np
 import pytest
 
+from zero_play.connect4.neural_net import NeuralNet
+from zero_play.mcts_player import SearchManager
 from zero_play.othello.game import OthelloGame
 from zero_play.playout import Playout
 
@@ -393,7 +395,7 @@ def test_playout():
     playout.simulate(board)
 
 
-def test():
+def test_pass_is_not_win():
     game = OthelloGame()
     board = game.create_board("""\
 ......
@@ -423,5 +425,20 @@ X.....
 .OO...
 >X
 """)
+    expected_valid_moves = [False] * 37
 
+    valid_moves = game.get_valid_moves(board)
+
+    assert expected_valid_moves == valid_moves.tolist()
     assert game.O_PLAYER == game.get_winner(board)
+
+
+def test_training_data():
+    game = OthelloGame()
+    neural_net = NeuralNet(game)
+    neural_net.epochs_to_train = 10
+    search_manager = SearchManager(game, neural_net)
+    boards, outputs = search_manager.create_training_data(
+        iterations=10,
+        data_size=10)
+    neural_net.train(boards, outputs)

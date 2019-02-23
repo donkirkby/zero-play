@@ -3,16 +3,14 @@ from io import StringIO
 
 import numpy as np
 
-from zero_play.game import Game
+from zero_play.game import GridGame
 
 
-class OthelloGame(Game):
+class OthelloGame(GridGame):
     name = 'Othello'
 
     def __init__(self, board_height: int = 6, board_width: int = 6):
-        super(OthelloGame, self).__init__()
-        self.board_height = board_height
-        self.board_width = board_width
+        super(OthelloGame, self).__init__(board_height, board_width)
 
     def create_board(self, text: str = None) -> np.ndarray:
         board = np.zeros(self.board_height*self.board_width+1, dtype=int)
@@ -49,7 +47,13 @@ class OthelloGame(Game):
         for i, j in self.find_moves(spaces, player):
             move_spaces[i, j] = True
 
-        moves[-1] = moves.sum() == 0
+        if moves.sum() == 0:
+            # No moves for this player, check opponent.
+            for _ in self.find_moves(spaces, -player):
+                # Opponent has a move, pass is allowed.
+                moves[-1] = True
+                break
+
         return moves
 
     def find_moves(self, spaces: np.ndarray, player: int):
@@ -97,9 +101,6 @@ class OthelloGame(Game):
             result.write('\n')
         result.write(f'>{self.DISPLAY_CHARS[next_player+1]}\n')
         return result.getvalue()
-
-    def get_spaces(self, board):
-        return board[:-1].reshape(self.board_height, self.board_width)
 
     def parse_move(self, text: str, board: np.ndarray) -> int:
         trimmed = text.strip().replace(' ', '')
