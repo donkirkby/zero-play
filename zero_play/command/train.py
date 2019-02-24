@@ -116,11 +116,17 @@ def handle(args: Namespace):
             neural_net.save_checkpoint(checkpoint_path, filename)
             best_net.load_checkpoint(checkpoint_path, filename)
             best_net.save_checkpoint(checkpoint_path, best_file_name)
-        logger.info('%s %s with wins %f over base and %f over best.',
+        logger.info('%s %s with wins %f over base (%d/%d/%d) and %f over best (%d/%d/%d).',
                     decision,
                     filename,
                     win_rate_vs_base,
-                    win_rate_vs_best)
+                    wins_vs_base,
+                    base_ties,
+                    base_wins,
+                    win_rate_vs_best,
+                    wins_vs_best,
+                    best_ties,
+                    best_wins)
         search_manager.reset()
 
 
