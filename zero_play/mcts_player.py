@@ -215,11 +215,11 @@ class MctsPlayer(Player):
         self.search_manager = SearchManager(game, self.heuristic)
 
     @property
-    def heuristic(self):
+    def heuristic(self) -> Heuristic:
         return self._heuristic
 
     @heuristic.setter
-    def heuristic(self, value):
+    def heuristic(self, value: Heuristic):
         self._heuristic = value
         search_manager = getattr(self, 'search_manager', None)
         if search_manager is not None:
@@ -234,3 +234,7 @@ class MctsPlayer(Player):
         """
         self.search_manager.search(board, self.iteration_count)
         return self.search_manager.get_best_move()
+
+    def get_summary(self) -> typing.Sequence[str]:
+        return (('mcts',) + tuple(self.heuristic.get_summary()) +
+                (f'{self.iteration_count} iterations',))

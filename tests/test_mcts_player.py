@@ -11,6 +11,9 @@ from zero_play.tictactoe.game import TicTacToeGame
 
 
 class FirstChoiceHeuristic(Heuristic):
+    def get_summary(self) -> typing.Sequence[str]:
+        return 'first choice',
+
     def analyse(self, board: np.ndarray) -> typing.Tuple[float, np.ndarray]:
         valid_moves = self.game.get_valid_moves(board)
         if self.game.is_ended(board):

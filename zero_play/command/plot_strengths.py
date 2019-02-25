@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import seaborn as sn
 
-from zero_play.command.play import PlayController
+from zero_play.command.play import PlayController, load_arguments
 from zero_play.connect4.neural_net import NeuralNet
 from zero_play.game import Game
 from zero_play.mcts_player import MctsPlayer
@@ -472,7 +472,8 @@ def handle(args: Namespace):
     if '__live_coding_context__' in locals():
         controller = None
     else:
-        controller = PlayController(args)
+        game, players = load_arguments(args)
+        controller = PlayController(game, players)
 
     figure = plt.figure()
     db_path = os.path.abspath(os.path.join(

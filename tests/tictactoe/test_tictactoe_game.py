@@ -101,7 +101,7 @@ def test_parse_move(text, expected_move):
 @pytest.mark.parametrize('text,expected_message', [
     ('4B', r'Row must be between 1 and 3\.'),
     ('2D', r'Column must be between A and C\.'),
-    ('2BC', r'Move must have one number and one letter\.'),
+    ('2BC', r'A move must be a row and a column\.'),
 ])
 def test_parse_move_fails(text, expected_message):
     game = TicTacToeGame()

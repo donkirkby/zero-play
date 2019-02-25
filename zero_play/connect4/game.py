@@ -7,22 +7,17 @@ class Connect4Game(GridGame):
     name = 'Connect 4'
 
     def __init__(self, board_height: int = 6, board_width: int = 7):
-        super(Connect4Game, self).__init__(board_height, board_width)
+        super().__init__(board_height, board_width)
 
     def create_board(self, text: str = None) -> np.ndarray:
-        board = np.zeros((self.board_height, self.board_width), dtype=int)
-        if text:
+        if text is None:
+            lines = None
+        else:
             lines = text.splitlines()
             if len(lines) == self.board_height+1:
                 # Trim off coordinates.
                 lines = lines[1:]
-            for i, line in enumerate(lines):
-                for j, c in enumerate(line):
-                    if c == 'X':
-                        board[i, j] = 1
-                    elif c == 'O':
-                        board[i, j] = -1
-        return board
+        return self.create_grid_board(lines=lines)
 
     def get_valid_moves(self, board: np.ndarray) -> np.ndarray:
         # Any zero value in top row in a valid move
@@ -30,10 +25,7 @@ class Connect4Game(GridGame):
 
     def display(self, board: np.ndarray, show_coordinates: bool = False) -> str:
         header = '1234567\n' if show_coordinates else ''
-        return header + ''.join(
-            ''.join(self.DISPLAY_CHARS[board[i, j]+1]
-                    for j in range(self.board_width)) + '\n'
-            for i in range(self.board_height))
+        return header + super().display(board)
 
     def parse_move(self, text: str, board: np.ndarray) -> int:
         move_int = int(text)

@@ -55,7 +55,7 @@ class CommandParser(ArgumentParser):
         action = kwargs.get('action')
         if action == 'entry_point':
             kwargs['action'] = 'store'
-        new_action = super(CommandParser, self).add_argument(*args, **kwargs)
+        new_action = super().add_argument(*args, **kwargs)
         if action == 'entry_point':
             new_action.choices = sorted(self.load_group(new_action.dest))
         return new_action

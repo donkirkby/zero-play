@@ -55,3 +55,7 @@ class Player(metaclass=ABCMeta):
             state.
         :param opponent: the opposing player.
         """
+
+    @abstractmethod
+    def get_summary(self) -> typing.Sequence[str]:
+        """ Human-readable attributes to describe this player. """

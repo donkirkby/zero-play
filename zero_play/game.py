@@ -1,4 +1,6 @@
+import typing
 from abc import ABC, abstractmethod
+from io import StringIO
 
 import numpy as np
 
@@ -132,11 +134,74 @@ class Game(ABC):
 # noinspection PyAbstractClass
 class GridGame(Game):
     def __init__(self, board_height: int, board_width: int):
-        super(GridGame, self).__init__()
+        super().__init__()
         self.board_height = board_height
         self.board_width = board_width
+
+    def create_board(self, text: str = None) -> np.ndarray:
+        return self.create_grid_board(text)
+
+    def create_grid_board(self,
+                          text: str = None,
+                          lines: typing.Sequence[str] = None,
+                          extra_count: int = 0) -> np.ndarray:
+        board = np.zeros(self.board_height*self.board_width + extra_count,
+                         dtype=int)
+        spaces = self.get_spaces(board)
+        if text:
+            lines = text.splitlines()
+        if lines:
+            if len(lines) == self.board_height + 1:
+                # Trim off coordinates.
+                lines = lines[1:]
+                lines = [line[2:] for line in lines]
+            for i, line in enumerate(lines):
+                spaces[i] = [self.DISPLAY_CHARS.index(c) - 1 for c in line]
+        return board if extra_count else spaces
 
     def get_spaces(self, board: np.ndarray) -> np.ndarray:
         return board[:self.board_height*self.board_width].reshape(
             self.board_height,
             self.board_width)
+
+    def get_valid_moves(self, board: np.ndarray) -> np.ndarray:
+        spaces = self.get_spaces(board)
+        return spaces.reshape(self.board_height * self.board_width) == 0
+
+    def display(self, board: np.ndarray, show_coordinates: bool = False) -> str:
+        result = StringIO()
+        if show_coordinates:
+            result.write('  ')
+            for i in range(65, 65+self.board_width):
+                result.write(chr(i))
+            result.write('\n')
+        spaces = self.get_spaces(board)
+        for i in range(self.board_height):
+            if show_coordinates:
+                result.write(chr(49+i) + ' ')
+            for j in range(self.board_width):
+                result.write(self.DISPLAY_CHARS[spaces[i, j]+1])
+            result.write('\n')
+        return result.getvalue()
+
+    def parse_move(self, text: str, board: np.ndarray) -> int:
+        trimmed = text.strip().replace(' ', '')
+        if len(trimmed) != 2:
+            raise ValueError('A move must be a row and a column.')
+        row, column = trimmed
+        i = ord(row) - 49
+        j = ord(column.upper()) - 65
+        if i < 0 or self.board_height <= i:
+            raise ValueError(f'Row must be between 1 and {self.board_height}.')
+        if j < 0 or self.board_width <= j:
+            max_column = chr(64 + self.board_width)
+            raise ValueError(f'Column must be between A and {max_column}.')
+
+        return i*self.board_width + j
+
+    def make_move(self, board: np.ndarray, move: int) -> np.ndarray:
+        moving_player = self.get_active_player(board)
+        new_board: np.ndarray = board.copy()
+        i, j = move // self.board_width, move % self.board_width
+        new_board[i, j] = moving_player
+        return new_board

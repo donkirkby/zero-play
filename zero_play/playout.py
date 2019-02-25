@@ -6,6 +6,9 @@ from zero_play.heuristic import Heuristic
 
 
 class Playout(Heuristic):
+    def get_summary(self) -> typing.Sequence[str]:
+        return 'playout',
+
     def analyse(self, board: np.ndarray) -> typing.Tuple[float, np.ndarray]:
         value = self.simulate(board)
         child_predictions = self.create_even_policy(board)

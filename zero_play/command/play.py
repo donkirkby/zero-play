@@ -8,33 +8,45 @@ from zero_play.command_parser import CommandParser
 from zero_play.player import Player, get_player_argument
 
 
+def load_arguments(args: Namespace) -> typing.Tuple[Game, typing.List[Player]]:
+    parser: CommandParser = args.parser
+    game: Game = parser.load_argument(args, 'game')
+    heuristics = [parser.load_argument(args,
+                                       'heuristic',
+                                       get_player_argument(args.heuristic,
+                                                           Game.X_PLAYER),
+                                       game=game),
+                  parser.load_argument(args,
+                                       'heuristic',
+                                       get_player_argument(args.heuristic,
+                                                           Game.O_PLAYER),
+                                       game=game)]
+    player_names = args.player
+    players = [parser.load_argument(args,
+                                    'player',
+                                    get_player_argument(player_names,
+                                                        Game.X_PLAYER),
+                                    game=game,
+                                    player_number=Game.X_PLAYER,
+                                    heuristic=heuristics),
+               parser.load_argument(
+                                    args,
+                                    'player',
+                                    get_player_argument(player_names,
+                                                        Game.O_PLAYER),
+                                    game=game,
+                                    player_number=Game.O_PLAYER,
+                                    heuristic=heuristics)]
+    return game, players
+
+
 class PlayController:
-    def __init__(self, args: Namespace = None, game: Game = None, players: typing.List[Player] = None):
-        if args is None:
-            assert game is not None
-            assert players is not None
-            self.game = game
-            x_player, o_player = players
-            x_player.player_number = game.X_PLAYER
-            o_player.player_number = game.O_PLAYER
-            self.players = {Game.X_PLAYER: x_player, Game.O_PLAYER: o_player}
-        else:
-            parser: CommandParser = args.parser
-            self.game: Game = parser.load_argument(args, 'game')
-            player_names = args.player
-            self.players = {
-                Game.X_PLAYER: parser.load_argument(
-                    args,
-                    'player',
-                    get_player_argument(player_names, Game.X_PLAYER),
-                    game=self.game,
-                    player_number=Game.X_PLAYER),
-                Game.O_PLAYER: parser.load_argument(
-                    args,
-                    'player',
-                    get_player_argument(player_names, Game.O_PLAYER),
-                    game=self.game,
-                    player_number=Game.O_PLAYER)}
+    def __init__(self, game: Game, players: typing.List[Player]):
+        self.game = game
+        x_player, o_player = players
+        x_player.player_number = game.X_PLAYER
+        o_player.player_number = game.O_PLAYER
+        self.players = {Game.X_PLAYER: x_player, Game.O_PLAYER: o_player}
         self.board: np.ndarray = None
         self.start_game()
 
@@ -56,7 +68,7 @@ class PlayController:
 
         return True
 
-    def play(self, games: int = 1, flip: bool = False):
+    def play(self, games: int = 1, flip: bool = False, display: bool = False):
         current_x = original_x = self.players[self.game.X_PLAYER]
         current_o = original_o = self.players[self.game.O_PLAYER]
         wins = {original_x: 0,
@@ -70,8 +82,13 @@ class PlayController:
                 current_o.player_number = self.game.O_PLAYER
                 self.players[self.game.X_PLAYER] = current_x
                 self.players[self.game.O_PLAYER] = current_o
-            while not self.take_turn():
-                pass
+            while True:
+                if display:
+                    print(self.game.display(self.board, show_coordinates=True))
+                if self.take_turn():
+                    break
+            if display:
+                print(self.game.display(self.board, show_coordinates=True))
             if self.game.is_win(self.board, self.game.X_PLAYER):
                 wins[current_x] += 1
             elif self.game.is_win(self.board, self.game.O_PLAYER):
@@ -83,8 +100,32 @@ class PlayController:
         original_o.player_number = self.game.O_PLAYER
         self.players[self.game.X_PLAYER] = original_x
         self.players[self.game.O_PLAYER] = original_o
+        if display:
+            print(get_result_summary(original_x,
+                                     original_o,
+                                     wins[original_x],
+                                     ties,
+                                     wins[original_o]),
+                  end='')
 
         return wins[original_x], ties, wins[original_o]
+
+
+def get_result_summary(player_a, player_b, wins_a, ties, wins_b):
+    player_summaries = get_player_summaries(player_a, player_b)
+    return f"""\
+{wins_a} wins for {player_summaries[0]}
+{ties} ties
+{wins_b} wins for {player_summaries[1]}
+"""
+
+
+def get_player_summaries(*players: Player) -> typing.Sequence[str]:
+    summaries = [player.get_summary() for player in players]
+    for category_values in zip(*summaries):
+        if len(set(category_values)) > 1:
+            return category_values
+    return 'player A', 'player B'
 
 
 def create_parser(subparsers):
@@ -109,8 +150,30 @@ def create_parser(subparsers):
                         nargs='*',
                         help='heuristic for evaluating boards',
                         action='entry_point')
+    parser.add_argument('--display',
+                        action='store_true',
+                        help='display moves')
+    parser.add_argument('--num_games',
+                        '-n',
+                        type=int,
+                        default=1,
+                        help='number of games to play')
+    parser.add_argument('--flip',
+                        action='store_true',
+                        help='flip first player back and forth each game')
+    parser.add_argument('--max_moves',
+                        type=int,
+                        help='maximum moves in each game before declaring a tie')
 
 
 def handle(args: Namespace):
-    controller = PlayController(args)
-    controller.play()
+    game, players = load_arguments(args)
+    # players[0].heuristic.load_checkpoint('data/connect4-nn', filename='best.h5')
+    # players[1].heuristic.load_checkpoint('data/connect4-nn',
+    #                                      filename=f'checkpoint-01.h5')
+    controller = PlayController(game, players)
+    wins, ties, losses = controller.play(args.num_games,
+                                         args.flip,
+                                         args.display)
+    print(get_result_summary(players[0], players[1], wins, ties, losses),
+          end='')

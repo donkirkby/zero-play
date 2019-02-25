@@ -186,9 +186,10 @@ def test_run_games():
                      (8, False, 8, False)]
 
     result_keys = []
-    while not result_queue.empty():
+    for _ in range(len(expected_keys)):
         iterations1, neural_net1, iterations2, neural_net2, result = \
-            result_queue.get_nowait()
+            result_queue.get(timeout=1.0)
         result_keys.append((iterations1, neural_net1, iterations2, neural_net2))
 
     assert expected_keys == result_keys
+    assert result_queue.empty()

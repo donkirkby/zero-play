@@ -10,33 +10,29 @@ class OthelloGame(GridGame):
     name = 'Othello'
 
     def __init__(self, board_height: int = 6, board_width: int = 6):
-        super(OthelloGame, self).__init__(board_height, board_width)
+        super().__init__(board_height, board_width)
 
     def create_board(self, text: str = None) -> np.ndarray:
-        board = np.zeros(self.board_height*self.board_width+1, dtype=int)
+        if text is None:
+            lines = None
+            next_player_line = None
+        else:
+            lines = text.splitlines()
+            next_player_line = lines.pop()
+        board = self.create_grid_board(lines=lines, extra_count=1)
         spaces = self.get_spaces(board)
-        if not text:
+        if text:
+            assert next_player_line and next_player_line.startswith('>')
+            board[-1] = (self.X_PLAYER
+                         if next_player_line.endswith('X')
+                         else self.O_PLAYER)
+        else:
             board[-1] = self.X_PLAYER
             for i in range(self.board_height//2-1, self.board_height//2+1):
                 for j in range(self.board_width//2-1, self.board_width//2+1):
                     player = self.X_PLAYER if (i+j) % 2 else self.O_PLAYER
                     spaces[i, j] = player
-        else:
-            lines = text.splitlines()
-            next_player_line = lines.pop()
-            assert next_player_line.startswith('>')
-            board[-1] = (self.X_PLAYER
-                         if next_player_line.endswith('X')
-                         else self.O_PLAYER)
-            if len(lines) == self.board_height + 1:
-                # Trim off coordinates.
-                lines = [line[1:] for line in lines[1:]]
-            for i, line in enumerate(lines):
-                for j, c in enumerate(line):
-                    if c == 'X':
-                        spaces[i, j] = self.X_PLAYER
-                    elif c == 'O':
-                        spaces[i, j] = self.O_PLAYER
+
         return board
 
     def get_valid_moves(self, board: np.ndarray) -> np.ndarray:
@@ -85,39 +81,15 @@ class OthelloGame(GridGame):
                     j += dj
 
     def display(self, board: np.ndarray, show_coordinates: bool = False) -> str:
-        result = StringIO()
-        if show_coordinates:
-            result.write(' ')
-            for i in range(65, 65+self.board_width):
-                result.write(chr(i))
-            result.write('\n')
-        spaces = self.get_spaces(board)
+        result = super().display(board, show_coordinates)
         next_player = board[-1]
-        for i in range(self.board_height):
-            if show_coordinates:
-                result.write(chr(49+i))
-            for j in range(self.board_height):
-                result.write(self.DISPLAY_CHARS[spaces[i, j]+1])
-            result.write('\n')
-        result.write(f'>{self.DISPLAY_CHARS[next_player+1]}\n')
-        return result.getvalue()
+        return result + f'>{self.DISPLAY_CHARS[next_player+1]}\n'
 
     def parse_move(self, text: str, board: np.ndarray) -> int:
         trimmed = text.strip().replace(' ', '')
         if not trimmed:
             return self.board_height*self.board_width  # It's a pass.
-        if len(trimmed) != 2:
-            raise ValueError('A move must be a row and a column.')
-        row, column = trimmed
-        i = ord(row) - 49
-        j = ord(column.upper()) - 65
-        if i < 0 or self.board_height <= i:
-            raise ValueError(f'Row must be between 1 and {self.board_height}.')
-        if j < 0 or self.board_width <= j:
-            max_column = chr(64 + self.board_width)
-            raise ValueError(f'Column must be between A and {max_column}.')
-
-        return i*self.board_width + j
+        return super().parse_move(trimmed, board)
 
     def make_move(self, board: np.ndarray, move: int) -> np.ndarray:
         new_board: np.ndarray = board.copy()

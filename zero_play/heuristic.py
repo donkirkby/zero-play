@@ -11,6 +11,10 @@ class Heuristic(metaclass=ABCMeta):
         self.game = game
 
     @abstractmethod
+    def get_summary(self) -> typing.Sequence[str]:
+        """ Human-readable attributes to describe this heuristic. """
+
+    @abstractmethod
     def analyse(self, board: np.ndarray) -> typing.Tuple[float, np.ndarray]:
         """ Analyse the value of a board position and predict a move.
 

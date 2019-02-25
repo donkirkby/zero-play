@@ -30,6 +30,7 @@ class NeuralNet(Heuristic):
                          epochs=10,
                          batch_size=64,
                          num_channels=512)
+        self.checkpoint_name = 'random weights'
         self.args = args
 
         num_channels = 512
@@ -64,6 +65,9 @@ class NeuralNet(Heuristic):
         model.compile('adam', 'mean_squared_error')
         self.model = model
 
+    def get_summary(self) -> typing.Sequence[str]:
+        return 'neural net', self.checkpoint_name
+
     def analyse(self, board: np.ndarray) -> typing.Tuple[float, np.ndarray]:
         if self.game.is_ended(board):
             return self.analyse_end_game(board)
@@ -88,12 +92,14 @@ class NeuralNet(Heuristic):
         return folder_path
 
     def save_checkpoint(self, folder=None, filename='checkpoint.h5'):
+        self.checkpoint_name = 'model ' + filename
         folder_path = self.get_path(folder)
         file_path = folder_path / filename
         folder_path.mkdir(parents=True, exist_ok=True)
         self.model.save(file_path)
 
     def load_checkpoint(self, folder=None, filename='checkpoint.h5'):
+        self.checkpoint_name = 'model ' + filename
         folder_path = self.get_path(folder)
         file_path = folder_path / filename
         self.model = load_model(file_path)

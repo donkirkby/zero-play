@@ -1,39 +1,23 @@
 from io import StringIO
+from unittest.mock import patch, Mock
 
 import numpy as np
 
-from zero_play.command.play import PlayController
-from zero_play.game import Game
+from tests.test_mcts_player import FirstChoiceHeuristic
+from zero_play.command.play import PlayController, load_arguments, get_player_summaries
+from zero_play.connect4.game import Connect4Game
+from zero_play.connect4.neural_net import NeuralNet
+from zero_play.game import Game, GridGame
 from zero_play.human_player import HumanPlayer
 from zero_play.mcts_player import MctsPlayer
 from zero_play.zero_play import create_parser
 
 
-class FirstPlayerWinsGame(Game):
+class FirstPlayerWinsGame(GridGame):
     name = 'First Player Wins'
-    board_size = 1
 
-    def create_board(self, text: str = None) -> np.ndarray:
-        if text is None:
-            text = '.' * self.board_size
-        return np.array([self.DISPLAY_CHARS.index(c) - 1 for c in text])
-
-    def get_spaces(self, board: np.ndarray) -> np.ndarray:
-        return board
-
-    def get_valid_moves(self, board: np.ndarray) -> np.ndarray:
-        return board == 0
-
-    def display(self, board: np.ndarray, show_coordinates: bool = False) -> str:
-        return ''.join(self.DISPLAY_CHARS[piece + 1] for piece in board)
-
-    def parse_move(self, text: str, board: np.ndarray) -> int:
-        return int(text)
-
-    def make_move(self, board: np.ndarray, move: int) -> np.ndarray:
-        new_board = board.copy()
-        new_board[move] = self.get_active_player(board)
-        return new_board
+    def __init__(self, board_height: int = 1, board_width: int = 1):
+        super().__init__(board_height, board_width)
 
     def is_win(self, board: np.ndarray, player: int) -> bool:
         if (board == 0).sum() != 0:
@@ -47,7 +31,9 @@ class FirstPlayerWinsGame(Game):
 
 class SecondPlayerWinsGame(FirstPlayerWinsGame):
     name = 'Second Player Wins'
-    board_size = 2
+
+    def __init__(self, board_height: int = 1, board_width: int = 2):
+        super().__init__(board_height, board_width)
 
 
 class NoPlayerWinsGame(FirstPlayerWinsGame):
@@ -61,7 +47,8 @@ def test_take_turn(monkeypatch, capsys):
     monkeypatch.setattr('sys.stdin', StringIO('2b\n'))
     parser = create_parser()
     args = parser.parse_args(['play', 'tictactoe'])
-    controller = PlayController(args)
+    game, players = load_arguments(args)
+    controller = PlayController(game, players)
     expected_output = """\
   ABC
 1 ...
@@ -81,7 +68,8 @@ def test_winning_turn(monkeypatch, capsys):
     monkeypatch.setattr('sys.stdin', StringIO('1C\n'))
     parser = create_parser()
     args = parser.parse_args(['play', 'tictactoe'])
-    controller = PlayController(args)
+    game, players = load_arguments(args)
+    controller = PlayController(game, players)
     controller.board = controller.game.create_board("""\
   ABC
 1 XX.
@@ -112,7 +100,8 @@ def test_draw(monkeypatch, capsys):
     monkeypatch.setattr('sys.stdin', StringIO('2A\n'))
     parser = create_parser()
     args = parser.parse_args(['play', 'tictactoe'])
-    controller = PlayController(args)
+    game, players = load_arguments(args)
+    controller = PlayController(game, players)
     controller.board = controller.game.create_board("""\
   ABC
 1 XOX
@@ -143,7 +132,8 @@ def test_different_players(monkeypatch, capsys):
     monkeypatch.setattr('sys.stdin', StringIO('2A\n'))
     parser = create_parser()
     args = parser.parse_args(['play', 'tictactoe', '--players', 'human', 'mcts'])
-    controller = PlayController(args)
+    game, players = load_arguments(args)
+    controller = PlayController(game, players)
 
     assert isinstance(controller.players[Game.X_PLAYER], HumanPlayer)
     assert isinstance(controller.players[Game.O_PLAYER], MctsPlayer)
@@ -222,3 +212,102 @@ def test_play_two_flip():
     assert expected_p1_wins == p1_wins
     assert expected_ties == ties
     assert expected_p2_wins == p2_wins
+
+
+def test_display(capsys):
+    game = SecondPlayerWinsGame()
+    heuristics = [FirstChoiceHeuristic(game)]
+    mcts_iterations = [10, 20]
+    players = [MctsPlayer(game,
+                          game.X_PLAYER,
+                          mcts_iterations,
+                          heuristics),
+               MctsPlayer(game,
+                          game.O_PLAYER,
+                          mcts_iterations,
+                          heuristics)]
+    controller = PlayController(game, players)
+    expected_output = """\
+  AB
+1 ..
+
+  AB
+1 X.
+
+  AB
+1 XO
+
+  AB
+1 ..
+
+  AB
+1 X.
+
+  AB
+1 XO
+
+1 wins for 10 iterations
+0 ties
+1 wins for 20 iterations
+"""
+
+    controller.play(games=2, flip=True, display=True)
+
+    out, err = capsys.readouterr()
+    assert expected_output == out
+
+
+def test_player_summaries(capsys):
+    game = Connect4Game()
+    heuristics = [FirstChoiceHeuristic(game), NeuralNet(game)]
+    mcts_iterations = [10, 20]
+    players = [MctsPlayer(game,
+                          game.X_PLAYER,
+                          mcts_iterations,
+                          heuristics),
+               HumanPlayer(game, game.O_PLAYER)]
+    expected_summaries = ('mcts', 'human')
+
+    summaries = get_player_summaries(*players)
+
+    assert expected_summaries == summaries
+
+
+def test_player_summaries_heuristic(capsys):
+    game = Connect4Game()
+    heuristics = [FirstChoiceHeuristic(game), NeuralNet(game)]
+    mcts_iterations = [10, 20]
+    players = [MctsPlayer(game,
+                          game.X_PLAYER,
+                          mcts_iterations,
+                          heuristics),
+               MctsPlayer(game,
+                          game.O_PLAYER,
+                          mcts_iterations,
+                          heuristics)]
+    expected_summaries = ('first choice', 'neural net')
+
+    summaries = get_player_summaries(*players)
+
+    assert expected_summaries == summaries
+
+
+@patch('zero_play.connect4.neural_net.load_model', new=Mock())
+def test_player_summaries_checkpoints(capsys, monkeypatch):
+    game = Connect4Game()
+    heuristics = [NeuralNet(game), NeuralNet(game)]
+    heuristics[0].load_checkpoint(filename='checkpoint1.h5')
+    mcts_iterations = [10]
+    players = [MctsPlayer(game,
+                          game.X_PLAYER,
+                          mcts_iterations,
+                          heuristics),
+               MctsPlayer(game,
+                          game.O_PLAYER,
+                          mcts_iterations,
+                          heuristics)]
+    expected_summaries = ('model checkpoint1.h5', 'random weights')
+
+    summaries = get_player_summaries(*players)
+
+    assert expected_summaries == summaries

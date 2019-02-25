@@ -7,60 +7,11 @@ class TicTacToeGame(GridGame):
     name = 'Tic Tac Toe'
 
     def __init__(self):
-        super(TicTacToeGame, self).__init__(board_height=3, board_width=3)
-
-    def create_board(self, text: str = None) -> np.ndarray:
-        board = np.zeros((3, 3), dtype=int)
-        if text:
-            lines = text.splitlines()
-            if len(lines) == 4:
-                # Trim off coordinates.
-                lines = lines[1:]
-                lines = [line[2:] for line in lines]
-            for i, line in enumerate(lines):
-                for j, c in enumerate(line):
-                    if c == 'X':
-                        board[i, j] = 1
-                    elif c == 'O':
-                        board[i, j] = -1
-        return board
-
-    def get_valid_moves(self, board: np.ndarray) -> np.ndarray:
-        return board.reshape(9) == 0
-
-    def display(self, board: np.ndarray, show_coordinates: bool = False) -> str:
-        size = 3
-        header = '  ABC\n' if show_coordinates else ''
-        row_headers = [str(i+1) + ' ' if show_coordinates else ''
-                       for i in range(size)]
-        return header + ''.join(
-            row_headers[i] + ''.join(self.DISPLAY_CHARS[board[i, j]+1]
-                                     for j in range(3)) + '\n'
-            for i in range(3))
-
-    def parse_move(self, text: str, board: np.ndarray) -> int:
-        size = 3
-        clean_text = text.upper().strip()
-        if len(clean_text) != 2:
-            raise ValueError('Move must have one number and one letter.')
-        y, x = map(ord, clean_text)
-        i, j = y-49, x-65
-        if i >= size:
-            raise ValueError(f'Row must be between 1 and {size}.')
-        if j >= size:
-            raise ValueError(f'Column must be between A and {chr(64+size)}.')
-        return i*size + j
-
-    def make_move(self, board: np.ndarray, move: int) -> np.ndarray:
-        moving_player = self.get_active_player(board)
-        new_board: np.ndarray = board.copy()
-        i, j = move // 3, move % 3
-        new_board[i, j] = moving_player
-        return new_board
+        super().__init__(board_height=3, board_width=3)
 
     def is_win(self, board: np.ndarray, player: int) -> bool:
         """ Has the given player collected a triplet in any direction? """
-        size = 3
+        size = self.board_width
         # check horizontal lines
         for i in range(size):
             count = 0

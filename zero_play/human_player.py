@@ -1,3 +1,5 @@
+import typing
+
 import numpy as np
 
 from zero_play.game import Game
@@ -43,3 +45,6 @@ class HumanPlayer(Player):
                 print('The game is a draw.')
             else:
                 print(self.game.display_player(winner), 'Wins.')
+
+    def get_summary(self) -> typing.Sequence[str]:
+        return 'human',
