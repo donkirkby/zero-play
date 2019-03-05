@@ -161,9 +161,6 @@ def create_parser(subparsers):
     parser.add_argument('--flip',
                         action='store_true',
                         help='flip first player back and forth each game')
-    parser.add_argument('--max_moves',
-                        type=int,
-                        help='maximum moves in each game before declaring a tie')
 
 
 def handle(args: Namespace):

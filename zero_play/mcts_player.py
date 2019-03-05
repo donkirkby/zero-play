@@ -97,6 +97,20 @@ class SearchNode:
         self.child_predictions = child_predictions
         self.record_value(value)
 
+    def choose_child(self, temperature: float) -> 'SearchNode':
+        """ Choose a child randomly, ones with higher counts are more likely.
+
+        :param temperature: positive value that controls how deterministic the
+        choice is. The closer to zero, the more likely it is to choose the
+        child with maximum count.
+        """
+        children = self.find_all_children()
+        values = np.array([temperature * child.value_count for child in children])
+        weights = np.exp(values)
+        probabilities = weights / sum(weights)
+        child = np.random.choice(children, p=probabilities)
+        return child
+
     def find_best_children(self):
         children = self.find_all_children()
         best_value = float('-inf')
@@ -140,6 +154,12 @@ class SearchManager:
         self.current_node = np.random.choice(best_children)
         assert self.current_node.move is not None
         return self.current_node.move
+
+    def choose_weighted_move(self) -> int:
+        temperature = 1.0
+        child = self.current_node.choose_child(temperature)
+        assert child.move is not None
+        return child.move
 
     def create_training_data(self, iterations: int, data_size: int):
         game_states = []
@@ -233,6 +253,8 @@ class MctsPlayer(Player):
         :return: the chosen move's index in the list of valid moves.
         """
         self.search_manager.search(board, self.iteration_count)
+        if self.game.get_move_count(board) < 15:
+            return self.search_manager.choose_weighted_move()
         return self.search_manager.get_best_move()
 
     def get_summary(self) -> typing.Sequence[str]:

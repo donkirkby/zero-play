@@ -139,3 +139,14 @@ entropy for the move policies. I use mean squared error for everything. I don't
 know if I can mix things like that in the high-level API I'm using.
 
 [Connect 4 win rates in alpha-zero-general]: 2019/connect4-general-nn.png
+
+### 26 Feb 2019
+I've been reading the AlphaGo Zero paper, and I found the [AlphaZero paper]
+(includes an open-access link). The [AlphaZero supplementary material] even
+includes some Python code as pseudocode for the algorithm! In that pseudocode,
+it looks like the player uses softmax sampling to choose a move for the first
+30 moves of a game, then uses the best move from then on. I think this is
+related to the temperature algorithm I saw in the other paper.
+
+[AlphaZero paper]: https://deepmind.com/blog/alphazero-shedding-new-light-grand-games-chess-shogi-and-go/
+[AlphaZero supplementary material]: http://science.sciencemag.org/content/suppl/2018/12/05/362.6419.1140.DC1

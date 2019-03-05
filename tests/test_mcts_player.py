@@ -15,17 +15,39 @@ class FirstChoiceHeuristic(Heuristic):
         return 'first choice',
 
     def analyse(self, board: np.ndarray) -> typing.Tuple[float, np.ndarray]:
-        valid_moves = self.game.get_valid_moves(board)
-        if self.game.is_ended(board):
-            opponent = -self.game.get_active_player(board)
-            value = -1.0 if self.game.is_win(board, opponent) else 1.0
-            policy = np.ones_like(valid_moves) / len(valid_moves)
-        else:
+        policy = self.get_policy(board)
+        player = self.game.get_active_player(board)
+        if self.game.is_win(board, player):
             value = 1.0
-            first_valid = np.nonzero(valid_moves)[0][0]
-            policy = np.zeros_like(valid_moves)
-            policy[first_valid] = 1.0
+        elif self.game.is_win(board, -player):
+            value = -1.0
+        else:
+            value = 0.0
         return value, policy
+
+    def get_policy(self, board):
+        valid_moves = self.game.get_valid_moves(board)
+        if valid_moves.any():
+            first_valid = np.nonzero(valid_moves)[0][0]
+        else:
+            first_valid = 0
+        policy = np.zeros_like(valid_moves)
+        policy[first_valid] = 1.0
+        return policy
+
+
+class EarlyChoiceHeuristic(FirstChoiceHeuristic):
+    """ Thinks each move is 90% as good as the previous option. """
+    def get_summary(self) -> typing.Sequence[str]:
+        return 'early choice',
+
+    def get_policy(self, board):
+        valid_moves = self.game.get_valid_moves(board)
+        if not valid_moves.any():
+            valid_moves = (valid_moves == 0)
+        raw_policy = np.multiply(valid_moves, 0.9 ** np.arange(len(valid_moves)))
+        policy = raw_policy / raw_policy.sum()
+        return policy
 
 
 def test_repr():
@@ -204,6 +226,28 @@ XOXOXOO
     assert expected_display == display
 
 
+def test_choose_moves_at_random():
+    """ Early moves are chosen from a weighted random population. """
+    np.random.seed(0)
+    game = TicTacToeGame()
+    start_board = game.create_board("""\
+...
+...
+X..
+""")
+    player = MctsPlayer(game,
+                        mcts_iterations=[80],
+                        heuristic=[EarlyChoiceHeuristic(game)])
+
+    moves = set()
+    for _ in range(10):
+        move = player.choose_move(start_board)
+        moves.add(move)
+        player.search_manager.reset()
+
+    assert 1 < len(moves)
+
+
 def test_choose_move_no_iterations():
     np.random.seed(0)
     game = Connect4Game()
@@ -215,7 +259,7 @@ def test_choose_move_no_iterations():
 OXOXO..
 XOXOXOO
 """)
-    test_count = 200
+    test_count = 400
     expected_count = test_count/7
     expected_low = expected_count * 0.9
     expected_high = expected_count * 1.1

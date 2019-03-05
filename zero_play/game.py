@@ -62,6 +62,10 @@ class Game(ABC):
         """
 
     @abstractmethod
+    def get_move_count(self, board: np.ndarray) -> int:
+        """ The number of moves that have already been made in the game. """
+
+    @abstractmethod
     def get_spaces(self, board: np.ndarray) -> np.ndarray:
         """ Extract the board spaces from the complete game state. """
 
@@ -159,6 +163,9 @@ class GridGame(Game):
                 spaces[i] = [self.DISPLAY_CHARS.index(c) - 1 for c in line]
         return board if extra_count else spaces
 
+    def get_move_count(self, board: np.ndarray) -> int:
+        return (self.get_spaces(board) != Game.NO_PLAYER).sum()
+
     def get_spaces(self, board: np.ndarray) -> np.ndarray:
         return board[:self.board_height*self.board_width].reshape(
             self.board_height,
@@ -166,7 +173,8 @@ class GridGame(Game):
 
     def get_valid_moves(self, board: np.ndarray) -> np.ndarray:
         spaces = self.get_spaces(board)
-        return spaces.reshape(self.board_height * self.board_width) == 0
+        return spaces.reshape(self.board_height *
+                              self.board_width) == Game.NO_PLAYER
 
     def display(self, board: np.ndarray, show_coordinates: bool = False) -> str:
         result = StringIO()
