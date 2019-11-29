@@ -8,6 +8,14 @@ from zero_play.game import Game
 
 class Heuristic(metaclass=ABCMeta):
     def __init__(self, game: Game):
+        """ Initialize the heuristic object.
+
+        Subclasses must override this if they want to report which games this
+        heuristic can play.
+        :param game: the game object that contains the game rules
+        :raises ValueError: if the game is not one of the games this heuristic
+            can play
+        """
         self.game = game
 
     @abstractmethod

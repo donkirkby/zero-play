@@ -36,4 +36,6 @@ def test_train():
     game = Connect4Game()
     neural_net = NeuralNet(game)
 
-    neural_net.train(boards, outputs)
+    history = neural_net.train(boards, outputs)
+
+    assert history is not None

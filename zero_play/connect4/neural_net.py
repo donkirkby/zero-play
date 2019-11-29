@@ -9,6 +9,7 @@ from tensorflow.python.keras.callbacks import TensorBoard
 from tensorflow.python.keras.layers import Dense, Conv2D, Dropout, Flatten
 from tensorflow.python.keras.models import load_model
 
+from zero_play.connect4.game import Connect4Game
 from zero_play.game import GridGame
 from zero_play.heuristic import Heuristic
 
@@ -18,6 +19,8 @@ logger = logging.getLogger(__name__)
 class NeuralNet(Heuristic):
     def __init__(self, game: GridGame):
         super().__init__(game)
+        if not isinstance(game, Connect4Game):
+            raise ValueError(f'This neural net does not support {game.name}.')
         # game params
         self.board_height = game.board_height
         self.board_width = game.board_width
@@ -118,11 +121,13 @@ class NeuralNet(Heuristic):
         else:
             callbacks = [TensorBoard(log_dir)]
 
-        self.model.fit(np.expand_dims(boards, -1),
-                       outputs,
-                       verbose=0,
-                       initial_epoch=self.epochs_completed,
-                       epochs=self.epochs_completed+self.epochs_to_train,
-                       validation_split=0.2,
-                       callbacks=callbacks)
+        history = self.model.fit(
+            np.expand_dims(boards, -1),
+            outputs,
+            verbose=0,
+            initial_epoch=self.epochs_completed,
+            epochs=self.epochs_completed+self.epochs_to_train,
+            validation_split=0.2,
+            callbacks=callbacks)
         self.epochs_completed += self.epochs_to_train
+        return history

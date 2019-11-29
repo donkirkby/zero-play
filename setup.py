@@ -30,7 +30,7 @@ setup(name='zero_play',
           'Programming Language :: Python :: 3.7'],
       keywords='boardgames alphazero machine learning mcts',
       packages=['zero_play'],
-      install_requires=['numpy', 'tensorflow'],
+      install_requires=['numpy', 'tensorflow', 'PySide2'],
       extras_require={'dev': ['seaborn',
                               'matplotlib',
                               'pytest',
@@ -39,6 +39,7 @@ setup(name='zero_play',
                       'gpu': ['tensorflow-gpu']},
       entry_points={
           'console_scripts': ['zero_play=zero_play.zero_play:main'],
+          'gui_scripts': ['zero_play_gui=zero_play.zero_play_gui:main'],
           # The game entry point lets you add rules for new games.
           # The zero_play.game.Game class is a useful base class.
           'zero_play.game': ['tictactoe=zero_play.tictactoe.game:TicTacToeGame',
