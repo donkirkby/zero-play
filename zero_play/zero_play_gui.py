@@ -1,6 +1,6 @@
 import os
 import sys
-from PySide2.QtWidgets import QApplication, QMainWindow
+from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog
 # from PySide2.QtCore import QFile
 from pkg_resources import iter_entry_points, EntryPoint
 
@@ -23,6 +23,7 @@ class MainWindow(QMainWindow):
         self.ui.tic_tac_toe.clicked.connect(self.on_tic_tac_toe)
         self.ui.othello.clicked.connect(self.on_othello)
         self.ui.connect4.clicked.connect(self.on_connect4)
+        self.ui.network1.clicked.connect(self.on_network1)
         self.ui.cancel.clicked.connect(self.on_cancel)
         self.ui.start.clicked.connect(self.on_start)
         self.ui.stacked_widget.setCurrentWidget(self.ui.game_page)
@@ -67,6 +68,13 @@ class MainWindow(QMainWindow):
 
     def on_cancel(self):
         self.ui.stacked_widget.setCurrentWidget(self.ui.game_page)
+
+    def on_network1(self):
+        file_name, _ = QFileDialog.getOpenFileName(
+            self.ui.players_page,
+            "Open a file for player 1's neural network.",
+            filter='Checkpoint (*.h5)',
+            options=QFileDialog.DontUseNativeDialog)
 
     def on_start(self):
         self.ui.stacked_widget.setCurrentWidget(self.ui.display_page)

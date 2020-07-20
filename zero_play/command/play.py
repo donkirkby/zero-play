@@ -1,10 +1,13 @@
 import typing
 from argparse import Namespace, ArgumentDefaultsHelpFormatter
+from csv import DictWriter
+from datetime import datetime
 
 import numpy as np
 
 from zero_play.game import Game
 from zero_play.command_parser import CommandParser
+from zero_play.mcts_player import MctsPlayer
 from zero_play.player import Player, get_player_argument
 
 
@@ -47,7 +50,7 @@ class PlayController:
         x_player.player_number = game.X_PLAYER
         o_player.player_number = game.O_PLAYER
         self.players = {Game.X_PLAYER: x_player, Game.O_PLAYER: o_player}
-        self.board: np.ndarray = None
+        self.board: typing.Optional[np.ndarray] = None
         self.start_game()
 
     def start_game(self):
@@ -165,12 +168,33 @@ def create_parser(subparsers):
 
 def handle(args: Namespace):
     game, players = load_arguments(args)
-    # players[0].heuristic.load_checkpoint('data/connect4-nn', filename='best.h5')
-    # players[1].heuristic.load_checkpoint('data/connect4-nn',
-    #                                      filename=f'checkpoint-01.h5')
+    players[0].heuristic.load_checkpoint('data/connect4-nn', filename='best.h5')
+    players[1].heuristic.load_checkpoint('data/connect4-nn',
+                                         filename=f'checkpoint-01.h5')
     controller = PlayController(game, players)
-    wins, ties, losses = controller.play(args.num_games,
-                                         args.flip,
-                                         args.display)
-    print(get_result_summary(players[0], players[1], wins, ties, losses),
-          end='')
+    base_player = MctsPlayer(game, mcts_iterations=args.mcts_iterations)
+    base_controller = PlayController(game, [players[0], base_player])
+    with open('data/connect4-comparison.csv', 'w') as f:
+        writer = DictWriter(f, ['wins_vs_best',
+                                'ties_vs_best',
+                                'losses_vs_best',
+                                'wins_vs_base',
+                                'ties_vs_base',
+                                'losses_vs_base',
+                                'time'])
+        writer.writeheader()
+        while True:
+            wins, ties, losses = controller.play(games=2,
+                                                 flip=True)
+            wins_vs_base, ties_vs_base, losses_vs_base = base_controller.play(
+                games=2,
+                flip=True)
+            now = datetime.now()
+            writer.writerow(dict(wins_vs_best=wins,
+                                 ties_vs_best=ties,
+                                 losses_vs_best=losses,
+                                 wins_vs_base=wins_vs_base,
+                                 ties_vs_base=ties_vs_base,
+                                 losses_vs_base=losses_vs_base,
+                                 time=now.strftime('%Y-%m-%d %H:%M:%S')))
+            f.flush()

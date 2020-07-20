@@ -9,5 +9,11 @@ following:
 
         pyside2-uic -o main_window.py main_window.ui
 
+To add a new screen to the project:
+
+1. In Qt Creator choose New File or Project from the File menu.
+2. In the Qt section, choose Qt Designer Form.
+3. Select a widget type, like "Widget", and choose a file name.
+
 [Qt Creator]: https://www.qt.io/download-qt-installer
 [Qt Designer documentation]: https://doc.qt.io/qt-5/designer-quick-start.html
