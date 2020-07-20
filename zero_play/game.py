@@ -196,7 +196,7 @@ class GridGame(Game):
         trimmed = text.strip().replace(' ', '')
         if len(trimmed) != 2:
             raise ValueError('A move must be a row and a column.')
-        row, column = trimmed
+        row, column = trimmed[0], trimmed[1:]
         i = ord(row) - 49
         j = ord(column.upper()) - 65
         if i < 0 or self.board_height <= i:
