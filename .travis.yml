@@ -3,7 +3,7 @@ python:
     - "3.8"
 sudo: required
 install:
-    - sudo apt-get install libxcb-icccm4
+    - sudo apt-get install libxcb-icccm4 libxcb-image0
     - "pip install pipenv"
     - "pipenv install --dev"
 script:
