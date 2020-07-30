@@ -1,13 +1,18 @@
+dist: bionic
 language: python
 python:
     - "3.8"
-sudo: required
+before_install:
+    - "sudo apt-get install libxcb-xinerama0 libxkbcommon-x11-0 xserver-xephyr"
 install:
-    - sudo apt-get install libxcb-icccm4 libxcb-image0
     - "pip install pipenv"
     - "pipenv install --dev"
+services:
+    # XVirtual Frame Buffer creates a mock display for Qt tests.
+    - xvfb
 script:
-    - mypy zero_play && QT_DEBUG_PLUGINS=1 coverage run --source=zero_play -m pytest -s
+    # Add QT_DEBUG_PLUGINS=1 before coverage to debug Qt library problems.
+    - mypy zero_play && coverage run --source=zero_play -m pytest -s
 after_success:
     - pip install codecov
     - codecov
