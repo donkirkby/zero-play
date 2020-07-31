@@ -12,7 +12,7 @@ services:
     - xvfb
 script:
     # Add QT_DEBUG_PLUGINS=1 before coverage to debug Qt library problems.
-    - mypy zero_play && coverage run --source=zero_play -m pytest -s
+    - mypy zero_play && coverage run --source=zero_play -m pytest
 after_success:
     - pip install codecov
     - codecov

@@ -20,6 +20,7 @@ def test_start_square(pixmap_differ: PixmapDiffer):
     draw_square_grid(expected)
     expected.setBrush(TicTacToeDisplay.player1_colour)
     expected.drawEllipse(250, 50, 60, 60)
+    print('Font:', expected.font().toString())
     set_font_size(expected, 15)
     expected.drawText(244, 143, 'to move')
 
