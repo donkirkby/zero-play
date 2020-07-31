@@ -21,14 +21,29 @@ class TicTacToeDisplay(GridDisplay):
 
         width = scene.width()
         height = scene.height()
-        size = min(width, height)
-        x0 = (width-size) // 2
-        y0 = (height-size) // 2
+        cell_size = min(width//4, height//3)
+        size = cell_size*3
+        x0 = (width-cell_size*4) // 2
+        y0 = (height-cell_size*3) // 2
 
         scene.setBackgroundBrush(QBrush(self.background_colour))
-        for r in (size // 3, size * 2 // 3):
+        for r in (cell_size, cell_size*2):
             scene.addLine(x0, y0+r, x0+size, y0+r)
             scene.addLine(x0+r, y0, x0+r, y0+size)
+        self.to_move = scene.addEllipse(x0 + size * 25 // 24,
+                                        y0 + size * 5 // 24,
+                                        size // 4,
+                                        size // 4,
+                                        brush=self.get_player_brush(
+                                            self.game.X_PLAYER))
+        text_item = scene.addText('to move')
+        font = text_item.font()
+        font.setPointSize(int(size//16))
+        text_item.setFont(font)
+        text_item.adjustSize()
+        text_rect = text_item.boundingRect()
+        text_item.setPos(x0+size+cell_size//2 - text_rect.width()//2,
+                         y0+size*27//48 - text_rect.height()//2)
         for i in range(self.game.board_height):
             row: typing.List[QGraphicsItem] = []
             self.spaces.append(row)
@@ -47,7 +62,12 @@ class TicTacToeDisplay(GridDisplay):
                 if player == self.game.NO_PLAYER:
                     continue
                 piece = self.spaces[i][j]
-                piece.setBrush(QBrush(self.player1_colour
-                                      if player == self.game.X_PLAYER
-                                      else self.player2_colour))
+                piece.setBrush(self.get_player_brush(player))
                 piece.setVisible(True)
+        active_player = self.game.get_active_player(board)
+        self.to_move.setBrush(self.get_player_brush(active_player))
+
+    def get_player_brush(self, player):
+        return QBrush(self.player1_colour
+                      if player == self.game.X_PLAYER
+                      else self.player2_colour)
