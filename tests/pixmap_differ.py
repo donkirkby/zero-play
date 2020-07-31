@@ -4,7 +4,7 @@ from turtle import Turtle
 
 import pytest
 from PySide2.QtCore import QByteArray, QBuffer, QIODevice, QTextCodec
-from PySide2.QtGui import QPixmap, QPainter, QColor, QImage, QPen
+from PySide2.QtGui import QPixmap, QPainter, QColor, QImage
 from PySide2.QtWidgets import QApplication
 
 
@@ -15,17 +15,6 @@ def pixmap_differ():
     yield PixmapDiffer()
 
     assert app
-
-
-def encode_image(image: QImage):
-    image_bytes = QByteArray()
-    buffer = QBuffer(image_bytes)
-    buffer.open(QIODevice.WriteOnly)
-    image.save(buffer, "PNG")  # writes pixmap into bytes in PNG format
-    encoded_bytes = image_bytes.toBase64()
-    codec = QTextCodec.codecForName(b"UTF-8")
-    encoded_string = codec.toUnicode(encoded_bytes)
-    return encoded_string
 
 
 def display_diff(actual_image: QImage,
@@ -68,6 +57,8 @@ class PixmapDiffer:
         self.actual_pixmap = self.expected_pixmap = None
         self.actual = self.expected = None
         self.different_pixels = 0
+        self.diff_min_x = self.diff_min_y = None
+        self.diff_max_x = self.diff_max_y = None
 
         self.names = set()
 
@@ -101,7 +92,6 @@ class PixmapDiffer:
         self.expected_pixmap = QPixmap(width, height)
         self.expected = QPainter(self.expected_pixmap)
         self.expected.fillRect(0, 0, width, height, white)
-        self.different_pixels = 0
 
         return self.actual, self.expected
 
@@ -114,6 +104,7 @@ class PixmapDiffer:
     def assert_equal(self):
         __tracebackhide__ = True
         self.end()
+        self.different_pixels = 0
         actual_image: QImage = self.actual.device().toImage()
         expected_image: QImage = self.expected.device().toImage()
         diff_pixmap = QPixmap(actual_image.width(), actual_image.height())
@@ -124,7 +115,10 @@ class PixmapDiffer:
             for y in range(actual_image.height()):
                 actual_colour = actual_image.pixelColor(x, y)
                 expected_colour = expected_image.pixelColor(x, y)
-                diff.setPen(self.diff_colour(actual_colour, expected_colour))
+                diff.setPen(self.diff_colour(actual_colour,
+                                             expected_colour,
+                                             x,
+                                             y))
                 diff.drawPoint(x, y)
         diff.end()
         diff_image: QImage = diff.device().toImage()
@@ -137,14 +131,41 @@ class PixmapDiffer:
         expected_image.save(str(self.work_dir / (self.name + '_expected.png')))
         diff_path = str(self.work_dir / (self.name + '_diff.png'))
         diff_image.save(diff_path)
-        message = f'Found different pixels, see {diff_path}.'
+        diff_width = self.diff_max_x - self.diff_min_x + 1
+        diff_height = self.diff_max_y - self.diff_min_y + 1
+        diff_section = QImage(diff_width, diff_height, QImage.Format_RGB32)
+        diff_section_painter = QPainter(diff_section)
+        diff_section_painter.drawPixmap(0, 0,
+                                        diff_width, diff_height,
+                                        QPixmap.fromImage(diff_image),
+                                        self.diff_min_x, self.diff_min_y,
+                                        diff_width, diff_height)
+        # Uncomment and use decode_image() at the bottom of the file.
+        print(f'Encoded image of different section '
+              f'({self.diff_min_x}, {self.diff_min_y}) - '
+              f'({self.diff_max_x}, {self.diff_max_y}):')
+        print(encode_image(diff_section))
+        message = f'Found {self.different_pixels} different pixels, see {diff_path}.'
         assert self.different_pixels == 0, message
 
-    def diff_colour(self, actual_colour: QColor, expected_colour: QColor):
+    def diff_colour(self,
+                    actual_colour: QColor,
+                    expected_colour: QColor,
+                    x: int,
+                    y: int):
         if actual_colour == expected_colour:
             diff_colour = actual_colour.toRgb()
             diff_colour.setAlpha(diff_colour.alpha() // 3)
             return diff_colour
+        if self.different_pixels == 0:
+            self.diff_min_x = self.diff_max_x = x
+            self.diff_min_y = self.diff_max_y = y
+        else:
+            self.diff_min_x = min(self.diff_min_x, x)
+            self.diff_max_x = max(self.diff_max_x, x)
+            self.diff_min_y = min(self.diff_min_y, y)
+            self.diff_max_y = max(self.diff_max_y, y)
+
         self.different_pixels += 1
         # Colour
         dr = 0xff
@@ -156,11 +177,25 @@ class PixmapDiffer:
         return QColor(dr, dg, db, da)
 
 
-def outline_rect(painter, x, y, width, height, colour):
-    old_pen = painter.pen()
-    grey_pen = QPen(QColor('lightgrey'))
-    grey_pen.setWidth(2)
-    painter.setPen(grey_pen)
-    painter.drawRect(x, y, width, height)
-    painter.fillRect(x, y, width, height, colour)
-    painter.setPen(old_pen)
+def encode_image(image: QImage):
+    image_bytes = QByteArray()
+    buffer = QBuffer(image_bytes)
+    buffer.open(QIODevice.WriteOnly)
+    image.save(buffer, "PNG")  # writes pixmap into bytes in PNG format
+    encoded_bytes = image_bytes.toBase64()
+    codec = QTextCodec.codecForName(b"UTF-8")
+    encoded_string = codec.toUnicode(encoded_bytes)
+    return encoded_string
+
+
+# def decode_image():
+#     encoded_bytes = QByteArray(b'PasteBytesHere==')
+#     image_bytes = QByteArray.fromBase64(encoded_bytes)
+#     image = QImage.fromData(image_bytes)
+#     file_name = 'diff_image.png'
+#     image.save(file_name, 'PNG')
+#     print(f'Saved to {file_name}.')
+#
+#
+# if __name__ == '__main__':
+#     decode_image()
