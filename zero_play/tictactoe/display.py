@@ -1,7 +1,7 @@
 import typing
 
 import numpy as np
-from PySide2.QtGui import QColor, QBrush
+from PySide2.QtGui import QColor, QBrush, QFont
 from PySide2.QtWidgets import QGraphicsScene, QGraphicsItem
 
 from zero_play.tictactoe.game import TicTacToeGame
@@ -11,6 +11,7 @@ class GridDisplay:
     background_colour = QColor.fromRgb(0x009E0B)
     player1_colour = QColor.fromRgb(0x000000)
     player2_colour = QColor.fromRgb(0xFFFFFF)
+    default_font = 'Sans Serif,9,-1,5,50,0,0,0,0,0'
 
 
 class TicTacToeDisplay(GridDisplay):
@@ -37,8 +38,8 @@ class TicTacToeDisplay(GridDisplay):
                                         brush=self.get_player_brush(
                                             self.game.X_PLAYER))
         text_item = scene.addText('to move')
-        font = text_item.font()
-        font.setPointSize(int(size//16))
+        font = QFont(self.default_font)
+        font.setPointSize(int(size//18))
         text_item.setFont(font)
         text_item.adjustSize()
         text_rect = text_item.boundingRect()
