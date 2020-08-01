@@ -154,6 +154,7 @@ class PixmapDiffer:
                                         QPixmap.fromImage(diff_image),
                                         self.diff_min_x, self.diff_min_y,
                                         diff_width, diff_height)
+        diff_section_painter.end()
         # Uncomment and use decode_image() at the bottom of the file.
         print(f'Encoded image of different section '
               f'({self.diff_min_x}, {self.diff_min_y}) - '
