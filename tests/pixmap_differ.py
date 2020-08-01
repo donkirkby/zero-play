@@ -155,12 +155,14 @@ class PixmapDiffer:
                                         self.diff_min_x, self.diff_min_y,
                                         diff_width, diff_height)
         diff_section_painter.end()
-        # Uncomment and use decode_image() at the bottom of the file.
-        print(f'Encoded image of different section '
+        # To see an image dumped in the Travis CI log, copy the text from the
+        # log, and paste it in test_pixmap_differ.test_decode_image.
+        print(f'Encoded image of differing section '
               f'({self.diff_min_x}, {self.diff_min_y}) - '
               f'({self.diff_max_x}, {self.diff_max_y}):')
         print(encode_image(diff_section))
-        message = f'Found {self.different_pixels} different pixels, see {diff_path}.'
+        message = f'Found {self.different_pixels} different pixels, see ' \
+                  f'{diff_path}.'
         assert self.different_pixels == 0, message
 
     def diff_colour(self,
@@ -192,7 +194,7 @@ class PixmapDiffer:
         return QColor(dr, dg, db, da)
 
 
-def encode_image(image: QImage):
+def encode_image(image: QImage) -> str:
     image_bytes = QByteArray()
     buffer = QBuffer(image_bytes)
     buffer.open(QIODevice.WriteOnly)
@@ -203,14 +205,8 @@ def encode_image(image: QImage):
     return encoded_string
 
 
-# def decode_image():
-#     encoded_bytes = QByteArray(b'PasteBytesHere==')
-#     image_bytes = QByteArray.fromBase64(encoded_bytes)
-#     image = QImage.fromData(image_bytes)
-#     file_name = 'diff_image.png'
-#     image.save(file_name, 'PNG')
-#     print(f'Saved to {file_name}.')
-#
-#
-# if __name__ == '__main__':
-#     decode_image()
+def decode_image(text: str) -> QImage:
+    encoded_bytes = QByteArray(text.encode('utf8'))
+    image_bytes = QByteArray.fromBase64(encoded_bytes)
+    image = QImage.fromData(image_bytes)
+    return image

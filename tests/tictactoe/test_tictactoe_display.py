@@ -88,6 +88,7 @@ def draw_text(expected: QPainter, x: int, y: int, text: str):
     text_item = scene.addText(text)
     font = expected.font()
     text_item.setFont(font)
+    text_item.adjustSize()
     text_item.setPos(x, y)
     scene.render(expected)
 
