@@ -19,7 +19,7 @@ def create_blue_green_rect():
     return pixmap
 
 
-def test_encode_image():
+def test_encode_image(pixmap_differ):
     pixmap = create_blue_green_rect()
 
     text = encode_image(pixmap.toImage())
