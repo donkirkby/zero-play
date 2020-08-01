@@ -1,4 +1,4 @@
-from PySide2.QtGui import QFont
+from PySide2.QtGui import QFont, QPainter
 from PySide2.QtWidgets import QGraphicsScene
 
 # noinspection PyUnresolvedReferences
@@ -24,7 +24,7 @@ def test_start_square(pixmap_differ: PixmapDiffer):
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(250, 50, 60, 60)
         set_font_size(expected, 13)
-        expected.drawText(246, 141, 'to move')
+        draw_text(expected, 242, 121, 'to move')
 
         scene = QGraphicsScene(0, 0, size+80, size)
         TicTacToeDisplay(scene)
@@ -46,7 +46,7 @@ def test_start_wide(pixmap_differ: PixmapDiffer):
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(370, 50, 60, 60)
         set_font_size(expected, 13)
-        expected.drawText(366, 141, 'to move')
+        draw_text(expected, 362, 121, 'to move')
 
         scene = QGraphicsScene(0, 0, size*2 + 80, size)
         TicTacToeDisplay(scene)
@@ -68,7 +68,7 @@ def test_start_tall(pixmap_differ: PixmapDiffer):
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(125, 85, 30, 30)
         set_font_size(expected, 6)
-        expected.drawText(124, 130, 'to move')
+        draw_text(expected, 120, 118, 'to move')
 
         scene = QGraphicsScene(0, 0, size + 40, size*2)
         TicTacToeDisplay(scene)
@@ -82,6 +82,16 @@ def set_font_size(painter, size):
     painter.setFont(font)
 
 
+def draw_text(expected: QPainter, x: int, y: int, text: str):
+    window = expected.window()
+    scene = QGraphicsScene(0, 0, window.width(), window.height())
+    text_item = scene.addText(text)
+    font = expected.font()
+    text_item.setFont(font)
+    text_item.setPos(x, y)
+    scene.render(expected)
+
+
 def test_pieces(pixmap_differ: PixmapDiffer):
     size = 240
     with pixmap_differ.create_painters(
@@ -93,7 +103,7 @@ def test_pieces(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(10, 10, 60, 60)
         expected.drawEllipse(90, 90, 60, 60)
         set_font_size(expected, 13)
-        expected.drawText(246, 141, 'to move')
+        draw_text(expected, 242, 121, 'to move')
         expected.setBrush(TicTacToeDisplay.player2_colour)
         expected.drawEllipse(90, 10, 60, 60)
         expected.drawEllipse(250, 50, 60, 60)
