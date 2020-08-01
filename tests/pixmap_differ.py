@@ -1,4 +1,5 @@
 import typing
+from contextlib import contextmanager
 from pathlib import Path
 from turtle import Turtle
 
@@ -69,6 +70,19 @@ class PixmapDiffer:
                 continue
             assert work_file.suffix == '.png'
             work_file.unlink()
+
+    @contextmanager
+    def create_painters(
+            self,
+            width: int,
+            height: int,
+            name: str) -> typing.ContextManager[typing.Tuple[QPainter,
+                                                             QPainter]]:
+        try:
+            yield self.start(width, height, name)
+        finally:
+            self.end()
+        self.assert_equal()
 
     def start(self,
               width: int,
