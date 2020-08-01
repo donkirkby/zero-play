@@ -3,19 +3,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from turtle import Turtle
 
-import pytest
 from PySide2.QtCore import QByteArray, QBuffer, QIODevice, QTextCodec
 from PySide2.QtGui import QPixmap, QPainter, QColor, QImage
-from PySide2.QtWidgets import QApplication
-
-
-@pytest.fixture(scope='session')
-def pixmap_differ():
-    app = QApplication()
-
-    yield PixmapDiffer()
-
-    assert app
 
 
 def display_diff(actual_image: QImage,

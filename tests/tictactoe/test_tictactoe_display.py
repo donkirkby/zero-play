@@ -1,8 +1,7 @@
 from PySide2.QtGui import QFont, QPainter
 from PySide2.QtWidgets import QGraphicsScene
 
-# noinspection PyUnresolvedReferences
-from tests.pixmap_differ import PixmapDiffer, pixmap_differ
+from tests.pixmap_differ import PixmapDiffer
 from zero_play.tictactoe.display import TicTacToeDisplay
 
 

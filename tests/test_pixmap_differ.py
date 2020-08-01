@@ -1,7 +1,6 @@
 from PySide2.QtGui import QPixmap, QPainter, QColor
 
-# noinspection PyUnresolvedReferences
-from tests.pixmap_differ import pixmap_differ, encode_image, decode_image
+from tests.pixmap_differ import encode_image, decode_image
 
 ENCODED_BLUE_GREEN_RECT = 'iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAIAAADwyuo0AAAACX' \
                           'BIWXMAAA7EAAAOxAGVKw4bAAAAGElEQVQImWNkYPjPwMDA0MDI' \
