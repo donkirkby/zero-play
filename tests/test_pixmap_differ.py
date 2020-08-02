@@ -1,3 +1,7 @@
+import turtle
+from unittest.mock import Mock
+
+import pytest
 from PySide2.QtGui import QPixmap, QPainter, QColor
 
 from tests.pixmap_differ import encode_image, decode_image
@@ -18,12 +22,41 @@ def create_blue_green_rect():
     return pixmap
 
 
+def test_diff_found(pixmap_differ, monkeypatch):
+    mock_turtle = Mock('MockTurtle')
+    mock_turtle.display_image = Mock('MockTurtle.display_image')
+    mock_turtle.return_value.screen.cv.cget.return_value = 100
+    mock_turtle.return_value.xcor.return_value = 0
+    mock_turtle.return_value.ycor.return_value = 0
+    monkeypatch.setattr(turtle, 'Turtle', mock_turtle)
+    expected_pixmap = create_blue_green_rect()
+
+    with pytest.raises(AssertionError, match='Found 8 different pixels'):
+        actual: QPainter
+        expected: QPainter
+        with pixmap_differ.create_painters(4, 2, 'diff_found') as (actual,
+                                                                   expected):
+            expected.drawPixmap(0, 0, expected_pixmap)
+
+            # Do nothing to actual, so error should be raised.
+
+    # actual, diff, and expected
+    assert len(mock_turtle.display_image.call_args_list) == 3
+
+
 def test_encode_image(pixmap_differ):
-    pixmap = create_blue_green_rect()
+    expected_pixmap = create_blue_green_rect()
 
-    text = encode_image(pixmap.toImage())
+    text = encode_image(expected_pixmap.toImage())
+    actual: QPainter
+    expected: QPainter
+    with pixmap_differ.create_painters(4, 2, 'encode_image') as (
+            actual,
+            expected):
+        image = decode_image(text)
+        actual.drawPixmap(0, 0, QPixmap(image))
 
-    assert text == ENCODED_BLUE_GREEN_RECT
+        expected.drawPixmap(0, 0, expected_pixmap)
 
 
 def test_decode_image(pixmap_differ):

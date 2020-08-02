@@ -1,7 +1,7 @@
 import typing
 from contextlib import contextmanager
 from pathlib import Path
-from turtle import Turtle
+import turtle
 
 from PySide2.QtCore import QByteArray, QBuffer, QIODevice, QTextCodec
 from PySide2.QtGui import QPixmap, QPainter, QColor, QImage
@@ -11,10 +11,10 @@ def display_diff(actual_image: QImage,
                  diff_image: QImage,
                  expected_image: QImage):
     # Display image when in live turtle mode.
-    display_image = getattr(Turtle, 'display_image', None)
+    display_image = getattr(turtle.Turtle, 'display_image', None)
     if display_image is None:
         return
-    t = Turtle()
+    t = turtle.Turtle()
     # noinspection PyUnresolvedReferences
     screen = t.screen
     w = screen.cv.cget('width')
@@ -132,8 +132,8 @@ class PixmapDiffer:
             return
         actual_image.save(str(self.work_dir / (self.name + '_actual.png')))
         expected_image.save(str(self.work_dir / (self.name + '_expected.png')))
-        diff_path = str(self.work_dir / (self.name + '_diff.png'))
-        diff_image.save(diff_path)
+        diff_path = self.work_dir / (self.name + '_diff.png')
+        is_saved = diff_image.save(str(diff_path))
         diff_width = self.diff_max_x - self.diff_min_x + 1
         diff_height = self.diff_max_y - self.diff_min_y + 1
         diff_section = QImage(diff_width, diff_height, QImage.Format_RGB32)
@@ -150,8 +150,9 @@ class PixmapDiffer:
               f'({self.diff_min_x}, {self.diff_min_y}) - '
               f'({self.diff_max_x}, {self.diff_max_y}):')
         print(encode_image(diff_section))
-        message = f'Found {self.different_pixels} different pixels, see ' \
-                  f'{diff_path}.'
+        message = f'Found {self.different_pixels} different pixels, '
+        message += f'see' if is_saved else 'could not write'
+        message += f' {diff_path.relative_to(Path(__file__).parent)}.'
         assert self.different_pixels == 0, message
 
     def diff_colour(self,
