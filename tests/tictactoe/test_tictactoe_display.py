@@ -2,7 +2,7 @@ from PySide2.QtGui import QFont, QPainter
 from PySide2.QtWidgets import QGraphicsScene
 
 from tests.pixmap_differ import PixmapDiffer
-from zero_play.tictactoe.display import TicTacToeDisplay
+from zero_play.tictactoe.display import TicTacToeDisplay, center_text_item
 
 
 def draw_square_grid(expected):
@@ -23,7 +23,7 @@ def test_start_square(pixmap_differ: PixmapDiffer):
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(250, 50, 60, 60)
         set_font_size(expected, 13)
-        draw_text(expected, 242, 121, 'to move')
+        draw_text(expected, 280, 135, 'to move')
 
         scene = QGraphicsScene(0, 0, size+80, size)
         TicTacToeDisplay(scene)
@@ -45,7 +45,7 @@ def test_start_wide(pixmap_differ: PixmapDiffer):
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(370, 50, 60, 60)
         set_font_size(expected, 13)
-        draw_text(expected, 362, 121, 'to move')
+        draw_text(expected, 400, 135, 'to move')
 
         scene = QGraphicsScene(0, 0, size*2 + 80, size)
         TicTacToeDisplay(scene)
@@ -67,7 +67,7 @@ def test_start_tall(pixmap_differ: PixmapDiffer):
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(125, 85, 30, 30)
         set_font_size(expected, 6)
-        draw_text(expected, 120, 118, 'to move')
+        draw_text(expected, 140, 127, 'to move')
 
         scene = QGraphicsScene(0, 0, size + 40, size*2)
         TicTacToeDisplay(scene)
@@ -84,11 +84,10 @@ def set_font_size(painter, size):
 def draw_text(expected: QPainter, x: int, y: int, text: str):
     window = expected.window()
     scene = QGraphicsScene(0, 0, window.width(), window.height())
-    text_item = scene.addText(text)
+    text_item = scene.addSimpleText(text)
     font = expected.font()
     text_item.setFont(font)
-    text_item.adjustSize()
-    text_item.setPos(x, y)
+    center_text_item(text_item, x, y)
     scene.render(expected)
 
 
@@ -103,7 +102,7 @@ def test_pieces(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(10, 10, 60, 60)
         expected.drawEllipse(90, 90, 60, 60)
         set_font_size(expected, 13)
-        draw_text(expected, 242, 121, 'to move')
+        draw_text(expected, 280, 135, 'to move')
         expected.setBrush(TicTacToeDisplay.player2_colour)
         expected.drawEllipse(90, 10, 60, 60)
         expected.drawEllipse(250, 50, 60, 60)

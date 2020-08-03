@@ -2,9 +2,16 @@ import typing
 
 import numpy as np
 from PySide2.QtGui import QColor, QBrush, QFont
-from PySide2.QtWidgets import QGraphicsScene, QGraphicsItem
+from PySide2.QtWidgets import QGraphicsScene, QGraphicsItem, QGraphicsSimpleTextItem
 
 from zero_play.tictactoe.game import TicTacToeGame
+
+
+def center_text_item(item: QGraphicsSimpleTextItem, x: int, y: int):
+    bounds = item.boundingRect()
+    x -= bounds.width() / 2
+    y -= bounds.height() / 2
+    item.setPos(x, y)
 
 
 class GridDisplay:
@@ -37,14 +44,11 @@ class TicTacToeDisplay(GridDisplay):
                                         size // 4,
                                         brush=self.get_player_brush(
                                             self.game.X_PLAYER))
-        text_item = scene.addText('to move')
+        text_item = scene.addSimpleText('to move')
         font = QFont(self.default_font)
         font.setPointSize(int(size//18))
         text_item.setFont(font)
-        text_item.adjustSize()
-        text_rect = text_item.boundingRect()
-        text_item.setPos(x0+size+cell_size//2 - text_rect.width()//2,
-                         y0+size*27//48 - text_rect.height()//2)
+        center_text_item(text_item, x0+size+cell_size//2, y0+size*27//48)
         for i in range(self.game.board_height):
             row: typing.List[QGraphicsItem] = []
             self.spaces.append(row)
