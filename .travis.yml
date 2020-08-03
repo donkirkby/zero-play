@@ -7,6 +7,7 @@ before_install:
     - "sudo apt-get install libxcb-xinerama0 libxkbcommon-x11-0 xserver-xephyr"
 install: pipenv install --dev
 script:
+    - set -e
     - mypy zero_play
     # Add QT_DEBUG_PLUGINS=1 before xvfb-run to debug Qt library problems.
     - xvfb-run -a coverage run --source=zero_play -m pytest

@@ -7,7 +7,7 @@ from PySide2.QtWidgets import QGraphicsScene, QGraphicsItem, QGraphicsSimpleText
 from zero_play.tictactoe.game import TicTacToeGame
 
 
-def center_text_item(item: QGraphicsSimpleTextItem, x: int, y: int):
+def center_text_item(item: QGraphicsSimpleTextItem, x: float, y: float):
     bounds = item.boundingRect()
     x -= bounds.width() / 2
     y -= bounds.height() / 2

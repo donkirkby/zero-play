@@ -12,11 +12,19 @@
 # The timestamps should be similar, and the git ids should be the same.
 # More info:
 # https://github.com/travis-ci/packer-templates/blob/master/ci-ubuntu-1804.yml
+# If your install steps are slow, commit the finished installation to a new
+# docker tag like this:
+#     sudo docker ps
+#     sudo docker commit <container id> zero-play:test
+# Then you can shortcut the install steps by launching this script with the new
+# docker tag:
+#     sudo ./travis-local.sh zero-play:test
 
 set -e
+DOCKER_TAG=${1:-travisci/ci-ubuntu-1804:packer-1593521720-ca42795e}
 docker run --rm --name travis-build -dit \
   --mount type=bind,source=`pwd`,target=/home/travis/zero-play \
-  travisci/ci-ubuntu-1804:packer-1593521720-ca42795e /sbin/init
+  $DOCKER_TAG /sbin/init
 
 echo "Now run 'su - travis', followed by all the steps from your Travis CI log."
 echo "The project is mounted in /home/travis/zero-play."
