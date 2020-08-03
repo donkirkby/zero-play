@@ -167,17 +167,14 @@
        </layout>
       </widget>
       <widget class="QWidget" name="display_page">
-       <widget class="QWidget" name="verticalLayoutWidget">
-        <property name="geometry">
-         <rect>
-          <x>-1</x>
-          <y>-1</y>
-          <width>801</width>
-          <height>581</height>
-         </rect>
-        </property>
-        <layout class="QVBoxLayout" name="display_layout"/>
-       </widget>
+       <layout class="QVBoxLayout" name="display_layout">
+        <item>
+         <widget class="QGraphicsView" name="display_view"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="plot_page">
+       <layout class="QVBoxLayout" name="plot_layout"/>
       </widget>
      </widget>
     </item>
