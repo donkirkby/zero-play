@@ -223,3 +223,68 @@ def test_piece_click(pixmap_differ: PixmapDiffer):
         display.on_click(display.spaces[0][0])
 
         scene.render(actual)
+
+
+def test_winner(pixmap_differ: PixmapDiffer):
+    size = 240
+    with pixmap_differ.create_painters(
+            size+80,
+            size,
+            'tictactoe_winner') as (actual, expected):
+        draw_square_grid(expected)
+        expected.setBrush(TicTacToeDisplay.player1_colour)
+        expected.drawEllipse(10, 10, 60, 60)
+        expected.drawEllipse(90, 90, 60, 60)
+        expected.drawEllipse(170, 170, 60, 60)
+        expected.drawEllipse(250, 50, 60, 60)
+        set_font_size(expected, 13)
+        draw_text(expected, 280, 135, 'wins')
+        expected.setBrush(TicTacToeDisplay.player2_colour)
+        expected.drawEllipse(90, 10, 60, 60)
+        expected.drawEllipse(170, 90, 60, 60)
+
+        scene = QGraphicsScene(0, 0, size+80, size)
+        display = TicTacToeDisplay(scene)
+        board = display.game.create_board('''\
+XO.
+.XO
+..X
+''')
+        display.update(board)
+
+        scene.render(actual)
+
+    assert not display.spaces[0][2].isVisible()
+
+
+def test_draw(pixmap_differ: PixmapDiffer):
+    size = 240
+    with pixmap_differ.create_painters(
+            size+80,
+            size,
+            'tictactoe_winner') as (actual, expected):
+        draw_square_grid(expected)
+        expected.setBrush(TicTacToeDisplay.player1_colour)
+        expected.drawEllipse(10, 10, 60, 60)
+        expected.drawEllipse(10, 90, 60, 60)
+        expected.drawEllipse(90, 170, 60, 60)
+        expected.drawEllipse(170, 170, 60, 60)
+        expected.drawEllipse(170, 10, 60, 60)
+        set_font_size(expected, 13)
+        draw_text(expected, 280, 135, 'draw')
+        expected.setBrush(TicTacToeDisplay.player2_colour)
+        expected.drawEllipse(90, 10, 60, 60)
+        expected.drawEllipse(90, 90, 60, 60)
+        expected.drawEllipse(170, 90, 60, 60)
+        expected.drawEllipse(10, 170, 60, 60)
+
+        scene = QGraphicsScene(0, 0, size+80, size)
+        display = TicTacToeDisplay(scene)
+        board = display.game.create_board('''\
+XOX
+XOO
+OXX
+''')
+        display.update(board)
+
+        scene.render(actual)

@@ -53,6 +53,7 @@ class TicTacToeDisplay(GridDisplay):
         self.column_dividers = []
         self.row_dividers = []
         self.current_board = self.game.create_board()
+        self.text_x = self.text_y = 0
 
         scene.setBackgroundBrush(self.background_colour)
         for i in range(2):
@@ -92,7 +93,9 @@ class TicTacToeDisplay(GridDisplay):
         font = QFont(self.default_font)
         font.setPointSize(int(size//18))
         self.move_text.setFont(font)
-        center_text_item(self.move_text, x0+size+cell_size//2, y0+size*27//48)
+        self.text_x = x0 + size + cell_size // 2
+        self.text_y = y0 + size * 27 // 48
+        self.update_move_text()
 
         for i, row in enumerate(self.spaces):
             for j, piece in enumerate(row):
@@ -102,20 +105,44 @@ class TicTacToeDisplay(GridDisplay):
 
     def update(self, board: np.ndarray):
         self.current_board = board
+        is_ended = self.game.is_ended(board)
         spaces = self.game.get_spaces(board)
         for i in range(self.game.board_height):
             for j in range(self.game.board_width):
                 player = spaces[i][j]
                 piece = self.spaces[i][j]
                 if player == self.game.NO_PLAYER:
-                    piece.setBrush(self.background_colour)
-                    piece.setPen(self.background_colour)
+                    if is_ended:
+                        piece.setVisible(False)
+                    else:
+                        piece.setVisible(True)
+                        piece.setBrush(self.background_colour)
+                        piece.setPen(self.background_colour)
                 else:
+                    piece.setVisible(True)
                     piece.setBrush(self.get_player_brush(player))
                     piece.setPen(self.line_colour)
                 piece.setOpacity(1)
-        active_player = self.game.get_active_player(board)
-        self.to_move.setBrush(self.get_player_brush(active_player))
+        self.to_move.setVisible(True)
+        if is_ended:
+            if self.game.is_win(board, self.game.X_PLAYER):
+                self.update_move_text('wins')
+                self.to_move.setBrush(self.get_player_brush(self.game.X_PLAYER))
+            elif self.game.is_win(board, self.game.O_PLAYER):
+                self.update_move_text('wins')
+                self.to_move.setBrush(self.get_player_brush(self.game.O_PLAYER))
+            else:
+                self.update_move_text('draw')
+                self.to_move.setVisible(False)
+        else:
+            self.update_move_text('to move')
+            active_player = self.game.get_active_player(board)
+            self.to_move.setBrush(self.get_player_brush(active_player))
+
+    def update_move_text(self, text: str = None):
+        if text is not None:
+            self.move_text.setText(text)
+        center_text_item(self.move_text, self.text_x, self.text_y)
 
     def on_hover_enter(self, piece_item: GraphicsPieceItem):
         if self.is_piece_played(piece_item):
@@ -136,7 +163,6 @@ class TicTacToeDisplay(GridDisplay):
         move = piece_item.row * 3 + piece_item.column
         self.current_board = self.game.make_move(self.current_board, move)
         self.update(self.current_board)
-        print(self.game.is_ended(self.current_board))
 
     def is_piece_played(self, piece_item):
         current_spaces = self.game.get_spaces(self.current_board)

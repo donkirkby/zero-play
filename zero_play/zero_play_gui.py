@@ -30,10 +30,14 @@ class MainWindow(QMainWindow):
         self.ui.network1.clicked.connect(self.on_network1)
         self.ui.cancel.clicked.connect(self.on_cancel)
         self.ui.start.clicked.connect(self.on_start)
-        self.ui.stacked_widget.setCurrentWidget(self.ui.game_page)
+        self.ui.action_game.triggered.connect(self.on_new_game)
+        self.on_new_game()
         self.ui.display_view.setScene(QGraphicsScene(0, 0, 1, 1))
         self.game = None
         self.display: typing.Optional[TicTacToeDisplay] = None
+
+    def on_new_game(self):
+        self.ui.stacked_widget.setCurrentWidget(self.ui.game_page)
 
     def show_game(self, game: Game):
         self.game = game
@@ -65,7 +69,10 @@ class MainWindow(QMainWindow):
 
     def on_tic_tac_toe(self):
         self.show_game(TicTacToeGame())
-        self.display = TicTacToeDisplay(self.ui.display_view.scene())
+        if self.display is None:
+            self.display = TicTacToeDisplay(self.ui.display_view.scene())
+        else:
+            self.display.update(self.display.game.create_board())
 
     def on_othello(self):
         self.show_game(OthelloGame())
