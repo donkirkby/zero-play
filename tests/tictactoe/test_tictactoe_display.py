@@ -1,4 +1,4 @@
-from PySide2.QtGui import QFont, QPainter
+from PySide2.QtGui import QFont, QPainter, QColor, QPen
 from PySide2.QtWidgets import QGraphicsScene
 
 from tests.pixmap_differ import PixmapDiffer
@@ -115,5 +115,111 @@ XO.
 ...
 ''')
         display.update(board)
+
+        scene.render(actual)
+
+
+# noinspection DuplicatedCode
+def test_piece_hover_enter(pixmap_differ: PixmapDiffer):
+    size = 240
+    with pixmap_differ.create_painters(
+            size+80,
+            size,
+            'tictactoe_piece_hover_enter') as (actual, expected):
+        draw_square_grid(expected)
+        expected.setBrush(TicTacToeDisplay.player1_colour)
+        expected.drawEllipse(10, 10, 60, 60)
+        set_font_size(expected, 13)
+        draw_text(expected, 280, 135, 'to move')
+        colour = QColor(TicTacToeDisplay.player2_colour)
+        expected.setBrush(colour)
+        expected.drawEllipse(250, 50, 60, 60)
+        colour.setAlpha(127)
+        expected.setBrush(colour)
+        colour.setRgb(0, 0, 0, 127)
+        pen = QPen(colour)
+        expected.setPen(pen)
+        expected.drawEllipse(90, 10, 60, 60)
+
+        scene = QGraphicsScene(0, 0, size+80, size)
+        display = TicTacToeDisplay(scene)
+        board = display.game.create_board('''\
+X..
+...
+...
+''')
+        display.update(board)
+        display.on_hover_enter(display.spaces[0][1])
+
+        scene.render(actual)
+
+
+# noinspection DuplicatedCode
+def test_piece_hover_leave(pixmap_differ: PixmapDiffer):
+    size = 240
+    with pixmap_differ.create_painters(
+            size+80,
+            size,
+            'tictactoe_piece_hover_leave') as (actual, expected):
+        draw_square_grid(expected)
+        set_font_size(expected, 13)
+        draw_text(expected, 280, 135, 'to move')
+        expected.setBrush(TicTacToeDisplay.player1_colour)
+        expected.drawEllipse(250, 50, 60, 60)
+
+        scene = QGraphicsScene(0, 0, size+80, size)
+        display = TicTacToeDisplay(scene)
+        display.on_hover_enter(display.spaces[0][1])
+        display.on_hover_leave(display.spaces[0][1])
+
+        scene.render(actual)
+
+
+# noinspection DuplicatedCode
+def test_piece_hover_existing(pixmap_differ: PixmapDiffer):
+    size = 240
+    with pixmap_differ.create_painters(
+            size+80,
+            size,
+            'tictactoe_piece_hover_existing') as (actual, expected):
+        draw_square_grid(expected)
+        expected.setBrush(TicTacToeDisplay.player1_colour)
+        expected.drawEllipse(10, 10, 60, 60)
+        set_font_size(expected, 13)
+        draw_text(expected, 280, 135, 'to move')
+        colour = QColor(TicTacToeDisplay.player2_colour)
+        expected.setBrush(colour)
+        expected.drawEllipse(250, 50, 60, 60)
+
+        scene = QGraphicsScene(0, 0, size+80, size)
+        display = TicTacToeDisplay(scene)
+        board = display.game.create_board('''\
+X..
+...
+...
+''')
+        display.update(board)
+        display.on_hover_enter(display.spaces[0][0])
+
+        scene.render(actual)
+
+
+def test_piece_click(pixmap_differ: PixmapDiffer):
+    size = 240
+    with pixmap_differ.create_painters(
+            size+80,
+            size,
+            'tictactoe_piece_click') as (actual, expected):
+        draw_square_grid(expected)
+        expected.setBrush(TicTacToeDisplay.player1_colour)
+        expected.drawEllipse(10, 10, 60, 60)
+        set_font_size(expected, 13)
+        draw_text(expected, 280, 135, 'to move')
+        expected.setBrush(TicTacToeDisplay.player2_colour)
+        expected.drawEllipse(250, 50, 60, 60)
+
+        scene = QGraphicsScene(0, 0, size+80, size)
+        display = TicTacToeDisplay(scene)
+        display.on_click(display.spaces[0][0])
 
         scene.render(actual)
