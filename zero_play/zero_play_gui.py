@@ -7,6 +7,7 @@ from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, \
     QGraphicsScene
 from pkg_resources import iter_entry_points, EntryPoint
 
+from zero_play.connect4.display import Connect4Display
 from zero_play.connect4.game import Connect4Game
 from zero_play.game import Game
 from zero_play.heuristic import Heuristic
@@ -69,16 +70,14 @@ class MainWindow(QMainWindow):
 
     def on_tic_tac_toe(self):
         self.show_game(TicTacToeGame())
-        if self.display is None:
-            self.display = TicTacToeDisplay(self.ui.display_view.scene())
-        else:
-            self.display.update(self.display.game.create_board())
+        self.display = TicTacToeDisplay(self.ui.display_view.scene())
 
     def on_othello(self):
         self.show_game(OthelloGame())
 
     def on_connect4(self):
         self.show_game(Connect4Game())
+        self.display = Connect4Display(self.ui.display_view.scene())
 
     def on_cancel(self):
         self.ui.stacked_widget.setCurrentWidget(self.ui.game_page)

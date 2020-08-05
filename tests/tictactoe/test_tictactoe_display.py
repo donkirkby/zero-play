@@ -2,7 +2,8 @@ from PySide2.QtGui import QFont, QPainter, QColor, QPen
 from PySide2.QtWidgets import QGraphicsScene
 
 from tests.pixmap_differ import PixmapDiffer
-from zero_play.tictactoe.display import TicTacToeDisplay, center_text_item
+from zero_play.grid_display import center_text_item
+from zero_play.tictactoe.display import TicTacToeDisplay
 
 
 def draw_square_grid(expected):
@@ -13,6 +14,7 @@ def draw_square_grid(expected):
     expected.drawLine(160, 0, 160, 240)
 
 
+# noinspection DuplicatedCode
 def test_start_square(pixmap_differ: PixmapDiffer):
     size = 240
     with pixmap_differ.create_painters(
@@ -23,9 +25,29 @@ def test_start_square(pixmap_differ: PixmapDiffer):
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(250, 50, 60, 60)
         set_font_size(expected, 13)
-        draw_text(expected, 280, 135, 'to move')
+        draw_text(expected, 280, 136, 'to move')
 
         scene = QGraphicsScene(0, 0, size+80, size)
+        TicTacToeDisplay(scene)
+
+        scene.render(actual)
+
+
+# noinspection DuplicatedCode
+def test_start_clears_scene(pixmap_differ: PixmapDiffer):
+    size = 240
+    with pixmap_differ.create_painters(
+            size+80,
+            size,
+            'tictactoe_start_clears_scene') as (actual, expected):
+        draw_square_grid(expected)
+        expected.setBrush(TicTacToeDisplay.player1_colour)
+        expected.drawEllipse(250, 50, 60, 60)
+        set_font_size(expected, 13)
+        draw_text(expected, 280, 136, 'to move')
+
+        scene = QGraphicsScene(0, 0, size+80, size)
+        scene.addSimpleText('Previous Game should be cleared.')
         TicTacToeDisplay(scene)
 
         scene.render(actual)
@@ -45,7 +67,7 @@ def test_start_wide(pixmap_differ: PixmapDiffer):
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(370, 50, 60, 60)
         set_font_size(expected, 13)
-        draw_text(expected, 400, 135, 'to move')
+        draw_text(expected, 400, 136, 'to move')
 
         scene = QGraphicsScene(0, 0, size*2 + 80, size)
         TicTacToeDisplay(scene)
@@ -67,7 +89,7 @@ def test_start_tall(pixmap_differ: PixmapDiffer):
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(125, 85, 30, 30)
         set_font_size(expected, 6)
-        draw_text(expected, 140, 127, 'to move')
+        draw_text(expected, 140, 128, 'to move')
 
         scene = QGraphicsScene(0, 0, size + 40, size*2)
         TicTacToeDisplay(scene)
@@ -102,7 +124,7 @@ def test_pieces(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(10, 10, 60, 60)
         expected.drawEllipse(90, 90, 60, 60)
         set_font_size(expected, 13)
-        draw_text(expected, 280, 135, 'to move')
+        draw_text(expected, 280, 136, 'to move')
         expected.setBrush(TicTacToeDisplay.player2_colour)
         expected.drawEllipse(90, 10, 60, 60)
         expected.drawEllipse(250, 50, 60, 60)
@@ -130,7 +152,7 @@ def test_piece_hover_enter(pixmap_differ: PixmapDiffer):
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(10, 10, 60, 60)
         set_font_size(expected, 13)
-        draw_text(expected, 280, 135, 'to move')
+        draw_text(expected, 280, 136, 'to move')
         colour = QColor(TicTacToeDisplay.player2_colour)
         expected.setBrush(colour)
         expected.drawEllipse(250, 50, 60, 60)
@@ -163,7 +185,7 @@ def test_piece_hover_leave(pixmap_differ: PixmapDiffer):
             'tictactoe_piece_hover_leave') as (actual, expected):
         draw_square_grid(expected)
         set_font_size(expected, 13)
-        draw_text(expected, 280, 135, 'to move')
+        draw_text(expected, 280, 136, 'to move')
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(250, 50, 60, 60)
 
@@ -186,7 +208,7 @@ def test_piece_hover_existing(pixmap_differ: PixmapDiffer):
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(10, 10, 60, 60)
         set_font_size(expected, 13)
-        draw_text(expected, 280, 135, 'to move')
+        draw_text(expected, 280, 136, 'to move')
         colour = QColor(TicTacToeDisplay.player2_colour)
         expected.setBrush(colour)
         expected.drawEllipse(250, 50, 60, 60)
@@ -214,7 +236,7 @@ def test_piece_click(pixmap_differ: PixmapDiffer):
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(10, 10, 60, 60)
         set_font_size(expected, 13)
-        draw_text(expected, 280, 135, 'to move')
+        draw_text(expected, 280, 136, 'to move')
         expected.setBrush(TicTacToeDisplay.player2_colour)
         expected.drawEllipse(250, 50, 60, 60)
 
@@ -238,7 +260,7 @@ def test_winner(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(170, 170, 60, 60)
         expected.drawEllipse(250, 50, 60, 60)
         set_font_size(expected, 13)
-        draw_text(expected, 280, 135, 'wins')
+        draw_text(expected, 280, 136, 'wins')
         expected.setBrush(TicTacToeDisplay.player2_colour)
         expected.drawEllipse(90, 10, 60, 60)
         expected.drawEllipse(170, 90, 60, 60)
@@ -262,7 +284,7 @@ def test_draw(pixmap_differ: PixmapDiffer):
     with pixmap_differ.create_painters(
             size+80,
             size,
-            'tictactoe_winner') as (actual, expected):
+            'tictactoe_draw') as (actual, expected):
         draw_square_grid(expected)
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(10, 10, 60, 60)
@@ -271,7 +293,7 @@ def test_draw(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(170, 170, 60, 60)
         expected.drawEllipse(170, 10, 60, 60)
         set_font_size(expected, 13)
-        draw_text(expected, 280, 135, 'draw')
+        draw_text(expected, 280, 136, 'draw')
         expected.setBrush(TicTacToeDisplay.player2_colour)
         expected.drawEllipse(90, 10, 60, 60)
         expected.drawEllipse(90, 90, 60, 60)
