@@ -3,7 +3,9 @@ from PySide2.QtWidgets import QGraphicsScene
 
 from tests.pixmap_differ import PixmapDiffer
 from zero_play.grid_display import center_text_item
+from zero_play.mcts_player import MctsPlayer
 from zero_play.tictactoe.display import TicTacToeDisplay
+from zero_play.tictactoe.game import TicTacToeGame
 
 
 def draw_square_grid(expected):
@@ -174,6 +176,28 @@ X..
         display.on_hover_enter(display.spaces[0][1])
 
         scene.render(actual)
+
+
+def test_piece_hover_enter_mcts(pixmap_differ: PixmapDiffer):
+    """ Don't display move options while MCTS player is thinking. """
+    size = 240
+    with pixmap_differ.create_painters(
+            size+80,
+            size,
+            'tictactoe_piece_hover_enter_mcts') as (actual, expected):
+        draw_square_grid(expected)
+        expected.setBrush(TicTacToeDisplay.player1_colour)
+        set_font_size(expected, 13)
+        draw_text(expected, 280, 136, 'thinking')
+        expected.drawEllipse(250, 50, 60, 60)
+
+        scene = QGraphicsScene(0, 0, size+80, size)
+        player = MctsPlayer(TicTacToeGame(), TicTacToeGame.X_PLAYER)
+        display = TicTacToeDisplay(scene, mcts_players=(player,))
+        display.on_hover_enter(display.spaces[0][1])
+
+        scene.render(actual)
+        display.close()
 
 
 # noinspection DuplicatedCode

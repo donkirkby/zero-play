@@ -1,12 +1,15 @@
+import typing
 from PySide2.QtWidgets import QGraphicsScene
 
 from zero_play.grid_display import GridDisplay, GraphicsPieceItem
 from zero_play.connect4.game import Connect4Game
+from zero_play.mcts_player import MctsPlayer
 
 
 class Connect4Display(GridDisplay):
-    def __init__(self, scene: QGraphicsScene):
-        super().__init__(scene, Connect4Game())
+    def __init__(self, scene: QGraphicsScene,
+                 mcts_players: typing.Sequence[MctsPlayer] = ()):
+        super().__init__(scene, Connect4Game(), mcts_players)
 
     def calculate_move(self, row, column):
         return column

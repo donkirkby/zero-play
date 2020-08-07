@@ -217,15 +217,14 @@ def test_play_two_flip():
 def test_display(capsys):
     game = SecondPlayerWinsGame()
     heuristics = [FirstChoiceHeuristic(game)]
-    mcts_iterations = [10, 20]
     players = [MctsPlayer(game,
                           game.X_PLAYER,
-                          mcts_iterations,
-                          heuristics),
+                          iteration_count=10,
+                          heuristic=heuristics),
                MctsPlayer(game,
                           game.O_PLAYER,
-                          mcts_iterations,
-                          heuristics)]
+                          iteration_count=20,
+                          heuristic=heuristics)]
     controller = PlayController(game, players)
     expected_output = """\
   AB
@@ -260,10 +259,9 @@ def test_display(capsys):
 def test_player_summaries(capsys):
     game = Connect4Game()
     heuristics = [FirstChoiceHeuristic(game), NeuralNet(game)]
-    mcts_iterations = [10, 20]
     players = [MctsPlayer(game,
                           game.X_PLAYER,
-                          mcts_iterations,
+                          10,
                           heuristics),
                HumanPlayer(game, game.O_PLAYER)]
     expected_summaries = ('mcts', 'human')
@@ -276,14 +274,13 @@ def test_player_summaries(capsys):
 def test_player_summaries_heuristic(capsys):
     game = Connect4Game()
     heuristics = [FirstChoiceHeuristic(game), NeuralNet(game)]
-    mcts_iterations = [10, 20]
     players = [MctsPlayer(game,
                           game.X_PLAYER,
-                          mcts_iterations,
+                          10,
                           heuristics),
                MctsPlayer(game,
                           game.O_PLAYER,
-                          mcts_iterations,
+                          20,
                           heuristics)]
     expected_summaries = ('first choice', 'neural net')
 
@@ -297,14 +294,13 @@ def test_player_summaries_checkpoints(capsys, monkeypatch):
     game = Connect4Game()
     heuristics = [NeuralNet(game), NeuralNet(game)]
     heuristics[0].load_checkpoint(filename='checkpoint1.h5')
-    mcts_iterations = [10]
     players = [MctsPlayer(game,
                           game.X_PLAYER,
-                          mcts_iterations,
+                          10,
                           heuristics),
                MctsPlayer(game,
                           game.O_PLAYER,
-                          mcts_iterations,
+                          10,
                           heuristics)]
     expected_summaries = ('model checkpoint1.h5', 'random weights')
 

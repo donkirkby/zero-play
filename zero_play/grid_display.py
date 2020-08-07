@@ -2,12 +2,14 @@ import math
 import typing
 
 import numpy as np
-from PySide2.QtCore import QSize
+from PySide2.QtCore import QSize, QThread, Signal, Slot, QObject
 from PySide2.QtGui import QColor, QBrush, QFont
 from PySide2.QtWidgets import QGraphicsScene, QGraphicsItem, QGraphicsEllipseItem, QGraphicsSceneHoverEvent, \
     QGraphicsSceneMouseEvent, QGraphicsSimpleTextItem
 
 from zero_play.game import GridGame
+from zero_play.mcts_player import MctsPlayer
+from zero_play.mcts_worker import MctsWorker
 
 
 def center_text_item(item: QGraphicsSimpleTextItem, x: float, y: float):
@@ -38,21 +40,42 @@ class GraphicsPieceItem(QGraphicsEllipseItem):
         self.hover_listener.on_click(self)
 
 
-class GridDisplay:
+class GridDisplay(QObject):
     background_colour = QColor.fromRgb(0x009E0B)
     line_colour = QColor.fromRgb(0x000000)
     player1_colour = QColor.fromRgb(0x000000)
     player2_colour = QColor.fromRgb(0xFFFFFF)
     default_font = 'Sans Serif,9,-1,5,50,0,0,0,0,0'
 
-    def __init__(self, scene: QGraphicsScene, game: GridGame):
+    move_needed = Signal(int, np.ndarray)  # active_player, board
+
+    def __init__(self,
+                 scene: QGraphicsScene,
+                 game: GridGame,
+                 mcts_players: typing.Sequence[MctsPlayer] = (),
+                 parent: QObject = None):
+        super().__init__(parent)
         self.scene = scene
         self.game = game
+        self.mcts_workers: typing.Dict[int, MctsWorker] = {
+            player.player_number: MctsWorker(player)
+            for player in mcts_players}
         self.spaces = []
         self.column_dividers = []
         self.row_dividers = []
         self.current_board = self.game.create_board()
         self.text_x = self.text_y = 0
+
+        if not self.mcts_workers:
+            self.worker_thread = None
+        else:
+            self.worker_thread = QThread()
+            for worker in self.mcts_workers.values():
+                worker.move_chosen.connect(self.make_move)  # type: ignore
+                # noinspection PyUnresolvedReferences
+                self.move_needed.connect(worker.choose_move)  # type: ignore
+                worker.moveToThread(self.worker_thread)
+            self.worker_thread.start()
 
         scene.clear()
         scene.setBackgroundBrush(self.background_colour)
@@ -62,7 +85,7 @@ class GridDisplay:
             self.column_dividers.append(scene.addLine(0, 0, 1, 1))
         self.to_move = scene.addEllipse(
             0, 0, 1, 1, brush=self.get_player_brush(self.game.X_PLAYER))
-        self.move_text = scene.addSimpleText('to move')
+        self.move_text = scene.addSimpleText(self.choose_active_text())
         for i in range(self.game.board_height):
             row: typing.List[QGraphicsItem] = []
             self.spaces.append(row)
@@ -75,6 +98,12 @@ class GridDisplay:
 
         if scene.width() > 1:
             self.resize(scene.sceneRect().size())
+
+    def choose_active_text(self):
+        active_player = self.game.get_active_player(self.current_board)
+        if active_player in self.mcts_workers:
+            return 'thinking'
+        return 'to move'
 
     def resize(self, view_size: QSize):
         width = view_size.width()
@@ -142,7 +171,7 @@ class GridDisplay:
                 self.update_move_text('draw')
                 self.to_move.setVisible(False)
         else:
-            self.update_move_text('to move')
+            self.update_move_text(self.choose_active_text())
             active_player = self.game.get_active_player(board)
             self.to_move.setBrush(self.get_player_brush(active_player))
 
@@ -160,6 +189,8 @@ class GridDisplay:
         if self.is_piece_played(piece_item):
             return
         active_player = self.game.get_active_player(self.current_board)
+        if active_player in self.mcts_workers:
+            return
         piece_item.setBrush(self.get_player_brush(active_player))
         piece_item.setPen(self.line_colour)
         piece_item.setOpacity(0.5)
@@ -173,8 +204,21 @@ class GridDisplay:
 
     def on_click(self, piece_item: GraphicsPieceItem):
         move = self.calculate_move(piece_item.row, piece_item.column)
+        self.make_move(move)
+
+    @Slot(int)  # type: ignore
+    def make_move(self, move):
         self.current_board = self.game.make_move(self.current_board, move)
         self.update(self.current_board)
+
+        self.request_move()
+
+    def request_move(self):
+        if self.game.is_ended(self.current_board):
+            return
+        player = self.game.get_active_player(self.current_board)
+        # noinspection PyUnresolvedReferences
+        self.move_needed.emit(player, self.current_board)
 
     def calculate_move(self, row, column):
         move = row * self.game.board_width + column
@@ -184,3 +228,7 @@ class GridDisplay:
         current_spaces = self.game.get_spaces(self.current_board)
         hovered_player = current_spaces[piece_item.row][piece_item.column]
         return hovered_player != self.game.NO_PLAYER
+
+    def close(self):
+        if self.worker_thread is not None:
+            self.worker_thread.quit()

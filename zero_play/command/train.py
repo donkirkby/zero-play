@@ -69,7 +69,7 @@ def handle(args: Namespace):
     best_player = MctsPlayer(game, game.O_PLAYER, heuristic=[best_net])
     base_player = MctsPlayer(game,
                              game.O_PLAYER,
-                             mcts_iterations=[args.base_iterations],
+                             iteration_count=args.base_iterations,
                              heuristic=[Playout(game)])
 
     best_file_name = 'best.h5'

@@ -217,7 +217,7 @@ XOXOXOO
 OXOXO..
 XOXOXOO
 """
-    player = MctsPlayer(game, mcts_iterations=[200])
+    player = MctsPlayer(game, iteration_count=200)
 
     move = player.choose_move(start_board)
     board = game.make_move(start_board, move)
@@ -236,7 +236,7 @@ def test_choose_moves_at_random():
 X..
 """)
     player = MctsPlayer(game,
-                        mcts_iterations=[80],
+                        iteration_count=80,
                         heuristic=[EarlyChoiceHeuristic(game)])
 
     moves = set()
@@ -265,7 +265,7 @@ XOXOXOO
     expected_high = expected_count * 1.1
     move_counts = Counter()
     for _ in range(test_count):
-        player = MctsPlayer(game, mcts_iterations=[0])
+        player = MctsPlayer(game, iteration_count=0)
 
         move = player.choose_move(start_board)
         move_counts[move] += 1

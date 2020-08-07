@@ -2,7 +2,7 @@ import os
 import sys
 import typing
 
-from PySide2.QtGui import QResizeEvent
+from PySide2.QtGui import QResizeEvent, Qt
 from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, \
     QGraphicsScene
 from pkg_resources import iter_entry_points, EntryPoint
@@ -10,8 +10,10 @@ from pkg_resources import iter_entry_points, EntryPoint
 from zero_play.connect4.display import Connect4Display
 from zero_play.connect4.game import Connect4Game
 from zero_play.game import Game
+from zero_play.grid_display import GridDisplay
 from zero_play.heuristic import Heuristic
 from zero_play.main_window import Ui_MainWindow
+from zero_play.mcts_player import MctsPlayer
 from zero_play.othello.game import OthelloGame
 from zero_play.plot_canvas import PlotCanvas
 from zero_play.tictactoe.display import TicTacToeDisplay
@@ -32,15 +34,20 @@ class MainWindow(QMainWindow):
         self.ui.cancel.clicked.connect(self.on_cancel)
         self.ui.start.clicked.connect(self.on_start)
         self.ui.action_game.triggered.connect(self.on_new_game)
-        self.on_new_game()
         self.ui.display_view.setScene(QGraphicsScene(0, 0, 1, 1))
         self.game = None
-        self.display: typing.Optional[TicTacToeDisplay] = None
+        self.display_class = TicTacToeDisplay
+        self.display: typing.Optional[GridDisplay] = None
+        self.on_new_game()
 
     def on_new_game(self):
+        if self.display is not None:
+            self.display.close()
+            self.display = None
         self.ui.stacked_widget.setCurrentWidget(self.ui.game_page)
 
     def show_game(self, game: Game):
+        QApplication.setOverrideCursor(Qt.WaitCursor)
         self.game = game
         self.ui.game_name.setText(game.name)
         heuristics = []
@@ -62,22 +69,25 @@ class MainWindow(QMainWindow):
             heuristics.append((entry.name, heuristic))
         self.ui.player1.clear()
         self.ui.player2.clear()
+        self.ui.player1.addItem('human', None)
+        self.ui.player2.addItem('human', None)
         for name, heuristic in heuristics:
             self.ui.player1.addItem(name, heuristic)
             self.ui.player2.addItem(name, heuristic)
 
         self.ui.stacked_widget.setCurrentWidget(self.ui.players_page)
+        QApplication.restoreOverrideCursor()
 
     def on_tic_tac_toe(self):
         self.show_game(TicTacToeGame())
-        self.display = TicTacToeDisplay(self.ui.display_view.scene())
+        self.display_class = TicTacToeDisplay
 
     def on_othello(self):
         self.show_game(OthelloGame())
 
     def on_connect4(self):
         self.show_game(Connect4Game())
-        self.display = Connect4Display(self.ui.display_view.scene())
+        self.display_class = Connect4Display
 
     def on_cancel(self):
         self.ui.stacked_widget.setCurrentWidget(self.ui.game_page)
@@ -90,8 +100,18 @@ class MainWindow(QMainWindow):
             options=QFileDialog.DontUseNativeDialog)
 
     def on_start(self):
+        mcts_choices = {self.game.X_PLAYER: self.ui.player1.currentData(),
+                        self.game.O_PLAYER: self.ui.player2.currentData()}
+        mcts_players = [MctsPlayer(self.game, player_number, iteration_count=700)
+                        for player_number, heuristic in mcts_choices.items()
+                        if heuristic is not None]
+        self.display = self.display_class(self.ui.display_view.scene(),
+                                          mcts_players)
+        self.destroyed.connect(self.display.close)
+
         self.ui.stacked_widget.setCurrentWidget(self.ui.display_page)
         self.resize_display()
+        self.display.request_move()
 
     def resizeEvent(self, event: QResizeEvent):
         super().resizeEvent(event)

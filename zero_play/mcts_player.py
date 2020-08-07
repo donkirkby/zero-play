@@ -217,21 +217,14 @@ class MctsPlayer(Player):
     The original AlphaZero paper:
     https://deepmind.com/blog/alphago-zero-learning-scratch/
     """
-    DEFAULT_ITERATIONS = [80]
-    mcts_iterations = EntryPointArgument('--mcts_iterations',
-                                         nargs='*',
-                                         type=int,
-                                         help='Number of search iterations',
-                                         metavar='N',
-                                         default=DEFAULT_ITERATIONS)
+    DEFAULT_ITERATIONS = 80
 
     def __init__(self, game: Game,
                  player_number: int = Game.X_PLAYER,
-                 mcts_iterations: typing.Sequence[int] = tuple(DEFAULT_ITERATIONS),
+                 iteration_count: int = DEFAULT_ITERATIONS,
                  heuristic: typing.List[Heuristic] = None):
         super().__init__(game, player_number, heuristic)
-        self.iteration_count = get_player_argument(mcts_iterations,
-                                                   player_number)
+        self.iteration_count = iteration_count
         self.search_manager = SearchManager(game, self.heuristic)
 
     @property

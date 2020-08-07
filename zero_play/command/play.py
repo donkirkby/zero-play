@@ -172,7 +172,7 @@ def handle(args: Namespace):
     players[1].heuristic.load_checkpoint('data/connect4-nn',
                                          filename=f'checkpoint-01.h5')
     controller = PlayController(game, players)
-    base_player = MctsPlayer(game, mcts_iterations=args.mcts_iterations)
+    base_player = MctsPlayer(game, iteration_count=args.mcts_iterations)
     base_controller = PlayController(game, [players[0], base_player])
     with open('data/connect4-comparison.csv', 'w') as f:
         writer = DictWriter(f, ['wins_vs_best',
