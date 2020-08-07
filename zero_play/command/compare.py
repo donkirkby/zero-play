@@ -61,9 +61,8 @@ def choose_scenario(scenario_path: Path) -> PlayController:
                                                heuristic2_name]))
     scenario_path.write_text(scenario_text)
 
-    heuristics = [heuristic1, heuristic2]
-    player1 = MctsPlayer(game, Game.X_PLAYER, heuristic=heuristics)
-    player2 = MctsPlayer(game, Game.O_PLAYER, heuristic=heuristics)
+    player1 = MctsPlayer(game, Game.X_PLAYER, heuristic=heuristic1)
+    player2 = MctsPlayer(game, Game.O_PLAYER, heuristic=heuristic2)
     return PlayController(game, [player1, player2])
 
 

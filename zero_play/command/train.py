@@ -65,12 +65,12 @@ def handle(args: Namespace):
         writer.writeheader()
     best_net = NeuralNet(game)
     neural_net = NeuralNet(game)
-    training_player = MctsPlayer(game, heuristic=[neural_net])
-    best_player = MctsPlayer(game, game.O_PLAYER, heuristic=[best_net])
+    training_player = MctsPlayer(game, heuristic=neural_net)
+    best_player = MctsPlayer(game, game.O_PLAYER, heuristic=best_net)
     base_player = MctsPlayer(game,
                              game.O_PLAYER,
                              iteration_count=args.base_iterations,
-                             heuristic=[Playout(game)])
+                             heuristic=Playout(game))
 
     best_file_name = 'best.h5'
     try:

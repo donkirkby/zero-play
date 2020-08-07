@@ -62,6 +62,17 @@ class Game(ABC):
         """
 
     @abstractmethod
+    def display_move(self, board: np.ndarray, move: int) -> str:
+        """ Create human-readable display text for the given move.
+
+        :param board: an array of piece values, like the ones returned by
+            create_board().
+        :param move: the move to describe.
+        :return: display text. Typically, this should be valid text for passing
+            to create_board().
+        """
+
+    @abstractmethod
     def get_move_count(self, board: np.ndarray) -> int:
         """ The number of moves that have already been made in the game. """
 
@@ -191,6 +202,12 @@ class GridGame(Game):
                 result.write(self.DISPLAY_CHARS[spaces[i, j]+1])
             result.write('\n')
         return result.getvalue()
+
+    def display_move(self, board: np.ndarray, move: int) -> str:
+        row = move // self.board_width
+        column = move % self.board_width
+        column_text = chr(65 + column)
+        return f'{row+1}{column_text}'
 
     def parse_move(self, text: str, board: np.ndarray) -> int:
         trimmed = text.strip().replace(' ', '')

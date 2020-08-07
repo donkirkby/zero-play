@@ -173,6 +173,17 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="log_page">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QPlainTextEdit" name="log_text">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="plot_page">
        <layout class="QVBoxLayout" name="plot_layout"/>
       </widget>
@@ -204,9 +215,18 @@
     </widget>
     <addaction name="menu_new"/>
     <addaction name="action_open"/>
-    <addaction name="action_Save"/>
+    <addaction name="action_save"/>
+    <addaction name="action_save_log"/>
+   </widget>
+   <widget class="QMenu" name="menu_view">
+    <property name="title">
+     <string>&amp;View</string>
+    </property>
+    <addaction name="action_view_game"/>
+    <addaction name="action_view_log"/>
    </widget>
    <addaction name="menu_file"/>
+   <addaction name="menu_view"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="action_open">
@@ -234,9 +254,33 @@
     <string>&amp;Game</string>
    </property>
   </action>
-  <action name="action_Save">
+  <action name="action_save">
    <property name="text">
     <string>&amp;Save...</string>
+   </property>
+  </action>
+  <action name="action_view_game">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Game</string>
+   </property>
+  </action>
+  <action name="action_view_log">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Log</string>
+   </property>
+  </action>
+  <action name="action_save_log">
+   <property name="text">
+    <string>Save &amp;Log...</string>
    </property>
   </action>
  </widget>

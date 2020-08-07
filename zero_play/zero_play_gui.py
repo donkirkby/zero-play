@@ -2,9 +2,10 @@ import os
 import sys
 import typing
 
+from PySide2.QtCore import Slot
 from PySide2.QtGui import QResizeEvent, Qt
 from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, \
-    QGraphicsScene
+    QGraphicsScene, QActionGroup
 from pkg_resources import iter_entry_points, EntryPoint
 
 from zero_play.connect4.display import Connect4Display
@@ -35,6 +36,11 @@ class MainWindow(QMainWindow):
         self.ui.cancel.clicked.connect(self.on_cancel)
         self.ui.start.clicked.connect(self.on_start)
         self.ui.action_game.triggered.connect(self.on_new_game)
+        self.ui.action_view_game.triggered.connect(self.on_view_game)
+        self.ui.action_view_log.triggered.connect(self.on_view_log)
+        group = QActionGroup(self.ui.centralwidget)
+        group.addAction(self.ui.action_view_game)
+        group.addAction(self.ui.action_view_log)
         self.ui.display_view.setScene(QGraphicsScene(0, 0, 1, 1))
         self.game = None
         self.display_class = TicTacToeDisplay
@@ -104,17 +110,15 @@ class MainWindow(QMainWindow):
     def on_start(self):
         mcts_choices = {self.game.X_PLAYER: self.ui.player1.currentData(),
                         self.game.O_PLAYER: self.ui.player2.currentData()}
-        mcts_players = [MctsPlayer(self.game, player_number, iteration_count=700)
+        mcts_players = [MctsPlayer(self.game, player_number, iteration_count=600)
                         for player_number, heuristic in mcts_choices.items()
                         if heuristic is not None]
         self.display = self.display_class(self.ui.display_view.scene(),
                                           mcts_players)
         self.destroyed.connect(self.display.close)
+        self.display.log_changed.connect(self.on_log_changed)
 
-        self.ui.stacked_widget.setCurrentWidget(self.ui.display_page)
-        self.resize_display()
-        self.display.update(self.display.current_board)
-        self.display.request_move()
+        self.on_view_game()
 
     def resizeEvent(self, event: QResizeEvent):
         super().resizeEvent(event)
@@ -126,6 +130,22 @@ class MainWindow(QMainWindow):
         size = self.ui.display_view.maximumViewportSize()
         self.display.resize(size)
         self.display.scene.setSceneRect(0, 0, size.width(), size.height())
+
+    @Slot(str)  # type: ignore
+    def on_log_changed(self, text):
+        self.ui.log_text.setPlainText(text)
+
+    def on_view_game(self):
+        if self.display is None:
+            self.on_new_game()
+        else:
+            self.ui.stacked_widget.setCurrentWidget(self.ui.display_page)
+            self.resize_display()
+            self.display.update(self.display.current_board)
+            self.display.request_move()
+
+    def on_view_log(self):
+        self.ui.stacked_widget.setCurrentWidget(self.ui.log_page)
 
 
 def main():

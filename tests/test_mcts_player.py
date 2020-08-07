@@ -2,6 +2,7 @@ import typing
 from collections import Counter
 
 import numpy as np
+from pytest import approx
 
 from zero_play.connect4.game import Connect4Game
 from zero_play.heuristic import Heuristic
@@ -237,7 +238,7 @@ X..
 """)
     player = MctsPlayer(game,
                         iteration_count=80,
-                        heuristic=[EarlyChoiceHeuristic(game)])
+                        heuristic=EarlyChoiceHeuristic(game))
 
     moves = set()
     for _ in range(10):
@@ -323,6 +324,20 @@ def test_search_manager_with_opponent():
 
     assert first_value_count > 0
     assert first_value_count + 10 == second_value_count
+
+
+def test_annotate():
+    game = TicTacToeGame()
+    player = MctsPlayer(game,
+                        iteration_count=10,
+                        heuristic=FirstChoiceHeuristic(game))
+    board1 = game.create_board()
+    player.choose_move(board1)
+    move_probabilities = player.get_move_probabilities(board1)
+
+    best_move, best_probability = move_probabilities[0]
+    assert best_move == '1A'
+    assert best_probability == approx(0.999013)
 
 
 def test_create_training_data():

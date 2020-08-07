@@ -23,12 +23,12 @@ def get_player_argument(values: typing.Sequence, player_number: int):
 class Player(metaclass=ABCMeta):
     def __init__(self, game: Game,
                  player_number: int = Game.X_PLAYER,
-                 heuristic: typing.List[Heuristic] = None):
+                 heuristic: Heuristic = None):
         if heuristic is None:
-            heuristic = [Playout(game)]
+            heuristic = Playout(game)
         self.game = game
         self.player_number = player_number
-        self.heuristic = get_player_argument(heuristic, player_number)
+        self.heuristic = heuristic
 
     @property
     def heuristic(self):

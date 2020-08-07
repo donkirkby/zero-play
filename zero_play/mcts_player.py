@@ -2,13 +2,13 @@ import logging
 
 import math
 import typing
+from operator import itemgetter
 
 import numpy as np
 
 from zero_play.game import Game
 from zero_play.heuristic import Heuristic
-from zero_play.player import Player, get_player_argument
-from zero_play.command_parser import EntryPointArgument
+from zero_play.player import Player
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class SearchNode:
         self.parent = parent
         self.move = move
         self.children: typing.Optional[typing.List[SearchNode]] = None
-        self.child_predictions: np.ndarray = None
+        self.child_predictions: typing.Optional[np.ndarray] = None
         self.average_value = 0
         self.value_count = 0
 
@@ -105,11 +105,16 @@ class SearchNode:
         child with maximum count.
         """
         children = self.find_all_children()
+        probabilities = self.rank_children(children, temperature)
+        child = np.random.choice(children, p=probabilities)
+        return child
+
+    @staticmethod
+    def rank_children(children, temperature):
         values = np.array([temperature * child.value_count for child in children])
         weights = np.exp(values)
         probabilities = weights / sum(weights)
-        child = np.random.choice(children, p=probabilities)
-        return child
+        return probabilities
 
     def find_best_children(self):
         children = self.find_all_children()
@@ -135,7 +140,7 @@ class SearchManager:
         self.current_node = SearchNode(self.game)
         return self.current_node
 
-    def search(self, board: np.ndarray, iterations: int):
+    def find_node(self, board):
         if not np.array_equal(board, self.current_node.board):
             for child in self.current_node.find_all_children():
                 if np.array_equal(board, child.board):
@@ -143,6 +148,9 @@ class SearchManager:
                     break
             else:
                 self.current_node = SearchNode(self.game, board)
+
+    def search(self, board: np.ndarray, iterations: int):
+        self.find_node(board)
         for _ in range(iterations):
             leaf = self.current_node.select_leaf()
             leaf.evaluate(self.heuristic)
@@ -160,6 +168,21 @@ class SearchManager:
         child = self.current_node.choose_child(temperature)
         assert child.move is not None
         return child.move
+
+    def get_move_probabilities(self, board: np.ndarray, limit: int = 10):
+        self.find_node(board)
+        children = self.current_node.find_all_children()
+        temperature = 1.0
+        probabilities = self.current_node.rank_children(children, temperature)
+        ranked_children = sorted(zip(probabilities, children),
+                                 key=itemgetter(0),
+                                 reverse=True)
+        top_children = ranked_children[:limit]
+        top_moves = [(self.game.display_move(board, child_node.move),
+                      probability)
+                     for probability, child_node in top_children
+                     if child_node.move is not None]
+        return top_moves
 
     def create_training_data(self, iterations: int, data_size: int):
         game_states = []
@@ -222,7 +245,7 @@ class MctsPlayer(Player):
     def __init__(self, game: Game,
                  player_number: int = Game.X_PLAYER,
                  iteration_count: int = DEFAULT_ITERATIONS,
-                 heuristic: typing.List[Heuristic] = None):
+                 heuristic: Heuristic = None):
         super().__init__(game, player_number, heuristic)
         self.iteration_count = iteration_count
         self.search_manager = SearchManager(game, self.heuristic)
@@ -249,6 +272,11 @@ class MctsPlayer(Player):
         if self.game.get_move_count(board) < 15:
             return self.search_manager.choose_weighted_move()
         return self.search_manager.get_best_move()
+
+    def get_move_probabilities(self, board: np.ndarray) -> typing.List[
+            typing.Tuple[str, float]]:
+        """ Report the probability that each move is the best choice. """
+        return self.search_manager.get_move_probabilities(board)
 
     def get_summary(self) -> typing.Sequence[str]:
         return (('mcts',) + tuple(self.heuristic.get_summary()) +
