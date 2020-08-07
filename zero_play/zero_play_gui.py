@@ -14,6 +14,7 @@ from zero_play.grid_display import GridDisplay
 from zero_play.heuristic import Heuristic
 from zero_play.main_window import Ui_MainWindow
 from zero_play.mcts_player import MctsPlayer
+from zero_play.othello.display import OthelloDisplay
 from zero_play.othello.game import OthelloGame
 from zero_play.plot_canvas import PlotCanvas
 from zero_play.tictactoe.display import TicTacToeDisplay
@@ -84,6 +85,7 @@ class MainWindow(QMainWindow):
 
     def on_othello(self):
         self.show_game(OthelloGame())
+        self.display_class = OthelloDisplay
 
     def on_connect4(self):
         self.show_game(Connect4Game())
@@ -111,6 +113,7 @@ class MainWindow(QMainWindow):
 
         self.ui.stacked_widget.setCurrentWidget(self.ui.display_page)
         self.resize_display()
+        self.display.update(self.display.current_board)
         self.display.request_move()
 
     def resizeEvent(self, event: QResizeEvent):

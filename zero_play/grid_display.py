@@ -60,10 +60,11 @@ class GridDisplay(QObject):
         self.mcts_workers: typing.Dict[int, MctsWorker] = {
             player.player_number: MctsWorker(player)
             for player in mcts_players}
-        self.spaces = []
+        self.spaces = []  # self.spaces[i][j] holds row i, column j
         self.column_dividers = []
         self.row_dividers = []
         self.current_board = self.game.create_board()
+        self.valid_moves = self.game.get_valid_moves(self.current_board)
         self.text_x = self.text_y = 0
 
         if not self.mcts_workers:
@@ -98,6 +99,7 @@ class GridDisplay(QObject):
 
         if scene.width() > 1:
             self.resize(scene.sceneRect().size())
+            self.update(self.current_board)
 
     def choose_active_text(self):
         active_player = self.game.get_active_player(self.current_board)
@@ -141,6 +143,7 @@ class GridDisplay(QObject):
 
     def update(self, board: np.ndarray):
         self.current_board = board
+        self.valid_moves = self.game.get_valid_moves(board)
         is_ended = self.game.is_ended(board)
         spaces = self.game.get_spaces(board)
         for i in range(self.game.board_height):
@@ -191,6 +194,10 @@ class GridDisplay(QObject):
         active_player = self.game.get_active_player(self.current_board)
         if active_player in self.mcts_workers:
             return
+        move = self.calculate_move(piece_item.row, piece_item.column)
+        is_valid = self.valid_moves[move]
+        if not is_valid:
+            return
         piece_item.setBrush(self.get_player_brush(active_player))
         piece_item.setPen(self.line_colour)
         piece_item.setOpacity(0.5)
@@ -204,7 +211,9 @@ class GridDisplay(QObject):
 
     def on_click(self, piece_item: GraphicsPieceItem):
         move = self.calculate_move(piece_item.row, piece_item.column)
-        self.make_move(move)
+        is_valid = self.valid_moves[move]
+        if is_valid:
+            self.make_move(move)
 
     @Slot(int)  # type: ignore
     def make_move(self, move):
