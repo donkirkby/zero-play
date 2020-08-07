@@ -196,6 +196,7 @@ class SearchManager:
         while True:
             self.search(self.current_node.board, iterations)
             assert self.current_node.children is not None
+            assert self.current_node.child_predictions is not None
             move_weights = np.zeros(self.current_node.child_predictions.size)
             for child in self.current_node.children:
                 move = child.move
