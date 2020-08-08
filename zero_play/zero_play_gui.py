@@ -114,6 +114,7 @@ class MainWindow(QMainWindow):
                         for player_number, heuristic in mcts_choices.items()
                         if heuristic is not None]
         self.display = self.display_class(self.ui.display_view.scene(),
+                                          self.game,
                                           mcts_players)
         self.destroyed.connect(self.display.close)
         self.display.log_changed.connect(self.on_log_changed)

@@ -22,6 +22,7 @@ def test_create_board():
     assert expected_board == board.tolist()
 
 
+# noinspection DuplicatedCode
 def test_create_board_from_text():
     x, o = OthelloGame.X_PLAYER, OthelloGame.O_PLAYER
     text = """\
@@ -45,6 +46,7 @@ def test_create_board_from_text():
     assert expected_board == board.tolist()
 
 
+# noinspection DuplicatedCode
 def test_create_board_with_coordinates():
     x, o = OthelloGame.X_PLAYER, OthelloGame.O_PLAYER
     text = """\
@@ -69,6 +71,7 @@ def test_create_board_with_coordinates():
     assert expected_board == board.tolist()
 
 
+# noinspection DuplicatedCode
 def test_display():
     x, o = OthelloGame.X_PLAYER, OthelloGame.O_PLAYER
     board = np.array([0, 0, 0, 0, 0, 0,
@@ -92,6 +95,7 @@ def test_display():
     assert expected_text == text
 
 
+# noinspection DuplicatedCode
 def test_display_coordinates():
     x, o = OthelloGame.X_PLAYER, OthelloGame.O_PLAYER
     board = np.array([0, 0, 0, 0, 0, 0,
@@ -139,6 +143,30 @@ def test_get_valid_moves():
     moves = game.get_valid_moves(board)
 
     assert expected_moves == moves.tolist()
+
+
+def test_get_valid_moves_with_gap():
+    text = """\
+  ABCDEF
+1 ......
+2 ......
+3 ......
+4 ....X.
+5 ...O..
+6 ...XO.
+>O
+"""
+    expected_moves = [[0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 1],
+                      [0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0],
+                      [0, 0, 1, 0, 0, 0]]
+    game = OthelloGame()
+    board = game.create_board(text)
+    moves = game.get_valid_moves(board)
+
+    assert moves.astype(int)[:36].reshape((6, 6)).tolist() == expected_moves
 
 
 def test_get_no_valid_moves():

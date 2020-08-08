@@ -30,7 +30,7 @@ def test_start_square(pixmap_differ: PixmapDiffer):
         draw_text(expected, 280, 136, 'to move')
 
         scene = QGraphicsScene(0, 0, size+80, size)
-        TicTacToeDisplay(scene)
+        TicTacToeDisplay(scene, TicTacToeGame())
 
         scene.render(actual)
 
@@ -50,7 +50,7 @@ def test_start_clears_scene(pixmap_differ: PixmapDiffer):
 
         scene = QGraphicsScene(0, 0, size+80, size)
         scene.addSimpleText('Previous Game should be cleared.')
-        TicTacToeDisplay(scene)
+        TicTacToeDisplay(scene, TicTacToeGame())
 
         scene.render(actual)
 
@@ -72,7 +72,7 @@ def test_start_wide(pixmap_differ: PixmapDiffer):
         draw_text(expected, 400, 136, 'to move')
 
         scene = QGraphicsScene(0, 0, size*2 + 80, size)
-        TicTacToeDisplay(scene)
+        TicTacToeDisplay(scene, TicTacToeGame())
 
         scene.render(actual)
 
@@ -94,7 +94,7 @@ def test_start_tall(pixmap_differ: PixmapDiffer):
         draw_text(expected, 140, 128, 'to move')
 
         scene = QGraphicsScene(0, 0, size + 40, size*2)
-        TicTacToeDisplay(scene)
+        TicTacToeDisplay(scene, TicTacToeGame())
 
         scene.render(actual)
 
@@ -132,7 +132,7 @@ def test_pieces(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(250, 50, 60, 60)
 
         scene = QGraphicsScene(0, 0, size+80, size)
-        display = TicTacToeDisplay(scene)
+        display = TicTacToeDisplay(scene, TicTacToeGame())
         board = display.game.create_board('''\
 XO.
 .X.
@@ -166,7 +166,7 @@ def test_piece_hover_enter(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(90, 10, 60, 60)
 
         scene = QGraphicsScene(0, 0, size+80, size)
-        display = TicTacToeDisplay(scene)
+        display = TicTacToeDisplay(scene, TicTacToeGame())
         board = display.game.create_board('''\
 X..
 ...
@@ -192,8 +192,9 @@ def test_piece_hover_enter_mcts(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(250, 50, 60, 60)
 
         scene = QGraphicsScene(0, 0, size+80, size)
-        player = MctsPlayer(TicTacToeGame(), TicTacToeGame.X_PLAYER)
-        display = TicTacToeDisplay(scene, mcts_players=(player,))
+        game = TicTacToeGame()
+        player = MctsPlayer(game, TicTacToeGame.X_PLAYER)
+        display = TicTacToeDisplay(scene, game, mcts_players=(player,))
         display.on_hover_enter(display.spaces[0][1])
 
         scene.render(actual)
@@ -214,7 +215,7 @@ def test_piece_hover_leave(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(250, 50, 60, 60)
 
         scene = QGraphicsScene(0, 0, size+80, size)
-        display = TicTacToeDisplay(scene)
+        display = TicTacToeDisplay(scene, TicTacToeGame())
         display.on_hover_enter(display.spaces[0][1])
         display.on_hover_leave(display.spaces[0][1])
 
@@ -238,7 +239,7 @@ def test_piece_hover_existing(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(250, 50, 60, 60)
 
         scene = QGraphicsScene(0, 0, size+80, size)
-        display = TicTacToeDisplay(scene)
+        display = TicTacToeDisplay(scene, TicTacToeGame())
         board = display.game.create_board('''\
 X..
 ...
@@ -265,7 +266,7 @@ def test_piece_click(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(250, 50, 60, 60)
 
         scene = QGraphicsScene(0, 0, size+80, size)
-        display = TicTacToeDisplay(scene)
+        display = TicTacToeDisplay(scene, TicTacToeGame())
         display.on_click(display.spaces[0][0])
 
         scene.render(actual)
@@ -290,7 +291,7 @@ def test_winner(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(170, 90, 60, 60)
 
         scene = QGraphicsScene(0, 0, size+80, size)
-        display = TicTacToeDisplay(scene)
+        display = TicTacToeDisplay(scene, TicTacToeGame())
         board = display.game.create_board('''\
 XO.
 .XO
@@ -325,7 +326,7 @@ def test_draw(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(10, 170, 60, 60)
 
         scene = QGraphicsScene(0, 0, size+80, size)
-        display = TicTacToeDisplay(scene)
+        display = TicTacToeDisplay(scene, TicTacToeGame())
         board = display.game.create_board('''\
 XOX
 XOO

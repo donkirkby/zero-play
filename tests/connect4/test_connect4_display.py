@@ -5,6 +5,7 @@ from PySide2.QtWidgets import QGraphicsScene
 from tests.pixmap_differ import PixmapDiffer
 from tests.tictactoe.test_tictactoe_display import set_font_size, draw_text
 from zero_play.connect4.display import Connect4Display
+from zero_play.connect4.game import Connect4Game
 
 
 def draw_grid(expected):
@@ -35,7 +36,7 @@ def test_pieces(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(290, 50, 60, 60)
 
         scene = QGraphicsScene(0, 0, 360, 240)
-        display = Connect4Display(scene)
+        display = Connect4Display(scene, Connect4Game())
         board = display.game.create_board('''\
 .......
 .......
@@ -72,7 +73,7 @@ def test_clicked(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(5, 45, 30, 30)
 
         scene = QGraphicsScene(0, 0, 360, 240)
-        display = Connect4Display(scene)
+        display = Connect4Display(scene, Connect4Game())
         space = display.spaces[1][0]
         display.on_click(space)
 

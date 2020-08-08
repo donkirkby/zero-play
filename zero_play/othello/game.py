@@ -1,5 +1,4 @@
 import typing
-from io import StringIO
 
 import numpy as np
 
@@ -74,7 +73,7 @@ class OthelloGame(GridGame):
                     if piece == self.NO_PLAYER:
                         if has_flipped:
                             yield i, j
-                            break
+                        break
                     else:
                         has_flipped = True
                     i += di
