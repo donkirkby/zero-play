@@ -1,3 +1,4 @@
+import itertools
 import math
 import typing
 
@@ -65,11 +66,14 @@ class GridDisplay(QObject):
         self.spaces = []  # self.spaces[i][j] holds row i, column j
         self.column_dividers = []
         self.row_dividers = []
+        self.column_labels = []
+        self.row_labels = []
         self.current_board = self.game.create_board()
         self.valid_moves = self.game.get_valid_moves(self.current_board)
         self.text_x = self.text_y = 0
         self.last_move: int = 0
         self.move_probabilities = None
+        self._show_coordinates = False
         self.log_display = LogDisplay(game)
 
         if not self.mcts_workers:
@@ -90,6 +94,10 @@ class GridDisplay(QObject):
             self.row_dividers.append(scene.addLine(0, 0, 1, 1))
         for _ in range(game.board_width-1):
             self.column_dividers.append(scene.addLine(0, 0, 1, 1))
+        for i in range(game.board_height):
+            self.row_labels.append(scene.addSimpleText(f'{i + 1}'))
+        for j in range(game.board_width):
+            self.column_labels.append(scene.addSimpleText(chr(65+j)))
         self.to_move = scene.addEllipse(
             0, 0, 1, 1, brush=self.get_player_brush(self.game.X_PLAYER))
         self.move_text = scene.addSimpleText(self.choose_active_text())
@@ -107,6 +115,16 @@ class GridDisplay(QObject):
             self.resize(scene.sceneRect().size())
             self.update(self.current_board)
 
+    @property
+    def show_coordinates(self):
+        return self._show_coordinates
+
+    @show_coordinates.setter
+    def show_coordinates(self, value):
+        self._show_coordinates = value
+        self.resize(QSize(self.scene.width(), self.scene.height()))
+        self.update(self.current_board)
+
     def choose_active_text(self):
         active_player = self.game.get_active_player(self.current_board)
         if active_player in self.mcts_workers:
@@ -117,23 +135,35 @@ class GridDisplay(QObject):
         width = view_size.width()
         height = view_size.height()
         extra_columns = math.ceil(self.game.board_width/6)
-        cell_size = min(width//(self.game.board_width+extra_columns),
-                        height//self.game.board_height)
+        margin = 1 if self.show_coordinates else 0
+        cell_size = min(width//(self.game.board_width+extra_columns+margin),
+                        height//(self.game.board_height+margin))
         size = cell_size*self.game.board_width
-        x0 = (width-cell_size*(self.game.board_width+extra_columns)) // 2
-        y0 = (height-cell_size*self.game.board_height) // 2
+        x0 = (width-cell_size*(self.game.board_width+extra_columns+margin)) // 2
+        y0 = (height-cell_size*(self.game.board_height+margin)) // 2
+        x0 += margin*cell_size
+        y0 += margin*cell_size
+        font = QFont(self.default_font)
+        font.setPointSize(int(cell_size // 2))
         for i in range(self.game.board_height-1):
             r = cell_size * (i+1)
             self.row_dividers[i].setLine(x0, y0+r, x0+size, y0+r)
         for i in range(self.game.board_width-1):
             r = cell_size * (i+1)
             self.column_dividers[i].setLine(x0+r, y0, x0+r, y0+size)
+        for i, label in enumerate(self.row_labels):
+            r = cell_size * (2*i + 1) // 2
+            label.setFont(font)
+            center_text_item(label, x0 - cell_size // 2, y0+r)
+        for i, label in enumerate(self.column_labels):
+            r = cell_size * (2*i + 1) // 2
+            label.setFont(font)
+            center_text_item(label, x0+r, y0 - cell_size // 2)
         self.to_move.setRect(x0 + size + cell_size * extra_columns // 8,
                              y0 + cell_size * self.game.board_height // 2 -
                              cell_size * extra_columns * 7 // 8,
                              cell_size * extra_columns * 3 // 4,
                              cell_size * extra_columns * 3 // 4)
-        font = QFont(self.default_font)
         font.setPointSize(int(cell_size * extra_columns // 6))
         self.move_text.setFont(font)
         self.text_x = x0 + size + cell_size * extra_columns // 2
@@ -169,6 +199,8 @@ class GridDisplay(QObject):
                     piece.setPen(self.line_colour)
                 piece.setOpacity(1)
         self.to_move.setVisible(True)
+        for label in itertools.chain(self.row_labels, self.column_labels):
+            label.setVisible(self.show_coordinates)
         if is_ended:
             if self.game.is_win(board, self.game.X_PLAYER):
                 self.update_move_text('wins')

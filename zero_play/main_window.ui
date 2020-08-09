@@ -224,6 +224,8 @@
     </property>
     <addaction name="action_view_game"/>
     <addaction name="action_view_log"/>
+    <addaction name="separator"/>
+    <addaction name="action_coordinates"/>
    </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_view"/>
@@ -281,6 +283,14 @@
   <action name="action_save_log">
    <property name="text">
     <string>Save &amp;Log...</string>
+   </property>
+  </action>
+  <action name="action_coordinates">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Coordinates</string>
    </property>
   </action>
  </widget>

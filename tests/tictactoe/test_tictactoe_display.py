@@ -335,3 +335,41 @@ OXX
         display.update(board)
 
         scene.render(actual)
+
+
+def test_coordinates(pixmap_differ: PixmapDiffer):
+    with pixmap_differ.create_painters(
+            250,
+            200,
+            'tictactoe_coordinates') as (actual, expected):
+        expected.fillRect(0, 0, 250, 200, TicTacToeDisplay.background_colour)
+        expected.drawLine(50, 100, 200, 100)
+        expected.drawLine(50, 150, 200, 150)
+        expected.drawLine(100, 50, 100, 200)
+        expected.drawLine(150, 50, 150, 200)
+        expected.setBrush(TicTacToeDisplay.player1_colour)
+        expected.drawEllipse(106, 106, 37, 37)
+        set_font_size(expected, 8)
+        draw_text(expected, 225, 135, 'to move')
+        set_font_size(expected, 25)
+        draw_text(expected, 75, 25, 'A')
+        draw_text(expected, 125, 25, 'B')
+        draw_text(expected, 175, 25, 'C')
+        draw_text(expected, 25, 75, '1')
+        draw_text(expected, 25, 125, '2')
+        draw_text(expected, 25, 175, '3')
+        expected.setBrush(TicTacToeDisplay.player2_colour)
+        expected.drawEllipse(206, 82, 37, 37)
+
+        scene = QGraphicsScene(0, 0, 250, 200)
+        display = TicTacToeDisplay(scene, TicTacToeGame())
+        display.show_coordinates = True
+        board = display.game.create_board('''\
+  ABC
+1 ...
+2 .X.
+3 ...
+''')
+        display.update(board)
+
+        scene.render(actual)

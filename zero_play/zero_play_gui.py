@@ -36,6 +36,7 @@ class MainWindow(QMainWindow):
         self.ui.cancel.clicked.connect(self.on_cancel)
         self.ui.start.clicked.connect(self.on_start)
         self.ui.action_game.triggered.connect(self.on_new_game)
+        self.ui.action_coordinates.triggered.connect(self.on_view_coordinates)
         self.ui.action_view_game.triggered.connect(self.on_view_game)
         self.ui.action_view_log.triggered.connect(self.on_view_log)
         group = QActionGroup(self.ui.centralwidget)
@@ -52,6 +53,7 @@ class MainWindow(QMainWindow):
             self.display.close()
             self.display = None
         self.ui.stacked_widget.setCurrentWidget(self.ui.game_page)
+        self.ui.action_view_game.setChecked(True)
 
     def show_game(self, game: Game):
         QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -90,7 +92,7 @@ class MainWindow(QMainWindow):
         self.display_class = TicTacToeDisplay
 
     def on_othello(self):
-        self.show_game(OthelloGame())
+        self.show_game(OthelloGame(8, 8))
         self.display_class = OthelloDisplay
 
     def on_connect4(self):
@@ -118,6 +120,7 @@ class MainWindow(QMainWindow):
                                           mcts_players)
         self.destroyed.connect(self.display.close)
         self.display.log_changed.connect(self.on_log_changed)
+        self.display.show_coordinates = self.ui.action_coordinates.isChecked()
 
         self.on_view_game()
 
@@ -147,6 +150,9 @@ class MainWindow(QMainWindow):
 
     def on_view_log(self):
         self.ui.stacked_widget.setCurrentWidget(self.ui.log_page)
+
+    def on_view_coordinates(self, is_checked):
+        self.display.show_coordinates = is_checked
 
 
 def main():

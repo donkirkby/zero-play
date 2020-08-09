@@ -147,7 +147,11 @@ class SearchManager:
                     self.current_node = child
                     break
             else:
-                self.current_node = SearchNode(self.game, board)
+                parent = self.current_node.parent
+                if parent is not None and np.array_equal(parent.board, board):
+                    self.current_node = parent
+                else:
+                    self.current_node = SearchNode(self.game, board)
 
     def search(self, board: np.ndarray, iterations: int):
         self.find_node(board)
@@ -261,6 +265,9 @@ class MctsPlayer(Player):
         search_manager = getattr(self, 'search_manager', None)
         if search_manager is not None:
             search_manager.heuristic = value
+
+    def end_game(self, board: np.ndarray, opponent: Player):
+        self.search_manager.reset()
 
     def choose_move(self, board: np.ndarray) -> int:
         """ Choose a move for the given board.

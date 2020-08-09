@@ -42,6 +42,9 @@ class Ui_MainWindow(object):
         self.action_view_log.setCheckable(True)
         self.action_save_log = QAction(MainWindow)
         self.action_save_log.setObjectName(u"action_save_log")
+        self.action_coordinates = QAction(MainWindow)
+        self.action_coordinates.setObjectName(u"action_coordinates")
+        self.action_coordinates.setCheckable(True)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout_2 = QVBoxLayout(self.centralwidget)
@@ -203,6 +206,8 @@ class Ui_MainWindow(object):
         self.menu_new.addAction(self.action_training_session)
         self.menu_view.addAction(self.action_view_game)
         self.menu_view.addAction(self.action_view_log)
+        self.menu_view.addSeparator()
+        self.menu_view.addAction(self.action_coordinates)
 
         self.retranslateUi(MainWindow)
 
@@ -223,6 +228,7 @@ class Ui_MainWindow(object):
         self.action_view_game.setText(QCoreApplication.translate("MainWindow", u"&Game", None))
         self.action_view_log.setText(QCoreApplication.translate("MainWindow", u"&Log", None))
         self.action_save_log.setText(QCoreApplication.translate("MainWindow", u"Save &Log...", None))
+        self.action_coordinates.setText(QCoreApplication.translate("MainWindow", u"Coordinates", None))
         self.tic_tac_toe.setText(QCoreApplication.translate("MainWindow", u"Tic Tac Toe", None))
         self.connect4.setText(QCoreApplication.translate("MainWindow", u"Connect 4", None))
         self.othello.setText(QCoreApplication.translate("MainWindow", u"Othello", None))
