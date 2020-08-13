@@ -207,6 +207,17 @@ def test_parse_move(text, expected_move):
     assert expected_move == move
 
 
+@pytest.mark.parametrize('move,expected_text', [
+    (0, '1A'),
+    (64, 'PASS')
+])
+def test_display_move(move, expected_text):
+    game = OthelloGame(8, 8)
+    move_text = game.display_move(game.create_board(), move)
+
+    assert move_text == expected_text
+
+
 @pytest.mark.parametrize('text,expected_message', [
     ('7C', r'Row must be between 1 and 6\.'),
     ('6G', r'Column must be between A and F\.'),

@@ -1,6 +1,5 @@
 import typing
 
-import numpy as np
 from PySide2.QtWidgets import QGraphicsScene
 
 from zero_play.game import GridGame
@@ -15,8 +14,7 @@ class OthelloDisplay(GridDisplay):
                  mcts_players: typing.Sequence[MctsPlayer] = ()):
         super().__init__(scene, game, mcts_players)
 
-    def update(self, board: np.ndarray):
-        super().update(board)
-        if self.valid_moves[-1]:
-            move = len(self.valid_moves) - 1
-            self.make_move(move)
+    def get_forced_move(self):
+        pass_move = len(self.valid_moves) - 1
+        if self.valid_moves[pass_move]:
+            return pass_move

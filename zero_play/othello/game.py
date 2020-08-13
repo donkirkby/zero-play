@@ -84,6 +84,11 @@ class OthelloGame(GridGame):
         next_player = board[-1]
         return result + f'>{self.DISPLAY_CHARS[next_player+1]}\n'
 
+    def display_move(self, board: np.ndarray, move: int) -> str:
+        if move == self.board_width * self.board_height:
+            return 'PASS'
+        return super().display_move(board, move)
+
     def parse_move(self, text: str, board: np.ndarray) -> int:
         trimmed = text.strip().replace(' ', '')
         if not trimmed:

@@ -167,18 +167,53 @@
        </layout>
       </widget>
       <widget class="QWidget" name="display_page">
-       <layout class="QVBoxLayout" name="display_layout">
-        <item>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="4" column="2">
+         <widget class="QPushButton" name="toggle_review">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Review / Resume</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QPushButton" name="resume_here">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Resume Here</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="3">
+         <widget class="QTableWidget" name="choices">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="3">
          <widget class="QGraphicsView" name="display_view"/>
         </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="log_page">
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <item>
-         <widget class="QPlainTextEdit" name="log_text">
-          <property name="readOnly">
-           <bool>true</bool>
+        <item row="4" column="1">
+         <widget class="QComboBox" name="move_history">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
          </widget>
         </item>
@@ -222,9 +257,6 @@
     <property name="title">
      <string>&amp;View</string>
     </property>
-    <addaction name="action_view_game"/>
-    <addaction name="action_view_log"/>
-    <addaction name="separator"/>
     <addaction name="action_coordinates"/>
    </widget>
    <addaction name="menu_file"/>

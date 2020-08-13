@@ -50,7 +50,7 @@ class GridDisplay(QObject):
     default_font = 'Sans Serif,9,-1,5,50,0,0,0,0,0'
 
     move_needed = Signal(int, np.ndarray)  # active_player, board
-    log_changed = Signal(str)
+    move_made = Signal(np.ndarray)  # board
 
     def __init__(self,
                  scene: QGraphicsScene,
@@ -71,8 +71,6 @@ class GridDisplay(QObject):
         self.current_board = self.game.create_board()
         self.valid_moves = self.game.get_valid_moves(self.current_board)
         self.text_x = self.text_y = 0
-        self.last_move: int = 0
-        self.move_probabilities = None
         self._show_coordinates = False
         self.log_display = LogDisplay(game)
 
@@ -82,9 +80,11 @@ class GridDisplay(QObject):
             self.worker_thread = QThread()
             for worker in self.mcts_workers.values():
                 worker.move_chosen.connect(self.make_move)  # type: ignore
-                worker.move_analysed.connect(self.log_move)  # type: ignore
+                worker.move_analysed.connect(self.analyse_move)  # type: ignore
                 # noinspection PyUnresolvedReferences
                 self.move_needed.connect(worker.choose_move)  # type: ignore
+                # noinspection PyUnresolvedReferences
+                self.move_made.connect(worker.analyse_move)  # type: ignore
                 worker.moveToThread(self.worker_thread)
             self.worker_thread.start()
 
@@ -255,32 +255,34 @@ class GridDisplay(QObject):
 
     @Slot(int)  # type: ignore
     def make_move(self, move):
-        if self.move_probabilities is not None:
-            self.log_display.record_move(self.current_board,
-                                         move,
-                                         self.move_probabilities)
-            self.move_probabilities = None
-            # noinspection PyUnresolvedReferences
-            self.log_changed.emit(self.log_display.file.getvalue())
+        self.log_display.record_move(self.current_board, move)
+        # noinspection PyUnresolvedReferences
+        self.move_made.emit(self.current_board)
         self.current_board = self.game.make_move(self.current_board, move)
-        self.last_move = move
         self.update(self.current_board)
 
-        self.request_move()
-
-    @Slot(np.ndarray, list)  # type: ignore
-    def log_move(self,
-                 board: np.ndarray,
-                 move_probabilities: typing.List[typing.Tuple[str, float]]):
-        if np.array_equal(board, self.current_board):
-            # Save for analysing next move.
-            self.move_probabilities = move_probabilities
+        forced_move = self.get_forced_move()
+        if forced_move is None:
+            self.request_move()
         else:
-            self.log_display.record_move(board,
-                                         self.last_move,
-                                         move_probabilities)
-            # noinspection PyUnresolvedReferences
-            self.log_changed.emit(self.log_display.file.getvalue())  # type: ignore
+            self.make_move(forced_move)
+
+    def get_forced_move(self) -> typing.Optional[int]:
+        """ Override this method if some moves should be forced.
+
+        Look at self.valid_moves and self.current_board to decide.
+        :return: move number, or None if there is no forced move.
+        """
+        return None
+
+    @Slot(np.ndarray, int, list)  # type: ignore
+    def analyse_move(self,
+                     board: np.ndarray,
+                     analysing_player: int,
+                     move_probabilities: typing.List[typing.Tuple[str, float]]):
+        self.log_display.analyse_move(board,
+                                      analysing_player,
+                                      move_probabilities)
 
     def request_move(self):
         if self.game.is_ended(self.current_board):

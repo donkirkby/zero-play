@@ -112,7 +112,12 @@ class SearchNode:
     @staticmethod
     def rank_children(children, temperature):
         values = np.array([temperature * child.value_count for child in children])
+
+        # Avoid overflow by keeping the weights between 0 and 1.
+        values -= values.max(initial=0)
         weights = np.exp(values)
+
+        # Normalize the weights into probabilities that add up to 1.
         probabilities = weights / sum(weights)
         return probabilities
 

@@ -1,18 +1,73 @@
-from zero_play.log_display import LogDisplay
+from zero_play.log_display import LogDisplay, LogItem
 from zero_play.tictactoe.game import TicTacToeGame
 
 
 def test_record_move():
     game = TicTacToeGame()
     log = LogDisplay(game)
-    move = 1
-    move_probabilities = [('1A', 0.9), ('1B', 0.1), ('2B', 0.0)]
-    expected_log = """\
-event,step,player,move,comment,choice1,prob1,choice2,prob2,choice3,prob3,choice4,prob4,\
-choice5,prob5,choice6,prob6,choice7,prob7,choice8,prob8,choice9,prob9,choice10,prob10
-move,1,Player X,1B,choice 2,1A,0.9,1B,0.1,2B,0.0,,,,,,,,,,,,,,
-"""
+    step = 1
+    move = 3
+    board = game.create_board()
 
-    log.record_move(game.create_board(), move, move_probabilities)
+    log.record_move(board, move)
 
-    assert log.file.getvalue() == expected_log
+    assert log.items == [LogItem(step, 'Player X', '2A', board)]
+
+
+def test_analyse_move():
+    game = TicTacToeGame()
+    log = LogDisplay(game)
+    step = 1
+    move = 3
+    move_probabilities = [('1A', 0.9), ('1B', 0.1), ('2A', 0.0)]
+    board = game.create_board()
+
+    log.record_move(board, move)
+    log.analyse_move(board, TicTacToeGame.X_PLAYER, move_probabilities)
+
+    assert log.items == [
+        LogItem(step, 'Player X', '2A', board, 'choice 3', move_probabilities)]
+
+
+def test_analyse_move_other_player():
+    game = TicTacToeGame()
+    log = LogDisplay(game)
+    step = 1
+    move = 3
+    move_probabilities = [('1A', 0.8), ('1B', 0.1), ('2A', 0.1)]
+    board = game.create_board()
+
+    log.record_move(board, move)
+    log.analyse_move(board, TicTacToeGame.O_PLAYER, move_probabilities)
+
+    assert log.items == [
+        LogItem(step, 'Player X', '2A', board, 'choice 3', move_probabilities)]
+
+
+def test_analyse_move_both_players():
+    game = TicTacToeGame()
+    log = LogDisplay(game)
+    step = 1
+    move = 3
+    move_probabilities_active_player = [('1A', 0.9), ('1B', 0.1), ('2A', 0.0)]
+    move_probabilities_other_player = [('1A', 0.8), ('1B', 0.1), ('2A', 0.1)]
+    board = game.create_board()
+
+    log.record_move(board, move)
+    log.analyse_move(board,
+                     TicTacToeGame.O_PLAYER,
+                     move_probabilities_other_player)
+    log.analyse_move(board,
+                     TicTacToeGame.X_PLAYER,
+                     move_probabilities_active_player)
+    log.analyse_move(board,
+                     TicTacToeGame.O_PLAYER,
+                     move_probabilities_other_player)
+
+    assert log.items == [
+        LogItem(step,
+                'Player X',
+                '2A',
+                board,
+                'choice 3',
+                move_probabilities_active_player)]
