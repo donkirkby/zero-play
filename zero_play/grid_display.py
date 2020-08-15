@@ -3,15 +3,13 @@ import math
 import typing
 
 import numpy as np
-from PySide2.QtCore import QSize, QThread, Signal, Slot, QObject
+from PySide2.QtCore import QSize
 from PySide2.QtGui import QColor, QBrush, QFont
-from PySide2.QtWidgets import QGraphicsScene, QGraphicsItem, QGraphicsEllipseItem, QGraphicsSceneHoverEvent, \
-    QGraphicsSceneMouseEvent, QGraphicsSimpleTextItem
+from PySide2.QtWidgets import QGraphicsItem, QGraphicsEllipseItem, \
+    QGraphicsSceneHoverEvent, QGraphicsSceneMouseEvent, QGraphicsSimpleTextItem
 
 from zero_play.game import GridGame
-from zero_play.log_display import LogDisplay
-from zero_play.mcts_player import MctsPlayer
-from zero_play.mcts_worker import MctsWorker
+from zero_play.game_display import GameDisplay
 
 
 def center_text_item(item: QGraphicsSimpleTextItem, x: float, y: float):
@@ -42,53 +40,25 @@ class GraphicsPieceItem(QGraphicsEllipseItem):
         self.hover_listener.on_click(self)
 
 
-class GridDisplay(QObject):
+class GridDisplay(GameDisplay):
     background_colour = QColor.fromRgb(0x009E0B)
     line_colour = QColor.fromRgb(0x000000)
     player1_colour = QColor.fromRgb(0x000000)
     player2_colour = QColor.fromRgb(0xFFFFFF)
     default_font = 'Sans Serif,9,-1,5,50,0,0,0,0,0'
 
-    move_needed = Signal(int, np.ndarray)  # active_player, board
-    move_made = Signal(np.ndarray)  # board
-
     def __init__(self,
-                 scene: QGraphicsScene,
-                 game: GridGame,
-                 mcts_players: typing.Sequence[MctsPlayer] = (),
-                 parent: QObject = None):
-        super().__init__(parent)
-        self.scene = scene
-        self.game = game
-        self.mcts_workers: typing.Dict[int, MctsWorker] = {
-            player.player_number: MctsWorker(player)
-            for player in mcts_players}
+                 game: GridGame):
+        super().__init__(game)
+        self.game: GridGame = game
         self.spaces = []  # self.spaces[i][j] holds row i, column j
         self.column_dividers = []
         self.row_dividers = []
         self.column_labels = []
         self.row_labels = []
-        self.current_board = self.game.create_board()
-        self.valid_moves = self.game.get_valid_moves(self.current_board)
         self.text_x = self.text_y = 0
-        self._show_coordinates = False
-        self.log_display = LogDisplay(game)
 
-        if not self.mcts_workers:
-            self.worker_thread = None
-        else:
-            self.worker_thread = QThread()
-            for worker in self.mcts_workers.values():
-                worker.move_chosen.connect(self.make_move)  # type: ignore
-                worker.move_analysed.connect(self.analyse_move)  # type: ignore
-                # noinspection PyUnresolvedReferences
-                self.move_needed.connect(worker.choose_move)  # type: ignore
-                # noinspection PyUnresolvedReferences
-                self.move_made.connect(worker.analyse_move)  # type: ignore
-                worker.moveToThread(self.worker_thread)
-            self.worker_thread.start()
-
-        scene.clear()
+        scene = self.scene
         scene.setBackgroundBrush(self.background_colour)
         for _ in range(game.board_height-1):
             self.row_dividers.append(scene.addLine(0, 0, 1, 1))
@@ -111,27 +81,8 @@ class GridDisplay(QObject):
                 piece.setPen(self.background_colour)
                 row.append(piece)
 
-        if scene.width() > 1:
-            self.resize(scene.sceneRect().size())
-            self.update(self.current_board)
-
-    @property
-    def show_coordinates(self):
-        return self._show_coordinates
-
-    @show_coordinates.setter
-    def show_coordinates(self, value):
-        self._show_coordinates = value
-        self.resize(QSize(self.scene.width(), self.scene.height()))
-        self.update(self.current_board)
-
-    def choose_active_text(self):
-        active_player = self.game.get_active_player(self.current_board)
-        if active_player in self.mcts_workers:
-            return 'thinking'
-        return 'to move'
-
     def resize(self, view_size: QSize):
+        super().resize(view_size)
         width = view_size.width()
         height = view_size.height()
         extra_columns = math.ceil(self.game.board_width/6)
@@ -253,44 +204,6 @@ class GridDisplay(QObject):
         if is_valid:
             self.make_move(move)
 
-    @Slot(int)  # type: ignore
-    def make_move(self, move):
-        self.log_display.record_move(self.current_board, move)
-        # noinspection PyUnresolvedReferences
-        self.move_made.emit(self.current_board)
-        self.current_board = self.game.make_move(self.current_board, move)
-        self.update(self.current_board)
-
-        forced_move = self.get_forced_move()
-        if forced_move is None:
-            self.request_move()
-        else:
-            self.make_move(forced_move)
-
-    def get_forced_move(self) -> typing.Optional[int]:
-        """ Override this method if some moves should be forced.
-
-        Look at self.valid_moves and self.current_board to decide.
-        :return: move number, or None if there is no forced move.
-        """
-        return None
-
-    @Slot(np.ndarray, int, list)  # type: ignore
-    def analyse_move(self,
-                     board: np.ndarray,
-                     analysing_player: int,
-                     move_probabilities: typing.List[typing.Tuple[str, float]]):
-        self.log_display.analyse_move(board,
-                                      analysing_player,
-                                      move_probabilities)
-
-    def request_move(self):
-        if self.game.is_ended(self.current_board):
-            return
-        player = self.game.get_active_player(self.current_board)
-        # noinspection PyUnresolvedReferences
-        self.move_needed.emit(player, self.current_board)
-
     def calculate_move(self, row, column):
         move = row * self.game.board_width + column
         return move
@@ -299,7 +212,3 @@ class GridDisplay(QObject):
         current_spaces = self.game.get_spaces(self.current_board)
         hovered_player = current_spaces[piece_item.row][piece_item.column]
         return hovered_player != self.game.NO_PLAYER
-
-    def close(self):
-        if self.worker_thread is not None:
-            self.worker_thread.quit()

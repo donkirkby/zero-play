@@ -1,7 +1,11 @@
+from zero_play.connect4.game import Connect4Game
 from zero_play.grid_display import GridDisplay, GraphicsPieceItem
 
 
 class Connect4Display(GridDisplay):
+    def __init__(self):
+        super().__init__(Connect4Game())
+
     def calculate_move(self, row, column):
         return column
 

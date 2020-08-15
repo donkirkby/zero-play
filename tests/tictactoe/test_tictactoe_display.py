@@ -1,3 +1,4 @@
+from PySide2.QtCore import QSize
 from PySide2.QtGui import QFont, QPainter, QColor, QPen
 from PySide2.QtWidgets import QGraphicsScene
 
@@ -29,30 +30,10 @@ def test_start_square(pixmap_differ: PixmapDiffer):
         set_font_size(expected, 13)
         draw_text(expected, 280, 136, 'to move')
 
-        scene = QGraphicsScene(0, 0, size+80, size)
-        TicTacToeDisplay(scene, TicTacToeGame())
+        display = TicTacToeDisplay()
+        display.resize(QSize(size+80, size))
 
-        scene.render(actual)
-
-
-# noinspection DuplicatedCode
-def test_start_clears_scene(pixmap_differ: PixmapDiffer):
-    size = 240
-    with pixmap_differ.create_painters(
-            size+80,
-            size,
-            'tictactoe_start_clears_scene') as (actual, expected):
-        draw_square_grid(expected)
-        expected.setBrush(TicTacToeDisplay.player1_colour)
-        expected.drawEllipse(250, 50, 60, 60)
-        set_font_size(expected, 13)
-        draw_text(expected, 280, 136, 'to move')
-
-        scene = QGraphicsScene(0, 0, size+80, size)
-        scene.addSimpleText('Previous Game should be cleared.')
-        TicTacToeDisplay(scene, TicTacToeGame())
-
-        scene.render(actual)
+        display.scene.render(actual)
 
 
 def test_start_wide(pixmap_differ: PixmapDiffer):
@@ -71,10 +52,10 @@ def test_start_wide(pixmap_differ: PixmapDiffer):
         set_font_size(expected, 13)
         draw_text(expected, 400, 136, 'to move')
 
-        scene = QGraphicsScene(0, 0, size*2 + 80, size)
-        TicTacToeDisplay(scene, TicTacToeGame())
+        display = TicTacToeDisplay()
+        display.resize(QSize(size*2+80, size))
 
-        scene.render(actual)
+        display.scene.render(actual)
 
 
 def test_start_tall(pixmap_differ: PixmapDiffer):
@@ -93,10 +74,10 @@ def test_start_tall(pixmap_differ: PixmapDiffer):
         set_font_size(expected, 6)
         draw_text(expected, 140, 128, 'to move')
 
-        scene = QGraphicsScene(0, 0, size + 40, size*2)
-        TicTacToeDisplay(scene, TicTacToeGame())
+        display = TicTacToeDisplay()
+        display.resize(QSize(size+40, size*2))
 
-        scene.render(actual)
+        display.scene.render(actual)
 
 
 def set_font_size(painter, size):
@@ -131,8 +112,8 @@ def test_pieces(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(90, 10, 60, 60)
         expected.drawEllipse(250, 50, 60, 60)
 
-        scene = QGraphicsScene(0, 0, size+80, size)
-        display = TicTacToeDisplay(scene, TicTacToeGame())
+        display = TicTacToeDisplay()
+        display.resize(QSize(size+80, size))
         board = display.game.create_board('''\
 XO.
 .X.
@@ -140,7 +121,7 @@ XO.
 ''')
         display.update(board)
 
-        scene.render(actual)
+        display.scene.render(actual)
 
 
 # noinspection DuplicatedCode
@@ -165,8 +146,9 @@ def test_piece_hover_enter(pixmap_differ: PixmapDiffer):
         expected.setPen(pen)
         expected.drawEllipse(90, 10, 60, 60)
 
-        scene = QGraphicsScene(0, 0, size+80, size)
-        display = TicTacToeDisplay(scene, TicTacToeGame())
+        display = TicTacToeDisplay()
+        display.resize(QSize(size+80, size))
+
         board = display.game.create_board('''\
 X..
 ...
@@ -175,7 +157,7 @@ X..
         display.update(board)
         display.on_hover_enter(display.spaces[0][1])
 
-        scene.render(actual)
+        display.scene.render(actual)
 
 
 def test_piece_hover_enter_mcts(pixmap_differ: PixmapDiffer):
@@ -191,13 +173,14 @@ def test_piece_hover_enter_mcts(pixmap_differ: PixmapDiffer):
         draw_text(expected, 280, 136, 'thinking')
         expected.drawEllipse(250, 50, 60, 60)
 
-        scene = QGraphicsScene(0, 0, size+80, size)
-        game = TicTacToeGame()
-        player = MctsPlayer(game, TicTacToeGame.X_PLAYER)
-        display = TicTacToeDisplay(scene, game, mcts_players=(player,))
+        display = TicTacToeDisplay()
+        player = MctsPlayer(display.game, TicTacToeGame.X_PLAYER)
+        display.mcts_players = (player, )
+        display.resize(QSize(size+80, size))
+
         display.on_hover_enter(display.spaces[0][1])
 
-        scene.render(actual)
+        display.scene.render(actual)
         display.close()
 
 
@@ -214,12 +197,13 @@ def test_piece_hover_leave(pixmap_differ: PixmapDiffer):
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(250, 50, 60, 60)
 
-        scene = QGraphicsScene(0, 0, size+80, size)
-        display = TicTacToeDisplay(scene, TicTacToeGame())
+        display = TicTacToeDisplay()
+        display.resize(QSize(size+80, size))
+
         display.on_hover_enter(display.spaces[0][1])
         display.on_hover_leave(display.spaces[0][1])
 
-        scene.render(actual)
+        display.scene.render(actual)
 
 
 # noinspection DuplicatedCode
@@ -238,8 +222,9 @@ def test_piece_hover_existing(pixmap_differ: PixmapDiffer):
         expected.setBrush(colour)
         expected.drawEllipse(250, 50, 60, 60)
 
-        scene = QGraphicsScene(0, 0, size+80, size)
-        display = TicTacToeDisplay(scene, TicTacToeGame())
+        display = TicTacToeDisplay()
+        display.resize(QSize(size+80, size))
+
         board = display.game.create_board('''\
 X..
 ...
@@ -248,7 +233,7 @@ X..
         display.update(board)
         display.on_hover_enter(display.spaces[0][0])
 
-        scene.render(actual)
+        display.scene.render(actual)
 
 
 def test_piece_click(pixmap_differ: PixmapDiffer):
@@ -265,11 +250,12 @@ def test_piece_click(pixmap_differ: PixmapDiffer):
         expected.setBrush(TicTacToeDisplay.player2_colour)
         expected.drawEllipse(250, 50, 60, 60)
 
-        scene = QGraphicsScene(0, 0, size+80, size)
-        display = TicTacToeDisplay(scene, TicTacToeGame())
+        display = TicTacToeDisplay()
+        display.resize(QSize(size+80, size))
+
         display.on_click(display.spaces[0][0])
 
-        scene.render(actual)
+        display.scene.render(actual)
 
 
 def test_winner(pixmap_differ: PixmapDiffer):
@@ -290,8 +276,9 @@ def test_winner(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(90, 10, 60, 60)
         expected.drawEllipse(170, 90, 60, 60)
 
-        scene = QGraphicsScene(0, 0, size+80, size)
-        display = TicTacToeDisplay(scene, TicTacToeGame())
+        display = TicTacToeDisplay()
+        display.resize(QSize(size+80, size))
+
         board = display.game.create_board('''\
 XO.
 .XO
@@ -299,7 +286,7 @@ XO.
 ''')
         display.update(board)
 
-        scene.render(actual)
+        display.scene.render(actual)
 
     assert not display.spaces[0][2].isVisible()
 
@@ -325,8 +312,9 @@ def test_draw(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(170, 90, 60, 60)
         expected.drawEllipse(10, 170, 60, 60)
 
-        scene = QGraphicsScene(0, 0, size+80, size)
-        display = TicTacToeDisplay(scene, TicTacToeGame())
+        display = TicTacToeDisplay()
+        display.resize(QSize(size+80, size))
+
         board = display.game.create_board('''\
 XOX
 XOO
@@ -334,7 +322,7 @@ OXX
 ''')
         display.update(board)
 
-        scene.render(actual)
+        display.scene.render(actual)
 
 
 def test_coordinates(pixmap_differ: PixmapDiffer):
@@ -361,8 +349,9 @@ def test_coordinates(pixmap_differ: PixmapDiffer):
         expected.setBrush(TicTacToeDisplay.player2_colour)
         expected.drawEllipse(206, 82, 37, 37)
 
-        scene = QGraphicsScene(0, 0, 250, 200)
-        display = TicTacToeDisplay(scene, TicTacToeGame())
+        display = TicTacToeDisplay()
+        display.resize(QSize(250, 200))
+
         display.show_coordinates = True
         board = display.game.create_board('''\
   ABC
@@ -372,4 +361,4 @@ def test_coordinates(pixmap_differ: PixmapDiffer):
 ''')
         display.update(board)
 
-        scene.render(actual)
+        display.scene.render(actual)

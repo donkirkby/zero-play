@@ -21,45 +21,47 @@
        <number>1</number>
       </property>
       <widget class="QWidget" name="game_page">
-       <widget class="QPushButton" name="tic_tac_toe">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>10</y>
-          <width>141</width>
-          <height>101</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Tic Tac Toe</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="connect4">
-        <property name="geometry">
-         <rect>
-          <x>170</x>
-          <y>10</y>
-          <width>141</width>
-          <height>101</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Connect 4</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="othello">
-        <property name="geometry">
-         <rect>
-          <x>330</x>
-          <y>10</y>
-          <width>141</width>
-          <height>101</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Othello</string>
-        </property>
-       </widget>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="1">
+         <widget class="QPushButton" name="connect4">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Connect 4</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QPushButton" name="tic_tac_toe">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Tic Tac Toe</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="othello">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Othello</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="players_page">
        <layout class="QVBoxLayout" name="verticalLayout">

@@ -45,6 +45,12 @@ setup(name='zero_play',
           'zero_play.game': ['tictactoe=zero_play.tictactoe.game:TicTacToeGame',
                              'connect4=zero_play.connect4.game:Connect4Game',
                              'othello=zero_play.othello.game:OthelloGame'],
+          # The game_display entry point lets you add screens for new games.
+          # The zero_play.game_display.GameDisplay class is a useful base class.
+          'zero_play.game_display': [
+              'tictactoe=zero_play.tictactoe.display:TicTacToeDisplay',
+              'connect4=zero_play.connect4.display:Connect4Display',
+              'othello=zero_play.othello.display:OthelloDisplay'],
           # The player entry point lets you add new ways to choose moves.
           # The zero_play.player.Player class is a useful base class.
           'zero_play.player': ['human=zero_play.human_player:HumanPlayer',

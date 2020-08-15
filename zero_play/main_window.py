@@ -53,15 +53,35 @@ class Ui_MainWindow(object):
         self.stacked_widget.setObjectName(u"stacked_widget")
         self.game_page = QWidget()
         self.game_page.setObjectName(u"game_page")
-        self.tic_tac_toe = QPushButton(self.game_page)
-        self.tic_tac_toe.setObjectName(u"tic_tac_toe")
-        self.tic_tac_toe.setGeometry(QRect(10, 10, 141, 101))
+        self.gridLayout_3 = QGridLayout(self.game_page)
+        self.gridLayout_3.setObjectName(u"gridLayout_3")
         self.connect4 = QPushButton(self.game_page)
         self.connect4.setObjectName(u"connect4")
-        self.connect4.setGeometry(QRect(170, 10, 141, 101))
+        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.MinimumExpanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.connect4.sizePolicy().hasHeightForWidth())
+        self.connect4.setSizePolicy(sizePolicy)
+
+        self.gridLayout_3.addWidget(self.connect4, 0, 1, 1, 1)
+
+        self.tic_tac_toe = QPushButton(self.game_page)
+        self.tic_tac_toe.setObjectName(u"tic_tac_toe")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.tic_tac_toe.sizePolicy().hasHeightForWidth())
+        self.tic_tac_toe.setSizePolicy(sizePolicy1)
+
+        self.gridLayout_3.addWidget(self.tic_tac_toe, 0, 0, 1, 1)
+
         self.othello = QPushButton(self.game_page)
         self.othello.setObjectName(u"othello")
-        self.othello.setGeometry(QRect(330, 10, 141, 101))
+        sizePolicy.setHeightForWidth(self.othello.sizePolicy().hasHeightForWidth())
+        self.othello.setSizePolicy(sizePolicy)
+
+        self.gridLayout_3.addWidget(self.othello, 1, 0, 1, 1)
+
         self.stacked_widget.addWidget(self.game_page)
         self.players_page = QWidget()
         self.players_page.setObjectName(u"players_page")
@@ -96,11 +116,11 @@ class Ui_MainWindow(object):
 
         self.game_label_2 = QLabel(self.players_page)
         self.game_label_2.setObjectName(u"game_label_2")
-        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.game_label_2.sizePolicy().hasHeightForWidth())
-        self.game_label_2.setSizePolicy(sizePolicy)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.game_label_2.sizePolicy().hasHeightForWidth())
+        self.game_label_2.setSizePolicy(sizePolicy2)
 
         self.gridLayout.addWidget(self.game_label_2, 2, 0, 1, 1)
 
@@ -111,11 +131,11 @@ class Ui_MainWindow(object):
 
         self.label_2 = QLabel(self.players_page)
         self.label_2.setObjectName(u"label_2")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.label_2.sizePolicy().hasHeightForWidth())
-        self.label_2.setSizePolicy(sizePolicy1)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.label_2.sizePolicy().hasHeightForWidth())
+        self.label_2.setSizePolicy(sizePolicy3)
 
         self.gridLayout.addWidget(self.label_2, 1, 0, 1, 1)
 
@@ -131,8 +151,8 @@ class Ui_MainWindow(object):
 
         self.game_label = QLabel(self.players_page)
         self.game_label.setObjectName(u"game_label")
-        sizePolicy.setHeightForWidth(self.game_label.sizePolicy().hasHeightForWidth())
-        self.game_label.setSizePolicy(sizePolicy)
+        sizePolicy2.setHeightForWidth(self.game_label.sizePolicy().hasHeightForWidth())
+        self.game_label.setSizePolicy(sizePolicy2)
 
         self.gridLayout.addWidget(self.game_label, 0, 0, 1, 1)
 
@@ -156,28 +176,28 @@ class Ui_MainWindow(object):
         self.gridLayout_2.setObjectName(u"gridLayout_2")
         self.toggle_review = QPushButton(self.display_page)
         self.toggle_review.setObjectName(u"toggle_review")
-        sizePolicy.setHeightForWidth(self.toggle_review.sizePolicy().hasHeightForWidth())
-        self.toggle_review.setSizePolicy(sizePolicy)
+        sizePolicy2.setHeightForWidth(self.toggle_review.sizePolicy().hasHeightForWidth())
+        self.toggle_review.setSizePolicy(sizePolicy2)
 
         self.gridLayout_2.addWidget(self.toggle_review, 4, 2, 1, 1)
 
         self.resume_here = QPushButton(self.display_page)
         self.resume_here.setObjectName(u"resume_here")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.resume_here.sizePolicy().hasHeightForWidth())
-        self.resume_here.setSizePolicy(sizePolicy2)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.resume_here.sizePolicy().hasHeightForWidth())
+        self.resume_here.setSizePolicy(sizePolicy4)
 
         self.gridLayout_2.addWidget(self.resume_here, 4, 0, 1, 1)
 
         self.choices = QTableWidget(self.display_page)
         self.choices.setObjectName(u"choices")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.choices.sizePolicy().hasHeightForWidth())
-        self.choices.setSizePolicy(sizePolicy3)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.choices.sizePolicy().hasHeightForWidth())
+        self.choices.setSizePolicy(sizePolicy5)
 
         self.gridLayout_2.addWidget(self.choices, 2, 0, 1, 3)
 
@@ -188,11 +208,11 @@ class Ui_MainWindow(object):
 
         self.move_history = QComboBox(self.display_page)
         self.move_history.setObjectName(u"move_history")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        sizePolicy4.setHorizontalStretch(1)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.move_history.sizePolicy().hasHeightForWidth())
-        self.move_history.setSizePolicy(sizePolicy4)
+        sizePolicy6 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy6.setHorizontalStretch(1)
+        sizePolicy6.setVerticalStretch(0)
+        sizePolicy6.setHeightForWidth(self.move_history.sizePolicy().hasHeightForWidth())
+        self.move_history.setSizePolicy(sizePolicy6)
 
         self.gridLayout_2.addWidget(self.move_history, 4, 1, 1, 1)
 
@@ -252,8 +272,8 @@ class Ui_MainWindow(object):
         self.action_view_log.setText(QCoreApplication.translate("MainWindow", u"&Log", None))
         self.action_save_log.setText(QCoreApplication.translate("MainWindow", u"Save &Log...", None))
         self.action_coordinates.setText(QCoreApplication.translate("MainWindow", u"Coordinates", None))
-        self.tic_tac_toe.setText(QCoreApplication.translate("MainWindow", u"Tic Tac Toe", None))
         self.connect4.setText(QCoreApplication.translate("MainWindow", u"Connect 4", None))
+        self.tic_tac_toe.setText(QCoreApplication.translate("MainWindow", u"Tic Tac Toe", None))
         self.othello.setText(QCoreApplication.translate("MainWindow", u"Othello", None))
         self.network1.setText(QCoreApplication.translate("MainWindow", u"Network 1...", None))
         self.start.setText(QCoreApplication.translate("MainWindow", u"Start", None))

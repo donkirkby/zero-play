@@ -1,26 +1,23 @@
+import math
 import os
 import sys
 import typing
+from functools import partial
+from operator import attrgetter
 
 import numpy as np
 
 from PySide2.QtGui import QResizeEvent, Qt
 from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, \
-    QGraphicsScene, QTableWidgetItem
+    QTableWidgetItem, QGridLayout, QPushButton, QSizePolicy
 from pkg_resources import iter_entry_points, EntryPoint
 
-from zero_play.connect4.display import Connect4Display
-from zero_play.connect4.game import Connect4Game
-from zero_play.game import Game
+from zero_play.game_display import GameDisplay
 from zero_play.grid_display import GridDisplay
 from zero_play.heuristic import Heuristic
 from zero_play.main_window import Ui_MainWindow
 from zero_play.mcts_player import MctsPlayer
-from zero_play.othello.display import OthelloDisplay
-from zero_play.othello.game import OthelloGame
 from zero_play.plot_canvas import PlotCanvas
-from zero_play.tictactoe.display import TicTacToeDisplay
-from zero_play.tictactoe.game import TicTacToeGame
 
 
 class MainWindow(QMainWindow):
@@ -30,9 +27,6 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.plot_canvas = PlotCanvas(self.ui.centralwidget)
         self.ui.plot_page.layout().addWidget(self.plot_canvas)
-        self.ui.tic_tac_toe.clicked.connect(self.on_tic_tac_toe)
-        self.ui.othello.clicked.connect(self.on_othello)
-        self.ui.connect4.clicked.connect(self.on_connect4)
         self.ui.network1.clicked.connect(self.on_network1)
         self.ui.cancel.clicked.connect(self.on_cancel)
         self.ui.start.clicked.connect(self.on_start)
@@ -40,9 +34,8 @@ class MainWindow(QMainWindow):
         self.ui.action_coordinates.triggered.connect(self.on_view_coordinates)
         self.ui.toggle_review.clicked.connect(self.on_toggle_review)
         self.ui.move_history.currentIndexChanged.connect(self.on_move_history)
-        self.ui.display_view.setScene(QGraphicsScene(0, 0, 1, 1))
+        self.populate_game_list(self.ui.game_page.layout())
         self.game = None
-        self.display_class = TicTacToeDisplay
         self.display: typing.Optional[GridDisplay] = None
         self.on_new_game()
         self.board_to_resume: typing.Optional[np.ndarray] = None
@@ -50,8 +43,26 @@ class MainWindow(QMainWindow):
                              for name in self.ui.toggle_review.text().split('/')]
         self.on_toggle_review()
 
-    def on_resume(self):
-        self.resize_display()
+    def populate_game_list(self, game_layout: QGridLayout):
+        while game_layout.count():
+            child = game_layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+        games = []
+        for game_entry in iter_entry_points('zero_play.game_display'):
+            display_class = game_entry.load()
+            display: GameDisplay = display_class()
+            games.append(display)
+        games.sort(key=attrgetter('game.name'))
+        column_count = math.ceil(math.sqrt(len(games)))
+        for i, display in enumerate(games):
+            row = i // column_count
+            column = i % column_count
+            game_button = QPushButton(display.game.name)
+            game_button.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+            # noinspection PyUnresolvedReferences
+            game_button.clicked.connect(partial(self.show_game, display))
+            game_layout.addWidget(game_button, row, column)
 
     def on_toggle_review(self):
         choices = self.ui.choices
@@ -99,8 +110,10 @@ class MainWindow(QMainWindow):
         self.ui.stacked_widget.setCurrentWidget(self.ui.game_page)
         self.ui.action_view_game.setChecked(True)
 
-    def show_game(self, game: Game):
+    def show_game(self, display: GameDisplay):
         QApplication.setOverrideCursor(Qt.WaitCursor)
+        self.display = display
+        game = display.game
         self.game = game
         self.ui.game_name.setText(game.name)
         heuristics = []
@@ -131,18 +144,6 @@ class MainWindow(QMainWindow):
         self.ui.stacked_widget.setCurrentWidget(self.ui.players_page)
         QApplication.restoreOverrideCursor()
 
-    def on_tic_tac_toe(self):
-        self.show_game(TicTacToeGame())
-        self.display_class = TicTacToeDisplay
-
-    def on_othello(self):
-        self.show_game(OthelloGame(8, 8))
-        self.display_class = OthelloDisplay
-
-    def on_connect4(self):
-        self.show_game(Connect4Game())
-        self.display_class = Connect4Display
-
     def on_cancel(self):
         self.ui.stacked_widget.setCurrentWidget(self.ui.game_page)
 
@@ -156,16 +157,14 @@ class MainWindow(QMainWindow):
     def on_start(self):
         mcts_choices = {self.game.X_PLAYER: self.ui.player1.currentData(),
                         self.game.O_PLAYER: self.ui.player2.currentData()}
-        mcts_players = [MctsPlayer(self.game, player_number, iteration_count=600)
-                        for player_number, heuristic in mcts_choices.items()
-                        if heuristic is not None]
-        self.display = self.display_class(self.ui.display_view.scene(),
-                                          self.game,
-                                          mcts_players)
+        self.display.mcts_players = [
+            MctsPlayer(self.game, player_number, iteration_count=600)
+            for player_number, heuristic in mcts_choices.items()
+            if heuristic is not None]
+        self.ui.display_view.setScene(self.display.scene)
         self.destroyed.connect(self.display.close)
         self.display.show_coordinates = self.ui.action_coordinates.isChecked()
 
-        self.on_resume()
         self.on_view_game()
 
     def resizeEvent(self, event: QResizeEvent):
@@ -177,7 +176,6 @@ class MainWindow(QMainWindow):
             return
         size = self.ui.display_view.maximumViewportSize()
         self.display.resize(size)
-        self.display.scene.setSceneRect(0, 0, size.width(), size.height())
 
     def on_view_game(self):
         if self.display is None:

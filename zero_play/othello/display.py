@@ -1,18 +1,10 @@
-import typing
-
-from PySide2.QtWidgets import QGraphicsScene
-
-from zero_play.game import GridGame
 from zero_play.grid_display import GridDisplay
-from zero_play.mcts_player import MctsPlayer
+from zero_play.othello.game import OthelloGame
 
 
 class OthelloDisplay(GridDisplay):
-    def __init__(self,
-                 scene: QGraphicsScene,
-                 game: GridGame,
-                 mcts_players: typing.Sequence[MctsPlayer] = ()):
-        super().__init__(scene, game, mcts_players)
+    def __init__(self, board_height: int = 8, board_width: int = 8):
+        super().__init__(OthelloGame(board_height, board_width))
 
     def get_forced_move(self):
         pass_move = len(self.valid_moves) - 1
