@@ -1,9 +1,9 @@
 from PySide2.QtCore import QLine, QSize
 from PySide2.QtGui import QPainter, QColor, QPen
 
-from tests.pixmap_differ import PixmapDiffer
 from tests.tictactoe.test_tictactoe_display import set_font_size, draw_text
 from zero_play.connect4.display import Connect4Display
+from zero_play.pixmap_differ import PixmapDiffer
 
 
 def draw_grid(expected):

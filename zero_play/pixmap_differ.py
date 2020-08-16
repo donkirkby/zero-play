@@ -9,33 +9,37 @@ from PySide2.QtGui import QPixmap, QPainter, QColor, QImage
 
 def display_diff(actual_image: QImage,
                  diff_image: QImage,
-                 expected_image: QImage):
+                 expected_image: QImage,
+                 diff_count: int):
     # Display image when in live turtle mode.
     display_image = getattr(turtle.Turtle, 'display_image', None)
     if display_image is None:
         return
     t = turtle.Turtle()
     # noinspection PyUnresolvedReferences
-    screen = t.screen
+    screen = t.screen  # type: ignore
     w = screen.cv.cget('width')
     h = screen.cv.cget('height')
     ox, oy = w / 2, h / 2
-    text_height = 20
+    text_space = (h - actual_image.height() - diff_image.height() -
+                  expected_image.height())
+    text_height = max(20, text_space // 3)
+    font = ('Arial', text_height // 2, 'Normal')
     t.penup()
     t.goto(-ox, oy)
     t.right(90)
     t.forward(text_height)
-    t.write(f'Actual')
+    t.write(f'Actual', font=font)
     display_image(ox + t.xcor(), oy - t.ycor(),
                   image=encode_image(actual_image))
     t.forward(actual_image.height())
     t.forward(text_height)
-    t.write(f'Diff')
+    t.write(f'Diff ({diff_count} pixels)', font=font)
     display_image(ox + t.xcor(), oy - t.ycor(),
                   image=encode_image(diff_image))
     t.forward(diff_image.height())
     t.forward(text_height)
-    t.write('Expected')
+    t.write('Expected', font=font)
     display_image(ox + t.xcor(), oy - t.ycor(),
                   image=encode_image(expected_image))
     t.forward(expected_image.height())
@@ -52,7 +56,8 @@ class PixmapDiffer:
 
         self.names = set()
 
-        self.work_dir: Path = Path(__file__).parent / 'pixmap_diffs'
+        self.work_dir: Path = (Path(__file__).parent.parent /
+                               'tests' / 'pixmap_diffs')
         self.work_dir.mkdir(exist_ok=True)
         for work_file in self.work_dir.iterdir():
             if work_file.name == 'README.md':
@@ -65,8 +70,7 @@ class PixmapDiffer:
             self,
             width: int,
             height: int,
-            name: str) -> typing.ContextManager[typing.Tuple[QPainter,
-                                                             QPainter]]:
+            name: str) -> typing.Iterator[typing.Tuple[QPainter, QPainter]]:
         try:
             yield self.start(width, height, name)
         finally:
@@ -84,7 +88,7 @@ class PixmapDiffer:
         painters, or call the end() method and create a new painter on the
         same device. Order matters, though!
         """
-        assert name not in self.names
+        assert name not in self.names, f'Duplicate name: {name!r}.'
         self.names.add(name)
         self.name = name
 
@@ -126,7 +130,10 @@ class PixmapDiffer:
         diff.end()
         diff_image: QImage = diff.device().toImage()
 
-        display_diff(actual_image, diff_image, expected_image)
+        display_diff(actual_image,
+                     diff_image,
+                     expected_image,
+                     self.different_pixels)
 
         if self.different_pixels == 0:
             return
@@ -188,7 +195,9 @@ def encode_image(image: QImage) -> str:
     image_bytes = QByteArray()
     buffer = QBuffer(image_bytes)
     buffer.open(QIODevice.WriteOnly)
-    image.save(buffer, "PNG")  # writes pixmap into bytes in PNG format
+
+    # writes pixmap into bytes in PNG format
+    image.save(buffer, "PNG")  # type: ignore
     encoded_bytes = image_bytes.toBase64()
     codec = QTextCodec.codecForName(b"UTF-8")
     encoded_string = codec.toUnicode(encoded_bytes)

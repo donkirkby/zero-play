@@ -1,7 +1,7 @@
 from PySide2.QtCore import QSize
 
-from tests.pixmap_differ import PixmapDiffer
 from zero_play.othello.display import OthelloDisplay
+from zero_play.pixmap_differ import PixmapDiffer
 
 
 def test_piece_click_invalid(pixmap_differ: PixmapDiffer):

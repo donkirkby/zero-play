@@ -1,7 +1,7 @@
 import pytest
 from PySide2.QtWidgets import QApplication
 
-from tests.pixmap_differ import PixmapDiffer
+from zero_play.pixmap_differ import PixmapDiffer
 
 
 @pytest.fixture(scope='session')
