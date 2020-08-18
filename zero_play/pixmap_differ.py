@@ -53,6 +53,7 @@ class PixmapDiffer:
         self.different_pixels = 0
         self.diff_min_x = self.diff_min_y = None
         self.diff_max_x = self.diff_max_y = None
+        self.max_diff = 0
 
         self.names = set()
 
@@ -70,7 +71,9 @@ class PixmapDiffer:
             self,
             width: int,
             height: int,
-            name: str) -> typing.Iterator[typing.Tuple[QPainter, QPainter]]:
+            name: str,
+            max_diff: int = 0) -> typing.Iterator[typing.Tuple[QPainter, QPainter]]:
+        self.max_diff = max_diff
         try:
             yield self.start(width, height, name)
         finally:
@@ -159,7 +162,7 @@ class PixmapDiffer:
         print(encode_image(diff_section))
         message = f'Found {self.different_pixels} different pixels, '
         message += f'see' if is_saved else 'could not write'
-        message += f' {diff_path.relative_to(Path(__file__).parent)}.'
+        message += f' {diff_path.relative_to(Path(__file__).parent.parent)}.'
         assert self.different_pixels == 0, message
 
     def diff_colour(self,
@@ -167,7 +170,10 @@ class PixmapDiffer:
                     expected_colour: QColor,
                     x: int,
                     y: int):
-        if actual_colour == expected_colour:
+        diff_size = (abs(actual_colour.red() - expected_colour.red()) +
+                     abs(actual_colour.green() - expected_colour.green()) +
+                     abs(actual_colour.blue() - expected_colour.blue()))
+        if diff_size <= self.max_diff:
             diff_colour = actual_colour.toRgb()
             diff_colour.setAlpha(diff_colour.alpha() // 3)
             return diff_colour

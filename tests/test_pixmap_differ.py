@@ -4,7 +4,7 @@ from unittest.mock import Mock
 import pytest
 from PySide2.QtGui import QPixmap, QPainter, QColor
 
-from tests.pixmap_differ import encode_image, decode_image
+from zero_play.pixmap_differ import encode_image, decode_image
 
 ENCODED_BLUE_GREEN_RECT = 'iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAIAAADwyuo0AAAACX' \
                           'BIWXMAAA7EAAAOxAGVKw4bAAAAGElEQVQImWNkYPjPwMDA0MDI' \

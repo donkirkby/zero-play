@@ -12,6 +12,7 @@ from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, \
     QTableWidgetItem, QGridLayout, QPushButton, QSizePolicy
 from pkg_resources import iter_entry_points, EntryPoint
 
+from zero_play.game import GridGame
 from zero_play.game_display import GameDisplay
 from zero_play.grid_display import GridDisplay
 from zero_play.heuristic import Heuristic
@@ -116,7 +117,23 @@ class MainWindow(QMainWindow):
         game = display.game
         self.game = game
         self.ui.game_name.setText(game.name)
+        heuristics = self.load_heuristics()
+        self.ui.player1.clear()
+        self.ui.player2.clear()
+        self.ui.player1.addItem('human', None)
+        self.ui.player2.addItem('human', None)
+        for name, heuristic in heuristics:
+            self.ui.player1.addItem(name, heuristic)
+            self.ui.player2.addItem(name, heuristic)
+
+        self.ui.stacked_widget.setCurrentWidget(self.ui.players_page)
+        QApplication.restoreOverrideCursor()
+
+    def load_heuristics(self):
+        game = self.game
         heuristics = []
+        if not isinstance(game, GridGame):
+            return heuristics
         entry: EntryPoint
         for entry in iter_entry_points('zero_play.heuristic'):
             try:
@@ -133,16 +150,7 @@ class MainWindow(QMainWindow):
             except ValueError:
                 continue
             heuristics.append((entry.name, heuristic))
-        self.ui.player1.clear()
-        self.ui.player2.clear()
-        self.ui.player1.addItem('human', None)
-        self.ui.player2.addItem('human', None)
-        for name, heuristic in heuristics:
-            self.ui.player1.addItem(name, heuristic)
-            self.ui.player2.addItem(name, heuristic)
-
-        self.ui.stacked_widget.setCurrentWidget(self.ui.players_page)
-        QApplication.restoreOverrideCursor()
+        return heuristics
 
     def on_cancel(self):
         self.ui.stacked_widget.setCurrentWidget(self.ui.game_page)
