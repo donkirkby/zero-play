@@ -132,8 +132,6 @@ class MainWindow(QMainWindow):
     def load_heuristics(self):
         game = self.game
         heuristics = []
-        if not isinstance(game, GridGame):
-            return heuristics
         entry: EntryPoint
         for entry in iter_entry_points('zero_play.heuristic'):
             try:
@@ -163,6 +161,7 @@ class MainWindow(QMainWindow):
             options=QFileDialog.DontUseNativeDialog)
 
     def on_start(self):
+        self.display.update(self.display.game.create_board())
         mcts_choices = {self.game.X_PLAYER: self.ui.player1.currentData(),
                         self.game.O_PLAYER: self.ui.player2.currentData()}
         self.display.mcts_players = [

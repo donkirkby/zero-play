@@ -9,14 +9,16 @@ from tensorflow.python.keras.callbacks import TensorBoard
 from tensorflow.python.keras.layers import Dense, Conv2D, Dropout, Flatten
 from tensorflow.python.keras.models import load_model
 
-from zero_play.game import GridGame
+from zero_play.game import GridGame, Game
 from zero_play.heuristic import Heuristic
 
 logger = logging.getLogger(__name__)
 
 
 class NeuralNet(Heuristic):
-    def __init__(self, game: GridGame):
+    def __init__(self, game: Game):
+        if not isinstance(game, GridGame):
+            raise ValueError(f'{game.__class__} is not a subclass of GridGame.')
         super().__init__(game)
         # game params
         self.board_height = game.board_height
