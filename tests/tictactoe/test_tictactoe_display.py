@@ -2,7 +2,7 @@ from PySide2.QtCore import QSize
 from PySide2.QtGui import QFont, QPainter, QColor, QPen
 from PySide2.QtWidgets import QGraphicsScene
 
-from zero_play.grid_display import center_text_item
+from zero_play.game_display import center_text_item
 from zero_play.mcts_player import MctsPlayer
 from zero_play.pixmap_differ import PixmapDiffer
 from zero_play.tictactoe.display import TicTacToeDisplay

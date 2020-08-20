@@ -6,17 +6,10 @@ import numpy as np
 from PySide2.QtCore import QSize
 from PySide2.QtGui import QColor, QBrush, QFont
 from PySide2.QtWidgets import QGraphicsItem, QGraphicsEllipseItem, \
-    QGraphicsSceneHoverEvent, QGraphicsSceneMouseEvent, QGraphicsSimpleTextItem
+    QGraphicsSceneHoverEvent, QGraphicsSceneMouseEvent
 
 from zero_play.game import GridGame
-from zero_play.game_display import GameDisplay
-
-
-def center_text_item(item: QGraphicsSimpleTextItem, x: float, y: float):
-    bounds = item.boundingRect()
-    x -= bounds.width() / 2
-    y -= bounds.height() / 2
-    item.setPos(x, y)
+from zero_play.game_display import GameDisplay, center_text_item
 
 
 class GraphicsPieceItem(QGraphicsEllipseItem):
@@ -45,7 +38,6 @@ class GridDisplay(GameDisplay):
     line_colour = QColor.fromRgb(0x000000)
     player1_colour = QColor.fromRgb(0x000000)
     player2_colour = QColor.fromRgb(0xFFFFFF)
-    default_font = 'Sans Serif,9,-1,5,50,0,0,0,0,0'
 
     def __init__(self,
                  game: GridGame):
@@ -105,11 +97,11 @@ class GridDisplay(GameDisplay):
         for i, label in enumerate(self.row_labels):
             r = cell_size * (2*i + 1) // 2
             label.setFont(font)
-            center_text_item(label, x0 - cell_size // 2, y0+r)
+            center_text_item(label, x0 - cell_size // 2, y0 + r)
         for i, label in enumerate(self.column_labels):
             r = cell_size * (2*i + 1) // 2
             label.setFont(font)
-            center_text_item(label, x0+r, y0 - cell_size // 2)
+            center_text_item(label, x0 + r, y0 - cell_size // 2)
         self.to_move.setRect(x0 + size + cell_size * extra_columns // 8,
                              y0 + cell_size * self.game.board_height // 2 -
                              cell_size * extra_columns * 7 // 8,

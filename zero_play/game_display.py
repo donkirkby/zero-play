@@ -3,7 +3,7 @@ import typing
 
 import numpy as np
 from PySide2.QtCore import QObject, Signal, QThread, QSize, Slot
-from PySide2.QtWidgets import QGraphicsScene
+from PySide2.QtWidgets import QGraphicsScene, QGraphicsSimpleTextItem
 
 from zero_play.game import Game
 from zero_play.log_display import LogDisplay
@@ -12,6 +12,8 @@ from zero_play.mcts_worker import MctsWorker
 
 
 class GameDisplay(QObject):
+    default_font = 'Sans Serif,9,-1,5,50,0,0,0,0,0'
+
     move_needed = Signal(int, np.ndarray)  # active_player, board
     move_made = Signal(np.ndarray)  # board
 
@@ -120,3 +122,10 @@ class GameDisplay(QObject):
     def close(self):
         if self.worker_thread is not None:
             self.worker_thread.quit()
+
+
+def center_text_item(item: QGraphicsSimpleTextItem, x: float, y: float):
+    bounds = item.boundingRect()
+    x -= bounds.width() / 2
+    y -= bounds.height() / 2
+    item.setPos(x, y)
