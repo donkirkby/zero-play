@@ -1,9 +1,13 @@
-# Zero Play
-## Teach a computer to play any game.
+---
+title: Zero Play
+subtitle: Teach a computer to play any game.
+---
+
 The zero play library is based on the ideas in the [AlphaGo Zero paper] and the
 example Python code in the [alpha-zero-general project]. The goal of this
 project is to make a reusable Python library that other projects can build on
-to make powerful computer opponents for many different board games.
+to make powerful computer opponents for many different board games. An example
+project that uses this library is [Shibumi Games].
 
 The main command is `zero_play`, and it has a few subcommands. Run
 `zero_play -h` to see a list of subcommands.
@@ -78,3 +82,4 @@ I'm planning to keep a [journal] for the project.
 [AlphaGo Zero paper]: https://deepmind.com/blog/alphago-zero-learning-scratch/
 [alpha-zero-general project]: https://github.com/suragnair/alpha-zero-general
 [journal]: journal/
+[Shibumi Games]: https://donkirkby.github.io/shibumi-games/

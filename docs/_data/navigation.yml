@@ -1,0 +1,11 @@
+- name: Journal
+  link: /journal
+  dropdown:
+  - name: Latest
+    link: /journal
+  - name: 2019
+    link: /journal/2019.html
+  - name: 2018
+    link: /journal/2018.html
+- name: GitHub
+  link: https://github.com/donkirkby/zero-play
