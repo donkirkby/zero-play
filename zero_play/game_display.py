@@ -46,6 +46,7 @@ class GameDisplay(QObject):
         if self.worker_thread is not None:
             self.worker_thread.quit()
 
+        self.log_display = LogDisplay(self.game)
         self.mcts_workers = {player.player_number: MctsWorker(player)
                              for player in players}
         if not self.mcts_workers:

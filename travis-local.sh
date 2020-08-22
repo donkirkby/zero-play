@@ -9,7 +9,7 @@
 # matches this docker tag:
 #     travisci/ci-ubuntu-1804:packer-1593521720-ca42795e
 #                                    timestamp^  git id^
-# The timestamps should be similar, and the git ids should be the same.
+# The timestamps should be similar, and the git commit ids should be the same.
 # More info:
 # https://github.com/travis-ci/packer-templates/blob/master/ci-ubuntu-1804.yml
 # If your install steps are slow, commit the finished installation to a new

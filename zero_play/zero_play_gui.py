@@ -110,12 +110,14 @@ class MainWindow(QMainWindow):
             self.display = None
         self.ui.stacked_widget.setCurrentWidget(self.ui.game_page)
         self.ui.action_view_game.setChecked(True)
+        self.setWindowTitle('ZeroPlay')
 
     def show_game(self, display: GameDisplay):
         QApplication.setOverrideCursor(Qt.WaitCursor)
         self.display = display
         game = display.game
         self.game = game
+        self.setWindowTitle(f'ZeroPlay - {game.name}')
         self.ui.game_name.setText(game.name)
         heuristics = self.load_heuristics()
         self.ui.player1.clear()
