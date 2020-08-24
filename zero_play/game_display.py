@@ -2,8 +2,9 @@ from abc import abstractmethod
 import typing
 
 import numpy as np
-from PySide2.QtCore import QObject, Signal, QThread, QSize, Slot
-from PySide2.QtWidgets import QGraphicsScene, QGraphicsSimpleTextItem
+from PySide2.QtCore import Signal, QThread, QSize, Slot
+from PySide2.QtGui import QResizeEvent
+from PySide2.QtWidgets import QGraphicsScene, QGraphicsSimpleTextItem, QGraphicsView, QSizePolicy
 
 from zero_play.game import Game
 from zero_play.log_display import LogDisplay
@@ -11,15 +12,14 @@ from zero_play.mcts_player import MctsPlayer
 from zero_play.mcts_worker import MctsWorker
 
 
-class GameDisplay(QObject):
+class GameDisplay(QGraphicsView):
     default_font = 'Sans Serif,9,-1,5,50,0,0,0,0,0'
 
     move_needed = Signal(int, np.ndarray)  # active_player, board
     move_made = Signal(np.ndarray)  # board
 
     def __init__(self, game: Game):
-        super().__init__()
-        self.scene = QGraphicsScene()
+        super().__init__(scene=QGraphicsScene())
         self.game = game
         self.mcts_workers: typing.Dict[int, MctsWorker] = {}
         self.worker_thread: typing.Optional[QThread] = None
@@ -27,6 +27,7 @@ class GameDisplay(QObject):
         self.valid_moves = self.game.get_valid_moves(self.current_board)
         self._show_coordinates = False
         self.log_display = LogDisplay(game)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
     @property
     def show_coordinates(self):
@@ -35,7 +36,9 @@ class GameDisplay(QObject):
     @show_coordinates.setter
     def show_coordinates(self, value):
         self._show_coordinates = value
-        self.resize(QSize(self.scene.width(), self.scene.height()))
+        scene = self.scene()
+        size = QSize(scene.width(), scene.height())
+        self.resizeEvent(QResizeEvent(size, size))
 
     @property
     def mcts_players(self):
@@ -64,17 +67,18 @@ class GameDisplay(QObject):
             self.worker_thread.start()
 
     @abstractmethod
-    def update(self, board: np.ndarray):
+    def update_board(self, board: np.ndarray):
         """ Update self.scene, based on the state in board.
 
-        It's probably also helpful to override resize().
+        It's probably also helpful to override resizeEvent().
 
         :param board: the state of the game to display.
         """
 
-    def resize(self, view_size: QSize):
-        self.scene.setSceneRect(0, 0, view_size.width(), view_size.height())
-        self.update(self.current_board)
+    def resizeEvent(self, event: QResizeEvent):
+        view_size = event.size()
+        self.scene().setSceneRect(0, 0, view_size.width(), view_size.height())
+        self.update_board(self.current_board)
 
     def choose_active_text(self):
         active_player = self.game.get_active_player(self.current_board)
@@ -88,7 +92,7 @@ class GameDisplay(QObject):
         # noinspection PyUnresolvedReferences
         self.move_made.emit(self.current_board)
         self.current_board = self.game.make_move(self.current_board, move)
-        self.update(self.current_board)
+        self.update_board(self.current_board)
 
         forced_move = self.get_forced_move()
         if forced_move is None:

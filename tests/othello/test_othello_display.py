@@ -1,5 +1,4 @@
-from PySide2.QtCore import QSize
-
+from tests.tictactoe.test_tictactoe_display import trigger_resize
 from zero_play.othello.display import OthelloDisplay
 from zero_play.pixmap_differ import PixmapDiffer
 
@@ -62,7 +61,7 @@ OOO...
 >O
 """
     display = OthelloDisplay(6, 6)
-    display.update(display.game.create_board(start_state))
+    display.update_board(display.game.create_board(start_state))
     display.on_click(display.spaces[0][2])
 
     state = display.game.display(display.current_board)
@@ -78,9 +77,9 @@ def test_invalid_hover_enter(pixmap_differ: PixmapDiffer):
             'othello_invalid_hover_enter') as (actual, expected):
 
         display = OthelloDisplay()
-        display.resize(QSize(size+40, size))
-        display.scene.render(expected)
+        trigger_resize(display, size+40, size)
+        display.scene().render(expected)
 
         display.on_hover_enter(display.spaces[0][0])
 
-        display.scene.render(actual)
+        display.scene().render(actual)

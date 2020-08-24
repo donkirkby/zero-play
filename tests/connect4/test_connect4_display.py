@@ -1,7 +1,7 @@
-from PySide2.QtCore import QLine, QSize
+from PySide2.QtCore import QLine
 from PySide2.QtGui import QPainter, QColor, QPen
 
-from tests.tictactoe.test_tictactoe_display import set_font_size, draw_text
+from tests.tictactoe.test_tictactoe_display import set_font_size, draw_text, trigger_resize
 from zero_play.connect4.display import Connect4Display
 from zero_play.pixmap_differ import PixmapDiffer
 
@@ -42,10 +42,10 @@ def test_pieces(pixmap_differ: PixmapDiffer):
 ...O...
 ...XX..
 ''')
-        display.resize(QSize(360, 240))
-        display.update(board)
+        trigger_resize(display, 360, 240)
+        display.update_board(board)
 
-        display.scene.render(actual)
+        display.scene().render(actual)
 
 
 def test_clicked(pixmap_differ: PixmapDiffer):
@@ -71,8 +71,8 @@ def test_clicked(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(5, 45, 30, 30)
 
         display = Connect4Display()
-        display.resize(QSize(360, 240))
+        trigger_resize(display, 360, 240)
         space = display.spaces[1][0]
         display.on_click(space)
 
-        display.scene.render(actual)
+        display.scene().render(actual)

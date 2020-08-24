@@ -3,8 +3,7 @@ import math
 import typing
 
 import numpy as np
-from PySide2.QtCore import QSize
-from PySide2.QtGui import QColor, QBrush, QFont
+from PySide2.QtGui import QColor, QBrush, QFont, QResizeEvent
 from PySide2.QtWidgets import QGraphicsItem, QGraphicsEllipseItem, \
     QGraphicsSceneHoverEvent, QGraphicsSceneMouseEvent
 
@@ -50,7 +49,7 @@ class GridDisplay(GameDisplay):
         self.row_labels = []
         self.text_x = self.text_y = 0
 
-        scene = self.scene
+        scene = self.scene()
         scene.setBackgroundBrush(self.background_colour)
         for _ in range(game.board_height-1):
             self.row_dividers.append(scene.addLine(0, 0, 1, 1))
@@ -72,9 +71,11 @@ class GridDisplay(GameDisplay):
                 piece.setBrush(self.background_colour)
                 piece.setPen(self.background_colour)
                 row.append(piece)
+        self.debug_message = ''
 
-    def resize(self, view_size: QSize):
-        super().resize(view_size)
+    def resizeEvent(self, event: QResizeEvent):
+        super().resizeEvent(event)
+        view_size = event.size()
         width = view_size.width()
         height = view_size.height()
         extra_columns = math.ceil(self.game.board_width/6)
@@ -120,7 +121,7 @@ class GridDisplay(GameDisplay):
                 y = y0 + i * cell_size + cell_size // 8
                 piece.setRect(x, y, cell_size * 3 // 4, cell_size * 3 // 4)
 
-    def update(self, board: np.ndarray):
+    def update_board(self, board: np.ndarray):
         self.current_board = board
         self.valid_moves = self.game.get_valid_moves(board)
         is_ended = self.game.is_ended(board)
@@ -165,7 +166,9 @@ class GridDisplay(GameDisplay):
                       else self.player2_colour)
 
     def update_move_text(self, text: str = None):
-        if text is not None:
+        if self.debug_message:
+            self.move_text.setText(self.debug_message)
+        elif text is not None:
             self.move_text.setText(text)
         center_text_item(self.move_text, self.text_x, self.text_y)
 

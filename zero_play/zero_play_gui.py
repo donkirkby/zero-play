@@ -12,7 +12,6 @@ from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, \
     QTableWidgetItem, QGridLayout, QPushButton, QSizePolicy
 from pkg_resources import iter_entry_points, EntryPoint
 
-from zero_play.game import GridGame
 from zero_play.game_display import GameDisplay
 from zero_play.grid_display import GridDisplay
 from zero_play.heuristic import Heuristic
@@ -70,7 +69,7 @@ class MainWindow(QMainWindow):
         is_review_visible = self.ui.toggle_review.text() == self.review_names[0]
         if not is_review_visible:
             if self.display is not None:
-                self.display.update(self.board_to_resume)
+                self.display.update_board(self.board_to_resume)
             self.board_to_resume = None
         else:
             self.board_to_resume = self.display.current_board
@@ -97,7 +96,7 @@ class MainWindow(QMainWindow):
     def on_move_history(self, item_index: int):
         assert self.display is not None
         history_item = self.display.log_display.items[item_index]
-        self.display.update(history_item.board)
+        self.display.update_board(history_item.board)
         self.ui.choices.clear()
         for i, (choice, probability) in enumerate(history_item.choices):
             self.ui.choices.setItem(0, 2*i, QTableWidgetItem(choice))
@@ -163,14 +162,19 @@ class MainWindow(QMainWindow):
             options=QFileDialog.DontUseNativeDialog)
 
     def on_start(self):
-        self.display.update(self.display.game.create_board())
+        self.display.update_board(self.display.game.create_board())
         mcts_choices = {self.game.X_PLAYER: self.ui.player1.currentData(),
                         self.game.O_PLAYER: self.ui.player2.currentData()}
         self.display.mcts_players = [
             MctsPlayer(self.game, player_number, iteration_count=600)
             for player_number, heuristic in mcts_choices.items()
             if heuristic is not None]
-        self.ui.display_view.setScene(self.display.scene)
+        layout: QGridLayout = self.ui.display_page.layout()
+        layout.removeWidget(self.ui.display_view)
+        self.ui.display_view.setVisible(False)
+        self.display.setVisible(True)
+        self.ui.display_view = self.display
+        layout.addWidget(self.display, 0, 0, 1, 3)
         self.destroyed.connect(self.display.close)
         self.display.show_coordinates = self.ui.action_coordinates.isChecked()
 
@@ -192,7 +196,7 @@ class MainWindow(QMainWindow):
         else:
             self.ui.stacked_widget.setCurrentWidget(self.ui.display_page)
             self.resize_display()
-            self.display.update(self.display.current_board)
+            self.display.update_board(self.display.current_board)
             self.display.request_move()
 
     def on_view_coordinates(self, is_checked):
