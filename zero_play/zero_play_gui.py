@@ -23,6 +23,7 @@ from zero_play.plot_canvas import PlotCanvas
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.plot_canvas = PlotCanvas(self.ui.centralwidget)
@@ -52,6 +53,7 @@ class MainWindow(QMainWindow):
         for game_entry in iter_entry_points('zero_play.game_display'):
             display_class = game_entry.load()
             display: GameDisplay = display_class()
+            self.destroyed.connect(display.close)
             games.append(display)
         games.sort(key=attrgetter('game.name'))
         column_count = math.ceil(math.sqrt(len(games)))
@@ -90,6 +92,7 @@ class MainWindow(QMainWindow):
         self.ui.move_history.setVisible(is_review_visible)
         self.ui.choices.setVisible(is_review_visible)
         self.ui.toggle_review.setText(self.review_names[is_review_visible])
+        self.ui.resume_here.setVisible(False)  # Not implemented yet.
         choices.setVisible(is_review_visible)
         self.resize_display()
 
@@ -175,7 +178,6 @@ class MainWindow(QMainWindow):
         self.display.setVisible(True)
         self.ui.display_view = self.display
         layout.addWidget(self.display, 0, 0, 1, 3)
-        self.destroyed.connect(self.display.close)
         self.display.show_coordinates = self.ui.action_coordinates.isChecked()
 
         self.on_view_game()
