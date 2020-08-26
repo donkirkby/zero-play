@@ -261,8 +261,15 @@
     </property>
     <addaction name="action_coordinates"/>
    </widget>
+   <widget class="QMenu" name="menu_Help">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="action_about"/>
+   </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_view"/>
+   <addaction name="menu_Help"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="action_open">
@@ -325,6 +332,11 @@
    </property>
    <property name="text">
     <string>Coordinates</string>
+   </property>
+  </action>
+  <action name="action_about">
+   <property name="text">
+    <string>&amp;About...</string>
    </property>
   </action>
  </widget>

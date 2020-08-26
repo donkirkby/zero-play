@@ -45,6 +45,8 @@ class Ui_MainWindow(object):
         self.action_coordinates = QAction(MainWindow)
         self.action_coordinates.setObjectName(u"action_coordinates")
         self.action_coordinates.setCheckable(True)
+        self.action_about = QAction(MainWindow)
+        self.action_about.setObjectName(u"action_about")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout_2 = QVBoxLayout(self.centralwidget)
@@ -235,6 +237,8 @@ class Ui_MainWindow(object):
         self.menu_new.setObjectName(u"menu_new")
         self.menu_view = QMenu(self.menubar)
         self.menu_view.setObjectName(u"menu_view")
+        self.menu_Help = QMenu(self.menubar)
+        self.menu_Help.setObjectName(u"menu_Help")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -242,6 +246,7 @@ class Ui_MainWindow(object):
 
         self.menubar.addAction(self.menu_file.menuAction())
         self.menubar.addAction(self.menu_view.menuAction())
+        self.menubar.addAction(self.menu_Help.menuAction())
         self.menu_file.addAction(self.menu_new.menuAction())
         self.menu_file.addAction(self.action_open)
         self.menu_file.addAction(self.action_save)
@@ -251,6 +256,7 @@ class Ui_MainWindow(object):
         self.menu_new.addAction(self.action_plot)
         self.menu_new.addAction(self.action_training_session)
         self.menu_view.addAction(self.action_coordinates)
+        self.menu_Help.addAction(self.action_about)
 
         self.retranslateUi(MainWindow)
 
@@ -272,6 +278,7 @@ class Ui_MainWindow(object):
         self.action_view_log.setText(QCoreApplication.translate("MainWindow", u"&Log", None))
         self.action_save_log.setText(QCoreApplication.translate("MainWindow", u"Save &Log...", None))
         self.action_coordinates.setText(QCoreApplication.translate("MainWindow", u"Coordinates", None))
+        self.action_about.setText(QCoreApplication.translate("MainWindow", u"&About...", None))
         self.connect4.setText(QCoreApplication.translate("MainWindow", u"Connect 4", None))
         self.tic_tac_toe.setText(QCoreApplication.translate("MainWindow", u"Tic Tac Toe", None))
         self.othello.setText(QCoreApplication.translate("MainWindow", u"Othello", None))
@@ -290,5 +297,6 @@ class Ui_MainWindow(object):
         self.menu_file.setTitle(QCoreApplication.translate("MainWindow", u"&File", None))
         self.menu_new.setTitle(QCoreApplication.translate("MainWindow", u"&New", None))
         self.menu_view.setTitle(QCoreApplication.translate("MainWindow", u"&View", None))
+        self.menu_Help.setTitle(QCoreApplication.translate("MainWindow", u"&Help", None))
     # retranslateUi
 

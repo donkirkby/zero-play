@@ -1,3 +1,5 @@
+import typing
+
 from zero_play.grid_display import GridDisplay
 from zero_play.othello.game import OthelloGame
 
@@ -10,3 +12,8 @@ class OthelloDisplay(GridDisplay):
         pass_move = len(self.valid_moves) - 1
         if self.valid_moves[pass_move]:
             return pass_move
+
+    @property
+    def credit_pairs(self) -> typing.Iterable[typing.Tuple[str, str]]:
+        return [('Othello Game:', 'Goro Hasegawa'),
+                ('Othello Implementation:', 'Don Kirkby')]

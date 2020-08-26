@@ -3,15 +3,19 @@ import os
 import sys
 import typing
 from functools import partial
+from itertools import chain
 from operator import attrgetter
 
 import numpy as np
 
 from PySide2.QtGui import QResizeEvent, Qt
-from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, \
-    QTableWidgetItem, QGridLayout, QPushButton, QSizePolicy
+from PySide2.QtWidgets import (QApplication, QMainWindow, QFileDialog,
+                               QTableWidgetItem, QGridLayout, QPushButton,
+                               QSizePolicy, QDialog, QWidget, QLabel)
 from pkg_resources import iter_entry_points, EntryPoint
 
+import zero_play
+from zero_play.about_dialog import Ui_Dialog
 from zero_play.game_display import GameDisplay
 from zero_play.grid_display import GridDisplay
 from zero_play.heuristic import Heuristic
@@ -20,9 +24,24 @@ from zero_play.mcts_player import MctsPlayer
 from zero_play.plot_canvas import PlotCanvas
 
 
+class AboutDialog(QDialog):
+    def __init__(self,
+                 credit_pairs: typing.Iterable[typing.Tuple[str, str]],
+                 parent: QWidget = None):
+        super().__init__(parent)
+        self.ui = Ui_Dialog()
+        self.ui.setupUi(self)
+        self.ui.version.setText(zero_play.__version__)
+        credits_layout = self.ui.credits_layout
+        for title, text in credit_pairs:
+            row = credits_layout.rowCount()
+            credits_layout.addWidget(QLabel(title), row, 0, Qt.AlignRight)
+            credits_layout.addWidget(QLabel(text), row, 1)
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
-        super(MainWindow, self).__init__()
+        super().__init__()
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -33,8 +52,10 @@ class MainWindow(QMainWindow):
         self.ui.start.clicked.connect(self.on_start)
         self.ui.action_game.triggered.connect(self.on_new_game)
         self.ui.action_coordinates.triggered.connect(self.on_view_coordinates)
-        self.ui.toggle_review.clicked.connect(self.on_toggle_review)
+        self.ui.action_about.triggered.connect(self.on_about)
+        self.ui.toggle_review.clicked.connect(self.on_view_coordinates)
         self.ui.move_history.currentIndexChanged.connect(self.on_move_history)
+        self.all_displays = []
         self.populate_game_list(self.ui.game_page.layout())
         self.game = None
         self.display: typing.Optional[GridDisplay] = None
@@ -44,12 +65,18 @@ class MainWindow(QMainWindow):
                              for name in self.ui.toggle_review.text().split('/')]
         self.on_toggle_review()
 
+    def on_about(self):
+        credit_pairs = chain(*(display.credit_pairs
+                               for display in self.all_displays))
+        dialog = AboutDialog(credit_pairs, self)
+        dialog.exec_()
+
     def populate_game_list(self, game_layout: QGridLayout):
         while game_layout.count():
             child = game_layout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
-        games = []
+        games = self.all_displays
         for game_entry in iter_entry_points('zero_play.game_display'):
             display_class = game_entry.load()
             display: GameDisplay = display_class()

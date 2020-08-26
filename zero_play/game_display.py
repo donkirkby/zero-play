@@ -80,6 +80,14 @@ class GameDisplay(QGraphicsView):
         self.scene().setSceneRect(0, 0, view_size.width(), view_size.height())
         self.update_board(self.current_board)
 
+    @property
+    def credit_pairs(self) -> typing.Iterable[typing.Tuple[str, str]]:
+        """ Return a list of label and detail pairs.
+
+        These are displayed in the about box.
+        """
+        return ()
+
     def choose_active_text(self):
         active_player = self.game.get_active_player(self.current_board)
         if active_player in self.mcts_workers:
