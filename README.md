@@ -28,7 +28,26 @@ Python packages before, read Brett Cannon's [quick-and-dirty guide].
 
 Then run it with the `zero_play_gui` command.
 
+The default installation generates some errors about `bdist_wheel` that don't
+seem to actually cause any problems. You can either ignore them, or install
+`wheel` before installing Zero Play.
+
+    pip install wheel
+    pip install zero-play
+    zero_play_gui
+
+Known bug on Ubuntu 20.04:
+
+> qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in "" even though
+> it was found.
+
+This is a [PySide2 bug] that is missing some dependencies. You can work around
+it by installing those dependencies like this:
+
+    sudo apt install libxcb-xinerama0
+
 [quick-and-dirty guide]: https://snarky.ca/a-quick-and-dirty-guide-on-how-to-install-packages-for-python/
+[PySide2 bug]: https://bugreports.qt.io/browse/QTBUG-84749
 
 ## More Information
 If you'd like to help out with the project, or add your own games, see the
@@ -36,4 +55,4 @@ If you'd like to help out with the project, or add your own games, see the
 design [journal] for the project.
 
 [journal]: docs/journal
-[screenshot]: docs/images/screenshot.png
+[screenshot]: https://donkirkby.github.io/zero-play/images/screenshot.png

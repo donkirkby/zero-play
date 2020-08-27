@@ -21,7 +21,11 @@ from zero_play.grid_display import GridDisplay
 from zero_play.heuristic import Heuristic
 from zero_play.main_window import Ui_MainWindow
 from zero_play.mcts_player import MctsPlayer
-from zero_play.plot_canvas import PlotCanvas
+
+try:
+    from zero_play.plot_canvas import PlotCanvas
+except ImportError:
+    from zero_play.plot_canvas_dummy import PlotCanvasDummy as PlotCanvas  # type: ignore
 
 
 class AboutDialog(QDialog):
@@ -51,6 +55,7 @@ class MainWindow(QMainWindow):
         self.ui.cancel.clicked.connect(self.on_cancel)
         self.ui.start.clicked.connect(self.on_start)
         self.ui.action_game.triggered.connect(self.on_new_game)
+        self.ui.action_plot.triggered.connect(self.on_plot)
         self.ui.action_coordinates.triggered.connect(self.on_view_coordinates)
         self.ui.action_about.triggered.connect(self.on_about)
         self.ui.toggle_review.clicked.connect(self.on_view_coordinates)
@@ -230,6 +235,9 @@ class MainWindow(QMainWindow):
 
     def on_view_coordinates(self, is_checked):
         self.display.show_coordinates = is_checked
+
+    def on_plot(self):
+        self.ui.stacked_widget.setCurrentWidget(self.ui.plot_page)
 
 
 def main():

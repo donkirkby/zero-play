@@ -3,7 +3,7 @@ See:
 https://packaging.python.org/en/latest/distributing.html
 https://github.com/pypa/sampleproject
 """
-
+import setuptools
 from setuptools import setup
 from os import path
 import zero_play
@@ -19,7 +19,7 @@ setup(name='zero_play',
       description='Play board games using the techniques from AlphaZero',
       long_description=long_description,
       long_description_content_type='text/markdown',
-      url='https://github.com/donkirkby/zero-play',
+      url='https://donkirkby.github.io/zero-play/',
       author='Don Kirkby',
       classifiers=[  # https://pypi.org/classifiers/
           'Development Status :: 3 - Alpha',
@@ -28,7 +28,7 @@ setup(name='zero_play',
           'License :: OSI Approved :: MIT License',
           'Programming Language :: Python :: 3.8'],
       keywords='boardgames alphazero machine learning mcts',
-      packages=['zero_play'],
+      packages=setuptools.find_packages(),
       install_requires=['numpy', 'tensorflow', 'PySide2'],
       extras_require={'dev': ['seaborn',
                               'matplotlib',

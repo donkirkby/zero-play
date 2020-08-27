@@ -50,7 +50,7 @@ with pip. Releasing a new version means publishing it on the
 
         rm dist/*
         exit
-        pipenv sync --dev
+        pipenv clean
 
 8. Commit the version number changes, push, and create a release on GitHub.
 

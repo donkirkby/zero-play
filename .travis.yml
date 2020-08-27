@@ -4,6 +4,7 @@ language: python
 python:
     - "3.8"
 before_install:
+    # Work around missing deps: https://bugreports.qt.io/browse/QTBUG-84749
     - "sudo apt-get install libxcb-xinerama0 libxkbcommon-x11-0 xserver-xephyr"
 install:
     - pipenv install --dev
