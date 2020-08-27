@@ -58,7 +58,7 @@ class MainWindow(QMainWindow):
         self.ui.action_plot.triggered.connect(self.on_plot)
         self.ui.action_coordinates.triggered.connect(self.on_view_coordinates)
         self.ui.action_about.triggered.connect(self.on_about)
-        self.ui.toggle_review.clicked.connect(self.on_view_coordinates)
+        self.ui.toggle_review.clicked.connect(self.on_toggle_review)
         self.ui.move_history.currentIndexChanged.connect(self.on_move_history)
         self.all_displays = []
         self.populate_game_list(self.ui.game_page.layout())
