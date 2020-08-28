@@ -1,10 +1,12 @@
-# Zero Play [![Build Status Badge]][latest build] [![Code Coverage]][codecov] #
-## Teach a computer to play any game. ##
+# Zero Play [![Build Status Badge]][latest build] [![Code Coverage]][codecov]
+### Teach a computer to play any game
 
 [Build Status Badge]: https://travis-ci.org/donkirkby/zero-play.svg?branch=master
 [latest build]: https://travis-ci.org/donkirkby/zero-play
 [Code Coverage]: https://codecov.io/github/donkirkby/zero-play/coverage.svg?branch=master
 [codecov]: https://codecov.io/github/donkirkby/zero-play?branch=master
+[journal]: docs/journal
+[screenshot]: https://donkirkby.github.io/zero-play/images/screenshot.png
 
 The zero play library is based on the ideas in the [AlphaGo Zero paper] and the
 example Python code in the [alpha-zero-general project]. The goal of this
@@ -53,6 +55,3 @@ it by installing those dependencies like this:
 If you'd like to help out with the project, or add your own games, see the
 `CONTRIBUTING.md` file in the source code. For all the details, look through the
 design [journal] for the project.
-
-[journal]: docs/journal
-[screenshot]: https://donkirkby.github.io/zero-play/images/screenshot.png
