@@ -1,5 +1,4 @@
 import math
-import os
 import sys
 import typing
 from functools import partial
@@ -12,15 +11,15 @@ from PySide2.QtGui import QResizeEvent, Qt
 from PySide2.QtWidgets import (QApplication, QMainWindow, QFileDialog,
                                QTableWidgetItem, QGridLayout, QPushButton,
                                QSizePolicy, QDialog, QWidget, QLabel)
-from pkg_resources import iter_entry_points, EntryPoint
+from pkg_resources import iter_entry_points
 
 import zero_play
 from zero_play.about_dialog import Ui_Dialog
 from zero_play.game_display import GameDisplay
 from zero_play.grid_display import GridDisplay
-from zero_play.heuristic import Heuristic
 from zero_play.main_window import Ui_MainWindow
 from zero_play.mcts_player import MctsPlayer
+from zero_play.playout import Playout
 
 try:
     from zero_play.plot_canvas import PlotCanvas
@@ -51,7 +50,6 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.plot_canvas = PlotCanvas(self.ui.centralwidget)
         self.ui.plot_page.layout().addWidget(self.plot_canvas)
-        self.ui.network1.clicked.connect(self.on_network1)
         self.ui.cancel.clicked.connect(self.on_cancel)
         self.ui.start.clicked.connect(self.on_start)
         self.ui.action_game.triggered.connect(self.on_new_game)
@@ -156,8 +154,8 @@ class MainWindow(QMainWindow):
         heuristics = self.load_heuristics()
         self.ui.player1.clear()
         self.ui.player2.clear()
-        self.ui.player1.addItem('human', None)
-        self.ui.player2.addItem('human', None)
+        self.ui.player1.addItem('Human', None)
+        self.ui.player2.addItem('Human', None)
         for name, heuristic in heuristics:
             self.ui.player1.addItem(name, heuristic)
             self.ui.player2.addItem(name, heuristic)
@@ -167,23 +165,23 @@ class MainWindow(QMainWindow):
 
     def load_heuristics(self):
         game = self.game
-        heuristics = []
-        entry: EntryPoint
-        for entry in iter_entry_points('zero_play.heuristic'):
-            try:
-                heuristic_class = entry.load()
-            except ImportError as ex:
-                library_path = os.environ.get('LD_LIBRARY_PATH')
-                if library_path is not None:
-                    raise
-                message = (f'Unable to load entry {entry.name}. Do you need to '
-                           f'set LD_LIBRARY_PATH?')
-                raise ImportError(message) from ex
-            try:
-                heuristic: Heuristic = heuristic_class(game)
-            except ValueError:
-                continue
-            heuristics.append((entry.name, heuristic))
+        heuristics = [('Computer', Playout(game))]
+        # entry: EntryPoint
+        # for entry in iter_entry_points('zero_play.heuristic'):
+        #     try:
+        #         heuristic_class = entry.load()
+        #     except ImportError as ex:
+        #         library_path = os.environ.get('LD_LIBRARY_PATH')
+        #         if library_path is not None:
+        #             raise
+        #         message = (f'Unable to load entry {entry.name}. Do you need to '
+        #                    f'set LD_LIBRARY_PATH?')
+        #         raise ImportError(message) from ex
+        #     try:
+        #         heuristic: Heuristic = heuristic_class(game)
+        #     except ValueError:
+        #         continue
+        #     heuristics.append((entry.name, heuristic))
         return heuristics
 
     def on_cancel(self):

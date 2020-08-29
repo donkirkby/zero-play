@@ -96,30 +96,10 @@ class Ui_MainWindow(object):
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.gridLayout = QGridLayout()
         self.gridLayout.setObjectName(u"gridLayout")
-        self.network1 = QPushButton(self.players_page)
-        self.network1.setObjectName(u"network1")
-
-        self.gridLayout.addWidget(self.network1, 3, 1, 1, 1)
-
-        self.start = QPushButton(self.players_page)
-        self.start.setObjectName(u"start")
-
-        self.gridLayout.addWidget(self.start, 6, 1, 1, 1)
-
         self.label = QLabel(self.players_page)
         self.label.setObjectName(u"label")
 
-        self.gridLayout.addWidget(self.label, 4, 0, 1, 1)
-
-        self.player1 = QComboBox(self.players_page)
-        self.player1.setObjectName(u"player1")
-
-        self.gridLayout.addWidget(self.player1, 2, 1, 1, 1)
-
-        self.cancel = QPushButton(self.players_page)
-        self.cancel.setObjectName(u"cancel")
-
-        self.gridLayout.addWidget(self.cancel, 6, 0, 1, 1)
+        self.gridLayout.addWidget(self.label, 2, 0, 1, 1)
 
         self.game_label_2 = QLabel(self.players_page)
         self.game_label_2.setObjectName(u"game_label_2")
@@ -129,32 +109,32 @@ class Ui_MainWindow(object):
         sizePolicy2.setHeightForWidth(self.game_label_2.sizePolicy().hasHeightForWidth())
         self.game_label_2.setSizePolicy(sizePolicy2)
 
-        self.gridLayout.addWidget(self.game_label_2, 2, 0, 1, 1)
+        self.gridLayout.addWidget(self.game_label_2, 1, 0, 1, 1)
+
+        self.player2 = QComboBox(self.players_page)
+        self.player2.setObjectName(u"player2")
+
+        self.gridLayout.addWidget(self.player2, 2, 1, 1, 1)
 
         self.game_name = QLabel(self.players_page)
         self.game_name.setObjectName(u"game_name")
 
         self.gridLayout.addWidget(self.game_name, 0, 1, 1, 1)
 
-        self.label_2 = QLabel(self.players_page)
-        self.label_2.setObjectName(u"label_2")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.label_2.sizePolicy().hasHeightForWidth())
-        self.label_2.setSizePolicy(sizePolicy3)
+        self.cancel = QPushButton(self.players_page)
+        self.cancel.setObjectName(u"cancel")
 
-        self.gridLayout.addWidget(self.label_2, 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.cancel, 3, 0, 1, 1)
 
-        self.player2 = QComboBox(self.players_page)
-        self.player2.setObjectName(u"player2")
+        self.player1 = QComboBox(self.players_page)
+        self.player1.setObjectName(u"player1")
 
-        self.gridLayout.addWidget(self.player2, 4, 1, 1, 1)
+        self.gridLayout.addWidget(self.player1, 1, 1, 1, 1)
 
-        self.lineEdit = QLineEdit(self.players_page)
-        self.lineEdit.setObjectName(u"lineEdit")
+        self.start = QPushButton(self.players_page)
+        self.start.setObjectName(u"start")
 
-        self.gridLayout.addWidget(self.lineEdit, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.start, 3, 1, 1, 1)
 
         self.game_label = QLabel(self.players_page)
         self.game_label.setObjectName(u"game_label")
@@ -162,16 +142,6 @@ class Ui_MainWindow(object):
         self.game_label.setSizePolicy(sizePolicy2)
 
         self.gridLayout.addWidget(self.game_label, 0, 0, 1, 1)
-
-        self.label_3 = QLabel(self.players_page)
-        self.label_3.setObjectName(u"label_3")
-
-        self.gridLayout.addWidget(self.label_3, 3, 0, 1, 1)
-
-        self.network2 = QPushButton(self.players_page)
-        self.network2.setObjectName(u"network2")
-
-        self.gridLayout.addWidget(self.network2, 5, 1, 1, 1)
 
 
         self.verticalLayout.addLayout(self.gridLayout)
@@ -190,21 +160,21 @@ class Ui_MainWindow(object):
 
         self.resume_here = QPushButton(self.display_page)
         self.resume_here.setObjectName(u"resume_here")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.resume_here.sizePolicy().hasHeightForWidth())
-        self.resume_here.setSizePolicy(sizePolicy4)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.resume_here.sizePolicy().hasHeightForWidth())
+        self.resume_here.setSizePolicy(sizePolicy3)
 
         self.gridLayout_2.addWidget(self.resume_here, 4, 0, 1, 1)
 
         self.choices = QTableWidget(self.display_page)
         self.choices.setObjectName(u"choices")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        sizePolicy5.setHorizontalStretch(0)
-        sizePolicy5.setVerticalStretch(0)
-        sizePolicy5.setHeightForWidth(self.choices.sizePolicy().hasHeightForWidth())
-        self.choices.setSizePolicy(sizePolicy5)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.choices.sizePolicy().hasHeightForWidth())
+        self.choices.setSizePolicy(sizePolicy4)
 
         self.gridLayout_2.addWidget(self.choices, 2, 0, 1, 3)
 
@@ -215,11 +185,11 @@ class Ui_MainWindow(object):
 
         self.move_history = QComboBox(self.display_page)
         self.move_history.setObjectName(u"move_history")
-        sizePolicy6 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        sizePolicy6.setHorizontalStretch(1)
-        sizePolicy6.setVerticalStretch(0)
-        sizePolicy6.setHeightForWidth(self.move_history.sizePolicy().hasHeightForWidth())
-        self.move_history.setSizePolicy(sizePolicy6)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy5.setHorizontalStretch(1)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.move_history.sizePolicy().hasHeightForWidth())
+        self.move_history.setSizePolicy(sizePolicy5)
 
         self.gridLayout_2.addWidget(self.move_history, 4, 1, 1, 1)
 
@@ -287,16 +257,12 @@ class Ui_MainWindow(object):
         self.connect4.setText(QCoreApplication.translate("MainWindow", u"Connect 4", None))
         self.tic_tac_toe.setText(QCoreApplication.translate("MainWindow", u"Tic Tac Toe", None))
         self.othello.setText(QCoreApplication.translate("MainWindow", u"Othello", None))
-        self.network1.setText(QCoreApplication.translate("MainWindow", u"Network 1...", None))
-        self.start.setText(QCoreApplication.translate("MainWindow", u"Start", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Player 2:", None))
-        self.cancel.setText(QCoreApplication.translate("MainWindow", u"Cancel", None))
         self.game_label_2.setText(QCoreApplication.translate("MainWindow", u"Player 1:", None))
         self.game_name.setText(QCoreApplication.translate("MainWindow", u"Chosen Game's Name", None))
-        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Description:", None))
+        self.cancel.setText(QCoreApplication.translate("MainWindow", u"Cancel", None))
+        self.start.setText(QCoreApplication.translate("MainWindow", u"Start", None))
         self.game_label.setText(QCoreApplication.translate("MainWindow", u"Game:", None))
-        self.label_3.setText("")
-        self.network2.setText(QCoreApplication.translate("MainWindow", u"Network 2...", None))
         self.toggle_review.setText(QCoreApplication.translate("MainWindow", u"Review / Resume", None))
         self.resume_here.setText(QCoreApplication.translate("MainWindow", u"Resume Here", None))
         self.menu_file.setTitle(QCoreApplication.translate("MainWindow", u"&File", None))
