@@ -9,6 +9,7 @@ before_install:
 install:
     - pipenv install --dev
     - pipenv graph
+    - pip install -e .
 script:
     - set -e
     - mypy zero_play
