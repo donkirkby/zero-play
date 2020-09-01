@@ -10,7 +10,7 @@ import numpy as np
 from PySide2.QtGui import QResizeEvent, Qt
 from PySide2.QtWidgets import (QApplication, QMainWindow, QFileDialog,
                                QTableWidgetItem, QGridLayout, QPushButton,
-                               QSizePolicy, QDialog, QWidget, QLabel)
+                               QSizePolicy, QDialog, QWidget, QLabel, QComboBox)
 from pkg_resources import iter_entry_points
 
 import zero_play
@@ -58,6 +58,12 @@ class MainWindow(QMainWindow):
         self.ui.action_about.triggered.connect(self.on_about)
         self.ui.toggle_review.clicked.connect(self.on_toggle_review)
         self.ui.move_history.currentIndexChanged.connect(self.on_move_history)
+        self.ui.player1.currentIndexChanged.connect(
+            lambda new_index: self.on_player_changed(self.ui.player1, new_index))
+        self.ui.player2.currentIndexChanged.connect(
+            lambda new_index: self.on_player_changed(self.ui.player2, new_index))
+        self.ui.searches1.setValue(600)
+        self.ui.searches2.setValue(600)
         self.all_displays = []
         self.populate_game_list(self.ui.game_page.layout())
         self.game = None
@@ -66,6 +72,7 @@ class MainWindow(QMainWindow):
         self.board_to_resume: typing.Optional[np.ndarray] = None
         self.review_names = [name.strip()
                              for name in self.ui.toggle_review.text().split('/')]
+        self.are_coordinates_always_visible = False
         self.on_toggle_review()
 
     def on_about(self):
@@ -103,8 +110,15 @@ class MainWindow(QMainWindow):
             if self.display is not None:
                 self.display.update_board(self.board_to_resume)
             self.board_to_resume = None
+            self.ui.action_coordinates.setChecked(
+                self.are_coordinates_always_visible)
+            self.on_view_coordinates(self.are_coordinates_always_visible)
         else:
             self.board_to_resume = self.display.current_board
+            self.are_coordinates_always_visible = (
+                self.ui.action_coordinates.isChecked())
+            self.ui.action_coordinates.setChecked(True)
+            self.on_view_coordinates(True)
             choices.clear()
             choices.setRowCount(1)
             choices.setColumnCount(20)
@@ -163,6 +177,21 @@ class MainWindow(QMainWindow):
         self.ui.stacked_widget.setCurrentWidget(self.ui.players_page)
         QApplication.restoreOverrideCursor()
 
+    def on_player_changed(self, player: QComboBox, new_index: int):
+        if player is self.ui.player1:
+            searches = self.ui.searches1
+            searches_label = self.ui.searches_label1
+            row = 1
+        else:
+            searches = self.ui.searches2
+            searches_label = self.ui.searches_label2
+            row = 2
+        heuristic = player.itemData(new_index)
+        searches.setVisible(heuristic is not None)
+        searches_label.setVisible(heuristic is not None)
+        colspan = 3 if heuristic is None else 1
+        self.ui.player_layout.addWidget(player, row, 1, 1, colspan)
+
     def load_heuristics(self):
         game = self.game
         heuristics = [('Computer', Playout(game))]
@@ -196,11 +225,13 @@ class MainWindow(QMainWindow):
 
     def on_start(self):
         self.display.update_board(self.display.game.create_board())
-        mcts_choices = {self.game.X_PLAYER: self.ui.player1.currentData(),
-                        self.game.O_PLAYER: self.ui.player2.currentData()}
+        mcts_choices = {self.game.X_PLAYER: (self.ui.player1.currentData(),
+                                             self.ui.searches1.value()),
+                        self.game.O_PLAYER: (self.ui.player2.currentData(),
+                                             self.ui.searches2.value())}
         self.display.mcts_players = [
-            MctsPlayer(self.game, player_number, iteration_count=600)
-            for player_number, heuristic in mcts_choices.items()
+            MctsPlayer(self.game, player_number, iteration_count=searches)
+            for player_number, (heuristic, searches) in mcts_choices.items()
             if heuristic is not None]
         layout: QGridLayout = self.ui.display_page.layout()
         layout.removeWidget(self.ui.display_view)
@@ -231,8 +262,9 @@ class MainWindow(QMainWindow):
             self.display.update_board(self.display.current_board)
             self.display.request_move()
 
-    def on_view_coordinates(self, is_checked):
-        self.display.show_coordinates = is_checked
+    def on_view_coordinates(self, is_checked: bool):
+        if self.display is not None:
+            self.display.show_coordinates = is_checked
 
     def on_plot(self):
         self.ui.stacked_widget.setCurrentWidget(self.ui.plot_page)

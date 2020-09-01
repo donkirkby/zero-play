@@ -94,57 +94,100 @@ class Ui_MainWindow(object):
         self.players_page.setObjectName(u"players_page")
         self.verticalLayout = QVBoxLayout(self.players_page)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.gridLayout = QGridLayout()
-        self.gridLayout.setObjectName(u"gridLayout")
-        self.label = QLabel(self.players_page)
-        self.label.setObjectName(u"label")
+        self.player_layout = QGridLayout()
+        self.player_layout.setObjectName(u"player_layout")
+        self.cancel = QPushButton(self.players_page)
+        self.cancel.setObjectName(u"cancel")
 
-        self.gridLayout.addWidget(self.label, 2, 0, 1, 1)
-
-        self.game_label_2 = QLabel(self.players_page)
-        self.game_label_2.setObjectName(u"game_label_2")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.game_label_2.sizePolicy().hasHeightForWidth())
-        self.game_label_2.setSizePolicy(sizePolicy2)
-
-        self.gridLayout.addWidget(self.game_label_2, 1, 0, 1, 1)
+        self.player_layout.addWidget(self.cancel, 3, 0, 1, 1)
 
         self.player2 = QComboBox(self.players_page)
         self.player2.setObjectName(u"player2")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.player2.sizePolicy().hasHeightForWidth())
+        self.player2.setSizePolicy(sizePolicy2)
 
-        self.gridLayout.addWidget(self.player2, 2, 1, 1, 1)
+        self.player_layout.addWidget(self.player2, 2, 1, 1, 1)
+
+        self.player1 = QComboBox(self.players_page)
+        self.player1.setObjectName(u"player1")
+        sizePolicy2.setHeightForWidth(self.player1.sizePolicy().hasHeightForWidth())
+        self.player1.setSizePolicy(sizePolicy2)
+
+        self.player_layout.addWidget(self.player1, 1, 1, 1, 1)
+
+        self.game_label = QLabel(self.players_page)
+        self.game_label.setObjectName(u"game_label")
+        sizePolicy3 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.game_label.sizePolicy().hasHeightForWidth())
+        self.game_label.setSizePolicy(sizePolicy3)
+
+        self.player_layout.addWidget(self.game_label, 0, 0, 1, 1)
+
+        self.label = QLabel(self.players_page)
+        self.label.setObjectName(u"label")
+
+        self.player_layout.addWidget(self.label, 2, 0, 1, 1)
+
+        self.game_label_2 = QLabel(self.players_page)
+        self.game_label_2.setObjectName(u"game_label_2")
+        sizePolicy3.setHeightForWidth(self.game_label_2.sizePolicy().hasHeightForWidth())
+        self.game_label_2.setSizePolicy(sizePolicy3)
+
+        self.player_layout.addWidget(self.game_label_2, 1, 0, 1, 1)
+
+        self.searches2 = QSpinBox(self.players_page)
+        self.searches2.setObjectName(u"searches2")
+        sizePolicy4 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.searches2.sizePolicy().hasHeightForWidth())
+        self.searches2.setSizePolicy(sizePolicy4)
+        self.searches2.setMaximum(1000000)
+
+        self.player_layout.addWidget(self.searches2, 2, 2, 1, 1)
+
+        self.searches1 = QSpinBox(self.players_page)
+        self.searches1.setObjectName(u"searches1")
+        sizePolicy4.setHeightForWidth(self.searches1.sizePolicy().hasHeightForWidth())
+        self.searches1.setSizePolicy(sizePolicy4)
+        self.searches1.setMaximum(1000000)
+
+        self.player_layout.addWidget(self.searches1, 1, 2, 1, 1)
+
+        self.searches_label1 = QLabel(self.players_page)
+        self.searches_label1.setObjectName(u"searches_label1")
+        sizePolicy5 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.searches_label1.sizePolicy().hasHeightForWidth())
+        self.searches_label1.setSizePolicy(sizePolicy5)
+
+        self.player_layout.addWidget(self.searches_label1, 1, 3, 1, 1)
+
+        self.searches_label2 = QLabel(self.players_page)
+        self.searches_label2.setObjectName(u"searches_label2")
+
+        self.player_layout.addWidget(self.searches_label2, 2, 3, 1, 1)
 
         self.game_name = QLabel(self.players_page)
         self.game_name.setObjectName(u"game_name")
 
-        self.gridLayout.addWidget(self.game_name, 0, 1, 1, 1)
-
-        self.cancel = QPushButton(self.players_page)
-        self.cancel.setObjectName(u"cancel")
-
-        self.gridLayout.addWidget(self.cancel, 3, 0, 1, 1)
-
-        self.player1 = QComboBox(self.players_page)
-        self.player1.setObjectName(u"player1")
-
-        self.gridLayout.addWidget(self.player1, 1, 1, 1, 1)
+        self.player_layout.addWidget(self.game_name, 0, 1, 1, 3)
 
         self.start = QPushButton(self.players_page)
         self.start.setObjectName(u"start")
 
-        self.gridLayout.addWidget(self.start, 3, 1, 1, 1)
+        self.player_layout.addWidget(self.start, 3, 1, 1, 3)
 
-        self.game_label = QLabel(self.players_page)
-        self.game_label.setObjectName(u"game_label")
-        sizePolicy2.setHeightForWidth(self.game_label.sizePolicy().hasHeightForWidth())
-        self.game_label.setSizePolicy(sizePolicy2)
+        self.player_layout.setColumnStretch(1, 10)
+        self.player_layout.setColumnStretch(2, 1)
 
-        self.gridLayout.addWidget(self.game_label, 0, 0, 1, 1)
-
-
-        self.verticalLayout.addLayout(self.gridLayout)
+        self.verticalLayout.addLayout(self.player_layout)
 
         self.stacked_widget.addWidget(self.players_page)
         self.display_page = QWidget()
@@ -153,28 +196,25 @@ class Ui_MainWindow(object):
         self.gridLayout_2.setObjectName(u"gridLayout_2")
         self.toggle_review = QPushButton(self.display_page)
         self.toggle_review.setObjectName(u"toggle_review")
-        sizePolicy2.setHeightForWidth(self.toggle_review.sizePolicy().hasHeightForWidth())
-        self.toggle_review.setSizePolicy(sizePolicy2)
+        sizePolicy3.setHeightForWidth(self.toggle_review.sizePolicy().hasHeightForWidth())
+        self.toggle_review.setSizePolicy(sizePolicy3)
 
         self.gridLayout_2.addWidget(self.toggle_review, 4, 2, 1, 1)
 
         self.resume_here = QPushButton(self.display_page)
         self.resume_here.setObjectName(u"resume_here")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.resume_here.sizePolicy().hasHeightForWidth())
-        self.resume_here.setSizePolicy(sizePolicy3)
+        sizePolicy4.setHeightForWidth(self.resume_here.sizePolicy().hasHeightForWidth())
+        self.resume_here.setSizePolicy(sizePolicy4)
 
         self.gridLayout_2.addWidget(self.resume_here, 4, 0, 1, 1)
 
         self.choices = QTableWidget(self.display_page)
         self.choices.setObjectName(u"choices")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.choices.sizePolicy().hasHeightForWidth())
-        self.choices.setSizePolicy(sizePolicy4)
+        sizePolicy6 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        sizePolicy6.setHorizontalStretch(0)
+        sizePolicy6.setVerticalStretch(0)
+        sizePolicy6.setHeightForWidth(self.choices.sizePolicy().hasHeightForWidth())
+        self.choices.setSizePolicy(sizePolicy6)
 
         self.gridLayout_2.addWidget(self.choices, 2, 0, 1, 3)
 
@@ -185,11 +225,11 @@ class Ui_MainWindow(object):
 
         self.move_history = QComboBox(self.display_page)
         self.move_history.setObjectName(u"move_history")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        sizePolicy5.setHorizontalStretch(1)
-        sizePolicy5.setVerticalStretch(0)
-        sizePolicy5.setHeightForWidth(self.move_history.sizePolicy().hasHeightForWidth())
-        self.move_history.setSizePolicy(sizePolicy5)
+        sizePolicy7 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy7.setHorizontalStretch(1)
+        sizePolicy7.setVerticalStretch(0)
+        sizePolicy7.setHeightForWidth(self.move_history.sizePolicy().hasHeightForWidth())
+        self.move_history.setSizePolicy(sizePolicy7)
 
         self.gridLayout_2.addWidget(self.move_history, 4, 1, 1, 1)
 
@@ -257,12 +297,14 @@ class Ui_MainWindow(object):
         self.connect4.setText(QCoreApplication.translate("MainWindow", u"Connect 4", None))
         self.tic_tac_toe.setText(QCoreApplication.translate("MainWindow", u"Tic Tac Toe", None))
         self.othello.setText(QCoreApplication.translate("MainWindow", u"Othello", None))
+        self.cancel.setText(QCoreApplication.translate("MainWindow", u"Cancel", None))
+        self.game_label.setText(QCoreApplication.translate("MainWindow", u"Game:", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Player 2:", None))
         self.game_label_2.setText(QCoreApplication.translate("MainWindow", u"Player 1:", None))
+        self.searches_label1.setText(QCoreApplication.translate("MainWindow", u"searches", None))
+        self.searches_label2.setText(QCoreApplication.translate("MainWindow", u"searches", None))
         self.game_name.setText(QCoreApplication.translate("MainWindow", u"Chosen Game's Name", None))
-        self.cancel.setText(QCoreApplication.translate("MainWindow", u"Cancel", None))
         self.start.setText(QCoreApplication.translate("MainWindow", u"Start", None))
-        self.game_label.setText(QCoreApplication.translate("MainWindow", u"Game:", None))
         self.toggle_review.setText(QCoreApplication.translate("MainWindow", u"Review / Resume", None))
         self.resume_here.setText(QCoreApplication.translate("MainWindow", u"Resume Here", None))
         self.menu_file.setTitle(QCoreApplication.translate("MainWindow", u"&File", None))
