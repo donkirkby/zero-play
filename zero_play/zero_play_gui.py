@@ -6,6 +6,7 @@ from itertools import chain
 from operator import attrgetter
 
 import numpy as np
+from PySide2.QtCore import QSettings
 
 from PySide2.QtGui import QResizeEvent, Qt
 from PySide2.QtWidgets import (QApplication, QMainWindow, QFileDialog,
@@ -48,6 +49,7 @@ class MainWindow(QMainWindow):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.settings = QSettings("Don Kirkby", "Zero Play")
         self.plot_canvas = PlotCanvas(self.ui.centralwidget)
         self.ui.plot_page.layout().addWidget(self.plot_canvas)
         self.ui.cancel.clicked.connect(self.on_cancel)
@@ -62,8 +64,7 @@ class MainWindow(QMainWindow):
             lambda new_index: self.on_player_changed(self.ui.player1, new_index))
         self.ui.player2.currentIndexChanged.connect(
             lambda new_index: self.on_player_changed(self.ui.player2, new_index))
-        self.ui.searches1.setValue(600)
-        self.ui.searches2.setValue(600)
+        self.ui.searches1.valueChanged.connect(self.on_searches_changed)
         self.all_displays = []
         self.populate_game_list(self.ui.game_page.layout())
         self.game = None
@@ -165,7 +166,12 @@ class MainWindow(QMainWindow):
         self.game = game
         self.setWindowTitle(f'ZeroPlay - {game.name}')
         self.ui.game_name.setText(game.name)
+        search_count = self.settings.value(f'{game.name} searches', 600, int)
+        self.ui.searches1.setValue(search_count)
+        self.ui.searches2.setValue(search_count)
         heuristics = self.load_heuristics()
+        player1_index = self.settings.value(f'{self.game.name} player 1', 0, int)
+        player2_index = self.settings.value(f'{self.game.name} player 2', 0, int)
         self.ui.player1.clear()
         self.ui.player2.clear()
         self.ui.player1.addItem('Human', None)
@@ -174,18 +180,26 @@ class MainWindow(QMainWindow):
             self.ui.player1.addItem(name, heuristic)
             self.ui.player2.addItem(name, heuristic)
 
+        self.ui.player1.setCurrentIndex(player1_index)
+        self.ui.player2.setCurrentIndex(player2_index)
         self.ui.stacked_widget.setCurrentWidget(self.ui.players_page)
         QApplication.restoreOverrideCursor()
 
     def on_player_changed(self, player: QComboBox, new_index: int):
+        if new_index < 0:
+            # Combo box was cleared.
+            return
         if player is self.ui.player1:
             searches = self.ui.searches1
             searches_label = self.ui.searches_label1
+            setting_name = f'{self.game.name} player 1'
             row = 1
         else:
             searches = self.ui.searches2
             searches_label = self.ui.searches_label2
+            setting_name = f'{self.game.name} player 2'
             row = 2
+        self.settings.setValue(setting_name, new_index)
         heuristic = player.itemData(new_index)
         searches.setVisible(heuristic is not None)
         searches_label.setVisible(heuristic is not None)
@@ -268,6 +282,10 @@ class MainWindow(QMainWindow):
 
     def on_plot(self):
         self.ui.stacked_widget.setCurrentWidget(self.ui.plot_page)
+
+    def on_searches_changed(self, search_count: int):
+        if self.game is not None:
+            self.settings.setValue(f'{self.game.name} searches', search_count)
 
 
 def main():
