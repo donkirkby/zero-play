@@ -55,3 +55,13 @@ it by installing those dependencies like this:
 If you'd like to help out with the project, or add your own games, see the
 `CONTRIBUTING.md` file in the source code. For all the details, look through the
 design [journal] for the project.
+
+## Related Projects
+Here are some similar projects for inspiration or collaboration:
+
+* I already mentioned the [alpha-zero-general project]. It was a big inspiration, but I'm trying to build something
+    that's easier to add new games to, or use as a library within another project.
+* [Galvanise] looks interesting. It's a mix of Python and C++, using Tensorflow. As of 2020, it looks like a single
+    developer, without much documentation. The games are defined with GDL, not Python code.
+
+[Galvanise]: https://github.com/richemslie/galvanise_zero

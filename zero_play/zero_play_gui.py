@@ -119,9 +119,12 @@ class MainWindow(QMainWindow):
 
     def on_toggle_review(self):
         choices = self.ui.choices
-        is_review_visible = self.ui.toggle_review.text() == self.review_names[0]
+        current_page = self.ui.stacked_widget.currentWidget()
+        is_game_displayed = current_page is self.ui.display_page
+        is_named_review = self.ui.toggle_review.text() == self.review_names[0]
+        is_review_visible = is_game_displayed and is_named_review
         if not is_review_visible:
-            if self.display is not None:
+            if self.display is not None and self.board_to_resume is not None:
                 self.display.update_board(self.board_to_resume)
             self.board_to_resume = None
             self.ui.action_coordinates.setChecked(
@@ -200,6 +203,7 @@ class MainWindow(QMainWindow):
         self.ui.player1.setCurrentIndex(player1_index)
         self.ui.player2.setCurrentIndex(player2_index)
         self.ui.stacked_widget.setCurrentWidget(self.ui.players_page)
+        self.on_toggle_review()
         QApplication.restoreOverrideCursor()
 
     def on_player_changed(self, player: QComboBox, new_index: int):
