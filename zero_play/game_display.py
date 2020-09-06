@@ -17,6 +17,7 @@ class GameDisplay(QGraphicsView):
 
     move_needed = Signal(int, np.ndarray)  # active_player, board
     move_made = Signal(np.ndarray)  # board
+    game_ended = Signal(np.ndarray)  # final_board
 
     def __init__(self, game: Game):
         super().__init__(scene=QGraphicsScene())
@@ -101,6 +102,9 @@ class GameDisplay(QGraphicsView):
         self.move_made.emit(self.current_board)
         self.current_board = self.game.make_move(self.current_board, move)
         self.update_board(self.current_board)
+        if self.game.is_ended(self.current_board):
+            # noinspection PyUnresolvedReferences
+            self.game_ended.emit(self.current_board)
 
         forced_move = self.get_forced_move()
         if forced_move is None:

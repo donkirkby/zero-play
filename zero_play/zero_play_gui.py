@@ -16,11 +16,13 @@ from pkg_resources import iter_entry_points
 
 import zero_play
 from zero_play.about_dialog import Ui_Dialog
+from zero_play.game import Game
 from zero_play.game_display import GameDisplay
 from zero_play.grid_display import GridDisplay
 from zero_play.main_window import Ui_MainWindow
 from zero_play.mcts_player import MctsPlayer
 from zero_play.playout import Playout
+from zero_play.strength_adjuster import StrengthAdjuster
 
 try:
     from zero_play.plot_canvas import PlotCanvas
@@ -43,13 +45,21 @@ class AboutDialog(QDialog):
             credits_layout.addWidget(QLabel(text), row, 1)
 
 
+def get_settings(game: Game = None):
+    settings = QSettings("Don Kirkby", "Zero Play")
+    if game is not None:
+        settings.beginGroup('games')
+        settings.beginGroup(game.name.replace(' ', '_'))
+
+    return settings
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.settings = QSettings("Don Kirkby", "Zero Play")
         self.plot_canvas = PlotCanvas(self.ui.centralwidget)
         self.ui.plot_page.layout().addWidget(self.plot_canvas)
         self.ui.cancel.clicked.connect(self.on_cancel)
@@ -65,8 +75,10 @@ class MainWindow(QMainWindow):
         self.ui.player2.currentIndexChanged.connect(
             lambda new_index: self.on_player_changed(self.ui.player2, new_index))
         self.ui.searches1.valueChanged.connect(self.on_searches_changed)
+        self.ui.searches_lock1.stateChanged.connect(self.on_lock_changed)
+        self.ui.searches_lock2.stateChanged.connect(self.on_lock_changed)
         self.all_displays = []
-        self.populate_game_list(self.ui.game_page.layout())
+        self.load_game_list(self.ui.game_page.layout())
         self.game = None
         self.display: typing.Optional[GridDisplay] = None
         self.on_new_game()
@@ -82,7 +94,7 @@ class MainWindow(QMainWindow):
         dialog = AboutDialog(credit_pairs, self)
         dialog.exec_()
 
-    def populate_game_list(self, game_layout: QGridLayout):
+    def load_game_list(self, game_layout: QGridLayout):
         while game_layout.count():
             child = game_layout.takeAt(0)
             if child.widget():
@@ -92,6 +104,7 @@ class MainWindow(QMainWindow):
             display_class = game_entry.load()
             display: GameDisplay = display_class()
             self.destroyed.connect(display.close)
+            display.game_ended.connect(self.on_game_ended)  # type: ignore
             games.append(display)
         games.sort(key=attrgetter('game.name'))
         column_count = math.ceil(math.sqrt(len(games)))
@@ -166,12 +179,16 @@ class MainWindow(QMainWindow):
         self.game = game
         self.setWindowTitle(f'ZeroPlay - {game.name}')
         self.ui.game_name.setText(game.name)
-        search_count = self.settings.value(f'{game.name} searches', 600, int)
+        settings = get_settings(game)
+        is_locked = settings.value('searches_locked', False, bool)
+        self.ui.searches_lock1.setChecked(is_locked)
+        self.ui.searches_lock2.setChecked(is_locked)
+        search_count = settings.value('searches', 600, int)
         self.ui.searches1.setValue(search_count)
         self.ui.searches2.setValue(search_count)
         heuristics = self.load_heuristics()
-        player1_index = self.settings.value(f'{self.game.name} player 1', 0, int)
-        player2_index = self.settings.value(f'{self.game.name} player 2', 0, int)
+        player1_index = settings.value('player_1', 0, int)
+        player2_index = settings.value('player_2', 0, int)
         self.ui.player1.clear()
         self.ui.player2.clear()
         self.ui.player1.addItem('Human', None)
@@ -189,21 +206,25 @@ class MainWindow(QMainWindow):
         if new_index < 0:
             # Combo box was cleared.
             return
+        settings = get_settings(self.game)
         if player is self.ui.player1:
             searches = self.ui.searches1
             searches_label = self.ui.searches_label1
-            setting_name = f'{self.game.name} player 1'
+            searches_lock = self.ui.searches_lock1
+            setting_name = 'player_1'
             row = 1
         else:
             searches = self.ui.searches2
             searches_label = self.ui.searches_label2
-            setting_name = f'{self.game.name} player 2'
+            searches_lock = self.ui.searches_lock2
+            setting_name = 'player_2'
             row = 2
-        self.settings.setValue(setting_name, new_index)
+        settings.setValue(setting_name, new_index)
         heuristic = player.itemData(new_index)
         searches.setVisible(heuristic is not None)
         searches_label.setVisible(heuristic is not None)
-        colspan = 3 if heuristic is None else 1
+        searches_lock.setVisible(heuristic is not None)
+        colspan = 4 if heuristic is None else 1
         self.ui.player_layout.addWidget(player, row, 1, 1, colspan)
 
     def load_heuristics(self):
@@ -284,8 +305,50 @@ class MainWindow(QMainWindow):
         self.ui.stacked_widget.setCurrentWidget(self.ui.plot_page)
 
     def on_searches_changed(self, search_count: int):
+        if self.ui.stacked_widget.currentWidget() is not self.ui.players_page:
+            return
         if self.game is not None:
-            self.settings.setValue(f'{self.game.name} searches', search_count)
+            settings = get_settings(self.game)
+            settings.setValue('searches', search_count)
+            settings.remove('game_count')
+            settings.remove('last_score')
+            settings.remove('streak_length')
+
+    def on_game_ended(self, board: np.ndarray):
+        if self.ui.searches_lock1.isChecked():
+            return
+        if self.display is None:
+            return
+        try:
+            mcts_player: MctsPlayer
+            mcts_player, = self.display.mcts_players
+        except ValueError:
+            # Didn't have exactly one MCTS player
+            return
+        winning_player = self.game.get_winner(board)
+        if winning_player == mcts_player.player_number:
+            score = -1
+        elif winning_player == Game.NO_PLAYER:
+            score = 0
+        else:
+            score = 1
+        settings = get_settings(self.game)
+        strength_adjuster = StrengthAdjuster(
+            strength=mcts_player.iteration_count,
+            game_count=settings.value('game_count', 0, int),
+            last_score=settings.value('last_score', 0, int),
+            streak_length=settings.value('streak_length', 1, int))
+        strength_adjuster.record_score(score)
+        settings.setValue('searches', strength_adjuster.strength)
+        settings.setValue('game_count', strength_adjuster.game_count)
+        settings.setValue('last_score', strength_adjuster.last_score)
+        settings.setValue('streak_length', strength_adjuster.streak_length)
+
+    def on_lock_changed(self, is_checked):
+        self.ui.searches_lock1.setChecked(is_checked)
+        self.ui.searches_lock2.setChecked(is_checked)
+        settings = get_settings(self.game)
+        settings.setValue('searches_locked', is_checked)
 
 
 def main():
