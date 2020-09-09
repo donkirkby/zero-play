@@ -33,7 +33,6 @@ setup(name='zero_play',
       extras_require={'ml': ['tensorflow'],
                       'ml-gpu': ['tensorflow-gpu']},
       entry_points={
-          'console_scripts': ['zero_play=zero_play.zero_play:main'],
           'gui_scripts': ['zero_play_gui=zero_play.zero_play_gui:main'],
           # The game entry point lets you add rules for new games.
           # The zero_play.game.Game class is a useful base class.

@@ -10,7 +10,7 @@ from zero_play.connect4.neural_net import NeuralNet
 from zero_play.game import Game, GridGame
 from zero_play.human_player import HumanPlayer
 from zero_play.mcts_player import MctsPlayer
-from zero_play.zero_play import create_parser
+from zero_play.zero_play_console import create_parser
 
 
 class FirstPlayerWinsGame(GridGame):
