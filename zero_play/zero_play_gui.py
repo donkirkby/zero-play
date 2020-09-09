@@ -4,6 +4,7 @@ import typing
 from functools import partial
 from itertools import chain
 from operator import attrgetter
+from random import shuffle
 
 import numpy as np
 from PySide2.QtCore import QSettings
@@ -137,8 +138,8 @@ class MainWindow(QMainWindow):
             self.ui.action_coordinates.setChecked(True)
             self.on_view_coordinates(True)
             choices.clear()
-            choices.setRowCount(1)
-            choices.setColumnCount(20)
+            choices.setRowCount(3)
+            choices.setColumnCount(10)
             choices.resizeColumnsToContents()
             choices.resizeRowsToContents()
             choices.setMaximumHeight(choices.horizontalHeader().height() +
@@ -161,11 +162,20 @@ class MainWindow(QMainWindow):
         assert self.display is not None
         history_item = self.display.log_display.items[item_index]
         self.display.update_board(history_item.board)
-        self.ui.choices.clear()
-        for i, (choice, probability) in enumerate(history_item.choices):
-            self.ui.choices.setItem(0, 2*i, QTableWidgetItem(choice))
-            self.ui.choices.setItem(0, 2*i+1, QTableWidgetItem(f'{probability}'))
-        self.ui.choices.resizeColumnsToContents()
+        choices = self.ui.choices
+        choices.clear()
+        choices.setColumnCount(len(history_item.choices))
+        choices.setVerticalHeaderLabels(['count', 'probability', 'value'])
+        choices.setHorizontalHeaderLabels([choice[0]
+                                           for choice in history_item.choices])
+        for i, (choice,
+                probability,
+                count,
+                value) in enumerate(history_item.choices):
+            choices.setItem(0, i, QTableWidgetItem(f'{count}'))
+            choices.setItem(1, i, QTableWidgetItem(f'{probability}'))
+            choices.setItem(2, i, QTableWidgetItem(f'{value}'))
+        choices.resizeColumnsToContents()
 
     def on_new_game(self):
         if self.display is not None:
@@ -189,6 +199,9 @@ class MainWindow(QMainWindow):
         search_count = settings.value('searches', 600, int)
         self.ui.searches1.setValue(search_count)
         self.ui.searches2.setValue(search_count)
+        self.ui.shuffle_players.setChecked(settings.value('shuffle_players',
+                                                          False,
+                                                          bool))
         heuristics = self.load_heuristics()
         player1_index = settings.value('player_1', 0, int)
         player2_index = settings.value('player_2', 0, int)
@@ -203,6 +216,7 @@ class MainWindow(QMainWindow):
         self.ui.player1.setCurrentIndex(player1_index)
         self.ui.player2.setCurrentIndex(player2_index)
         self.ui.stacked_widget.setCurrentWidget(self.ui.players_page)
+        self.board_to_resume = None
         self.on_toggle_review()
         QApplication.restoreOverrideCursor()
 
@@ -264,21 +278,27 @@ class MainWindow(QMainWindow):
 
     def on_start(self):
         self.display.update_board(self.display.game.create_board())
-        mcts_choices = {self.game.X_PLAYER: (self.ui.player1.currentData(),
-                                             self.ui.searches1.value()),
-                        self.game.O_PLAYER: (self.ui.player2.currentData(),
-                                             self.ui.searches2.value())}
+        ui = self.ui
+        player_fields = [(ui.player1.currentData(), ui.searches1.value()),
+                         (ui.player2.currentData(), ui.searches2.value())]
+        is_shuffled = ui.shuffle_players.isChecked()
+        settings = get_settings(self.game)
+        settings.setValue('shuffle_players', is_shuffled)
+        if is_shuffled:
+            shuffle(player_fields)
+        mcts_choices = {self.game.X_PLAYER: player_fields[0],
+                        self.game.O_PLAYER: player_fields[1]}
         self.display.mcts_players = [
             MctsPlayer(self.game, player_number, iteration_count=searches)
             for player_number, (heuristic, searches) in mcts_choices.items()
             if heuristic is not None]
-        layout: QGridLayout = self.ui.display_page.layout()
-        layout.removeWidget(self.ui.display_view)
-        self.ui.display_view.setVisible(False)
+        layout: QGridLayout = ui.display_page.layout()
+        layout.removeWidget(ui.display_view)
+        ui.display_view.setVisible(False)
         self.display.setVisible(True)
-        self.ui.display_view = self.display
+        ui.display_view = self.display
         layout.addWidget(self.display, 0, 0, 1, 3)
-        self.display.show_coordinates = self.ui.action_coordinates.isChecked()
+        self.display.show_coordinates = ui.action_coordinates.isChecked()
 
         self.on_view_game()
 

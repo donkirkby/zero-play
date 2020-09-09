@@ -85,6 +85,20 @@ X..
     assert np.array_equal(expected_moves, moves)
 
 
+def test_get_valid_moves_after_win():
+    text = """\
+XXX
+OO.
+...
+"""
+    expected_moves = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0])
+    game = TicTacToeGame()
+    board = game.create_board(text)
+    moves = game.get_valid_moves(board)
+
+    assert np.array_equal(expected_moves, moves)
+
+
 @pytest.mark.parametrize('text,expected_move', [
     ('1A', 0),
     ('1c', 2),

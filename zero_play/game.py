@@ -184,6 +184,9 @@ class GridGame(Game):
 
     def get_valid_moves(self, board: np.ndarray) -> np.ndarray:
         spaces = self.get_spaces(board)
+        if (self.is_win(board, self.X_PLAYER) or
+                self.is_win(board, self.O_PLAYER)):
+            return np.zeros(self.board_height*self.board_width, bool)
         return spaces.reshape(self.board_height *
                               self.board_width) == Game.NO_PLAYER
 

@@ -19,7 +19,9 @@ def test_analyse_move():
     log = LogDisplay(game)
     step = 1
     move = 3
-    move_probabilities = [('1A', 0.9), ('1B', 0.1), ('2A', 0.0)]
+    move_probabilities = [('1A', 0.9, 9, 0.9),
+                          ('1B', 0.1, 1, 0.1),
+                          ('2A', 0.0, 0, -0.1)]
     board = game.create_board()
 
     log.record_move(board, move)
@@ -34,7 +36,9 @@ def test_analyse_move_other_player():
     log = LogDisplay(game)
     step = 1
     move = 3
-    move_probabilities = [('1A', 0.8), ('1B', 0.1), ('2A', 0.1)]
+    move_probabilities = [('1A', 0.8, 8, 0.9),
+                          ('1B', 0.1, 1, 0.1),
+                          ('2A', 0.1, 1, -0.1)]
     board = game.create_board()
 
     log.record_move(board, move)
@@ -49,8 +53,12 @@ def test_analyse_move_both_players():
     log = LogDisplay(game)
     step = 1
     move = 3
-    move_probabilities_active_player = [('1A', 0.9), ('1B', 0.1), ('2A', 0.0)]
-    move_probabilities_other_player = [('1A', 0.8), ('1B', 0.1), ('2A', 0.1)]
+    move_probabilities_active_player = [('1A', 0.9, 9, 1.0),
+                                        ('1B', 0.1, 1, 0.1),
+                                        ('2A', 0.0, 0, 0.0)]
+    move_probabilities_other_player = [('1A', 0.8, 8, 0.9),
+                                       ('1B', 0.1, 1, 0.1),
+                                       ('2A', 0.1, 1, 0.1)]
     board = game.create_board()
 
     log.record_move(board, move)

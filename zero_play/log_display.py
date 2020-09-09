@@ -17,7 +17,9 @@ class LogItem:
     move_text: str
     board: np.ndarray
     comment: str = ''
-    choices: typing.Sequence[typing.Tuple[str, float]] = ()
+
+    # [(move_display, probability, value_count, avg_value)]
+    choices: typing.Sequence[typing.Tuple[str, float, int, float]] = ()
 
     def __str__(self):
         suffix = f' ({self.comment})' if self.comment else ''
@@ -53,10 +55,14 @@ class LogDisplay:
         move_text = self.game.display_move(board, move)
         self.items.append(LogItem(self.step, player, move_text, board))
 
-    def analyse_move(self,
-                     board: np.ndarray,
-                     analysing_player: int,
-                     move_probabilities: typing.List[typing.Tuple[str, float]]):
+    def analyse_move(
+            self,
+            board: np.ndarray,
+            analysing_player: int,
+            move_probabilities: typing.List[typing.Tuple[str,
+                                                         float,
+                                                         int,
+                                                         float]]):
         for item in reversed(self.items):
             if np.array_equal(item.board, board):
                 break
@@ -66,6 +72,9 @@ class LogDisplay:
         if item.choices and active_player != analysing_player:
             return
         item.choices = move_probabilities
-        for i, (choice, probability) in enumerate(move_probabilities, 1):
+        for i, (choice,
+                probability,
+                count,
+                value) in enumerate(move_probabilities, 1):
             if choice == item.move_text and i != 1:
                 item.comment = f'choice {i}'

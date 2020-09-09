@@ -335,9 +335,11 @@ def test_annotate():
     player.choose_move(board1)
     move_probabilities = player.get_move_probabilities(board1)
 
-    best_move, best_probability = move_probabilities[0]
+    best_move, best_probability, best_count, best_value = move_probabilities[0]
     assert best_move == '1A'
     assert best_probability == approx(0.999013)
+    assert best_count == 9
+    assert best_value == approx(-1/9)
 
 
 def test_create_training_data():

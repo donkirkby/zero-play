@@ -6,7 +6,7 @@ from zero_play.mcts_player import MctsPlayer
 
 class MctsWorker(QObject):
     move_chosen = Signal(int)
-    # board, analysing_player, [(move_text, probability)] for top 10 choices
+    # board, analysing_player, [(move_text, probability, count)] for top 10 choices
     move_analysed = Signal(np.ndarray, int, list)
 
     def __init__(self, player: MctsPlayer, parent: QObject = None):

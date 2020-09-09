@@ -121,10 +121,14 @@ class GameDisplay(QGraphicsView):
         return None
 
     @Slot(np.ndarray, int, list)  # type: ignore
-    def analyse_move(self,
-                     board: np.ndarray,
-                     analysing_player: int,
-                     move_probabilities: typing.List[typing.Tuple[str, float]]):
+    def analyse_move(
+            self,
+            board: np.ndarray,
+            analysing_player: int,
+            move_probabilities: typing.List[typing.Tuple[str,
+                                                         float,
+                                                         int,
+                                                         float]]):
         self.log_display.analyse_move(board,
                                       analysing_player,
                                       move_probabilities)

@@ -36,7 +36,7 @@ class SearchNode:
         self.move = move
         self.children: typing.Optional[typing.List[SearchNode]] = None
         self.child_predictions: typing.Optional[np.ndarray] = None
-        self.average_value = 0
+        self.average_value = 0.0
         self.value_count = 0
 
     def __repr__(self):
@@ -178,7 +178,21 @@ class SearchManager:
         assert child.move is not None
         return child.move
 
-    def get_move_probabilities(self, board: np.ndarray, limit: int = 10):
+    def get_move_probabilities(
+            self,
+            board: np.ndarray,
+            limit: int = 10) -> typing.List[typing.Tuple[str,
+                                                         float,
+                                                         int,
+                                                         float]]:
+        """ Report the probability that each move is the best choice.
+
+        :param board: the starting position
+        :param limit: the maximum number of moves to report
+        :return: [(move_display, probability, value_count, avg_value)], where
+        value_count is the number of times the value was probed from the move,
+        and avg_value is the average value from all those probes.
+        """
         self.find_node(board)
         children = self.current_node.find_all_children()
         temperature = 1.0
@@ -187,8 +201,11 @@ class SearchManager:
                                  key=itemgetter(0),
                                  reverse=True)
         top_children = ranked_children[:limit]
+        child_node: SearchNode
         top_moves = [(self.game.display_move(board, child_node.move),
-                      probability)
+                      probability,
+                      child_node.value_count,
+                      child_node.average_value)
                      for probability, child_node in top_children
                      if child_node.move is not None]
         return top_moves
@@ -287,8 +304,14 @@ class MctsPlayer(Player):
         return self.search_manager.get_best_move()
 
     def get_move_probabilities(self, board: np.ndarray) -> typing.List[
-            typing.Tuple[str, float]]:
-        """ Report the probability that each move is the best choice. """
+            typing.Tuple[str, float, int, float]]:
+        """ Report the probability that each move is the best choice.
+
+        :param board: the board to analyse
+        :return: [(move_display, probability, value_count, avg_value)], where
+        value_count is the number of times the value was probed from the move,
+        and avg_value is the average value from all those probes.
+        """
         return self.search_manager.get_move_probabilities(board)
 
     def get_summary(self) -> typing.Sequence[str]:
