@@ -79,3 +79,17 @@ def test_analyse_move_both_players():
                 board,
                 'choice 3',
                 move_probabilities_active_player)]
+
+
+def test_rewind():
+    game = TicTacToeGame()
+    log = LogDisplay(game)
+    board = game.create_board()
+    log.record_move(board, 0)
+    log.record_move(board, 1)
+    log.record_move(board, 2)
+
+    log.rewind_to(2)
+
+    assert len(log.items) == 2
+    assert log.step == 2

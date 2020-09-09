@@ -59,33 +59,35 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setAttribute(Qt.WA_DeleteOnClose, True)
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-        self.plot_canvas = PlotCanvas(self.ui.centralwidget)
-        self.ui.plot_page.layout().addWidget(self.plot_canvas)
-        self.ui.cancel.clicked.connect(self.on_cancel)
-        self.ui.start.clicked.connect(self.on_start)
-        self.ui.action_game.triggered.connect(self.on_new_game)
-        self.ui.action_plot.triggered.connect(self.on_plot)
-        self.ui.action_coordinates.triggered.connect(self.on_view_coordinates)
-        self.ui.action_about.triggered.connect(self.on_about)
-        self.ui.toggle_review.clicked.connect(self.on_toggle_review)
-        self.ui.move_history.currentIndexChanged.connect(self.on_move_history)
-        self.ui.player1.currentIndexChanged.connect(
-            lambda new_index: self.on_player_changed(self.ui.player1, new_index))
-        self.ui.player2.currentIndexChanged.connect(
-            lambda new_index: self.on_player_changed(self.ui.player2, new_index))
-        self.ui.searches1.valueChanged.connect(self.on_searches_changed)
-        self.ui.searches_lock1.stateChanged.connect(self.on_lock_changed)
-        self.ui.searches_lock2.stateChanged.connect(self.on_lock_changed)
+        ui = self.ui = Ui_MainWindow()
+        ui.setupUi(self)
+        self.plot_canvas = PlotCanvas(ui.centralwidget)
+        ui.plot_page.layout().addWidget(self.plot_canvas)
+        ui.cancel.clicked.connect(self.on_cancel)
+        ui.start.clicked.connect(self.on_start)
+        ui.action_game.triggered.connect(self.on_new_game)
+        ui.action_plot.triggered.connect(self.on_plot)
+        ui.action_coordinates.triggered.connect(self.on_view_coordinates)
+        ui.action_about.triggered.connect(self.on_about)
+        ui.toggle_review.clicked.connect(self.on_toggle_review)
+        ui.resume_here.clicked.connect(self.on_resume_here)
+        ui.move_history.currentIndexChanged.connect(self.on_move_history)
+        ui.player1.currentIndexChanged.connect(
+            lambda new_index: self.on_player_changed(ui.player1, new_index))
+        ui.player2.currentIndexChanged.connect(
+            lambda new_index: self.on_player_changed(ui.player2, new_index))
+        ui.searches1.valueChanged.connect(self.on_searches_changed)
+        ui.searches_lock1.stateChanged.connect(self.on_lock_changed)
+        ui.searches_lock2.stateChanged.connect(self.on_lock_changed)
+        self.is_history_dirty = False  # Has current game been rewound?
         self.all_displays = []
-        self.load_game_list(self.ui.game_page.layout())
+        self.load_game_list(ui.game_page.layout())
         self.game = None
         self.display: typing.Optional[GridDisplay] = None
         self.on_new_game()
         self.board_to_resume: typing.Optional[np.ndarray] = None
         self.review_names = [name.strip()
-                             for name in self.ui.toggle_review.text().split('/')]
+                             for name in ui.toggle_review.text().split('/')]
         self.are_coordinates_always_visible = False
         self.on_toggle_review()
 
@@ -154,9 +156,16 @@ class MainWindow(QMainWindow):
         self.ui.move_history.setVisible(is_review_visible)
         self.ui.choices.setVisible(is_review_visible)
         self.ui.toggle_review.setText(self.review_names[is_review_visible])
-        self.ui.resume_here.setVisible(False)  # Not implemented yet.
         choices.setVisible(is_review_visible)
         self.resize_display()
+
+    def on_resume_here(self):
+        self.board_to_resume = self.display.current_board
+        self.is_history_dirty = True
+        history_index = self.ui.move_history.currentIndex()
+        self.display.log_display.rewind_to(history_index)
+        self.on_toggle_review()
+        self.display.request_move()
 
     def on_move_history(self, item_index: int):
         assert self.display is not None
@@ -278,6 +287,7 @@ class MainWindow(QMainWindow):
 
     def on_start(self):
         self.display.update_board(self.display.game.create_board())
+        self.is_history_dirty = False
         ui = self.ui
         player_fields = [(ui.player1.currentData(), ui.searches1.value()),
                          (ui.player2.currentData(), ui.searches2.value())]
@@ -339,9 +349,9 @@ class MainWindow(QMainWindow):
             settings.remove('streak_length')
 
     def on_game_ended(self, board: np.ndarray):
-        if self.ui.searches_lock1.isChecked():
-            return
-        if self.display is None:
+        if (self.is_history_dirty or
+                self.display is None or
+                self.ui.searches_lock1.isChecked()):
             return
         try:
             mcts_player: MctsPlayer

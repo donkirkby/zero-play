@@ -1,9 +1,5 @@
-import itertools
-import os
 import typing
-from csv import DictWriter
 from dataclasses import dataclass
-from io import StringIO
 
 from zero_play.game import Game
 
@@ -40,12 +36,6 @@ class LogDisplay:
     def __init__(self, game: Game):
         self.game = game
         self.step = 0
-        self.file = StringIO()
-        columns = ['event', 'step', 'player', 'move', 'comment']
-        columns.extend(itertools.chain(*((f'choice{i}', f'prob{i}')
-                                         for i in range(1, 11))))
-        self.writer = DictWriter(self.file, columns, lineterminator=os.linesep)
-        self.writer.writeheader()
         self.items: typing.List[LogItem] = []
         self.offsets: typing.List[int] = []
 
@@ -78,3 +68,7 @@ class LogDisplay:
                 value) in enumerate(move_probabilities, 1):
             if choice == item.move_text and i != 1:
                 item.comment = f'choice {i}'
+
+    def rewind_to(self, step: int):
+        del self.items[step:]
+        self.step = step
