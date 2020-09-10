@@ -13,7 +13,7 @@ from PySide2.QtGui import QResizeEvent, Qt
 from PySide2.QtWidgets import (QApplication, QMainWindow, QFileDialog,
                                QTableWidgetItem, QGridLayout, QPushButton,
                                QSizePolicy, QDialog, QWidget, QLabel, QComboBox)
-from pkg_resources import iter_entry_points
+from pkg_resources import iter_entry_points, EntryPoint
 
 import zero_play
 from zero_play.about_dialog import Ui_Dialog
@@ -55,7 +55,12 @@ def get_settings(game: Game = None):
     return settings
 
 
-class MainWindow(QMainWindow):
+class ZeroPlayWindow(QMainWindow):
+    """ Main window for a collection of board games.
+
+    To create your own collection, declare a sub class, and override these
+    methods: get_collection_name(), filter_games().
+    """
     def __init__(self):
         super().__init__()
         self.setAttribute(Qt.WA_DeleteOnClose, True)
@@ -91,6 +96,17 @@ class MainWindow(QMainWindow):
         self.are_coordinates_always_visible = False
         self.on_toggle_review()
 
+    @staticmethod
+    def get_collection_name() -> str:
+        return 'Zero Play'
+
+    @staticmethod
+    def filter_games(
+            entries: typing.Iterable[EntryPoint]) -> typing.Generator[EntryPoint,
+                                                                      None,
+                                                                      None]:
+        yield from entries
+
     def on_about(self):
         credit_pairs = chain(*(display.credit_pairs
                                for display in self.all_displays))
@@ -103,7 +119,9 @@ class MainWindow(QMainWindow):
             if child.widget():
                 child.widget().deleteLater()
         games = self.all_displays
-        for game_entry in iter_entry_points('zero_play.game_display'):
+        all_entries = iter_entry_points('zero_play.game_display')
+        filtered_entries = self.filter_games(all_entries)
+        for game_entry in filtered_entries:
             display_class = game_entry.load()
             display: GameDisplay = display_class()
             self.destroyed.connect(display.close)
@@ -192,14 +210,15 @@ class MainWindow(QMainWindow):
             self.display = None
         self.ui.stacked_widget.setCurrentWidget(self.ui.game_page)
         self.ui.action_view_game.setChecked(True)
-        self.setWindowTitle('ZeroPlay')
+        self.setWindowTitle(self.get_collection_name())
 
     def show_game(self, display: GameDisplay):
         QApplication.setOverrideCursor(Qt.WaitCursor)
         self.display = display
         game = display.game
         self.game = game
-        self.setWindowTitle(f'ZeroPlay - {game.name}')
+        collection_name = self.get_collection_name()
+        self.setWindowTitle(f'{collection_name} - {game.name}')
         self.ui.game_name.setText(game.name)
         settings = get_settings(game)
         is_locked = settings.value('searches_locked', False, bool)
@@ -387,7 +406,7 @@ class MainWindow(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
-    window = MainWindow()
+    window = ZeroPlayWindow()
     window.show()
     return app.exec_()
 
