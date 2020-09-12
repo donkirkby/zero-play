@@ -1,16 +1,16 @@
 import numpy as np
 import pytest
 
-from zero_play.tictactoe.game import TicTacToeGame
+from zero_play.tictactoe.state import TicTacToeState
 
 
 def test_create_board():
-    expected_board = np.array([[0, 0, 0],
-                               [0, 0, 0],
-                               [0, 0, 0]])
-    board = TicTacToeGame().create_board()
+    expected_spaces = np.array([[0, 0, 0],
+                                [0, 0, 0],
+                                [0, 0, 0]])
+    board = TicTacToeState()
 
-    assert np.array_equal(expected_board, board)
+    assert np.array_equal(board.get_spaces(), expected_spaces)
 
 
 def test_create_board_from_text():
@@ -19,12 +19,12 @@ X..
 .O.
 ...
 """
-    expected_board = np.array([[1, 0, 0],
-                               [0, -1, 0],
-                               [0, 0, 0]])
-    board = TicTacToeGame().create_board(text)
+    expected_spaces = np.array([[1, 0, 0],
+                                [0, -1, 0],
+                                [0, 0, 0]])
+    board = TicTacToeState(text)
 
-    assert np.array_equal(expected_board, board)
+    assert np.array_equal(board.get_spaces(), expected_spaces)
 
 
 def test_create_board_with_coordinates():
@@ -34,41 +34,41 @@ def test_create_board_with_coordinates():
 2 .O.
 3 ...
 """
-    expected_board = np.array([[1, 0, 0],
-                               [0, -1, 0],
-                               [0, 0, 0]])
-    board = TicTacToeGame().create_board(text)
+    expected_spaces = np.array([[1, 0, 0],
+                                [0, -1, 0],
+                                [0, 0, 0]])
+    board = TicTacToeState(text)
 
-    assert np.array_equal(expected_board, board)
+    assert np.array_equal(board.get_spaces(), expected_spaces)
 
 
 def test_display():
-    board = np.array([[1, 0, 0],
-                      [0, -1, 0],
-                      [0, 0, 0]])
+    board = TicTacToeState(spaces=np.array([[1, 0, 0],
+                                            [0, -1, 0],
+                                            [0, 0, 0]]))
     expected_text = """\
 X..
 .O.
 ...
 """
-    text = TicTacToeGame().display(board)
+    text = board.display()
 
-    assert expected_text == text
+    assert text == expected_text
 
 
 def test_display_coordinates():
-    board = np.array([[1, 0, 0],
-                      [0, -1, 0],
-                      [0, 0, 0]])
+    board = TicTacToeState(spaces=np.array([[1, 0, 0],
+                                            [0, -1, 0],
+                                            [0, 0, 0]]))
     expected_text = """\
   ABC
 1 X..
 2 .O.
 3 ...
 """
-    text = TicTacToeGame().display(board, show_coordinates=True)
+    text = board.display(show_coordinates=True)
 
-    assert expected_text == text
+    assert text == expected_text
 
 
 def test_get_valid_moves():
@@ -78,11 +78,10 @@ X..
 ...
 """
     expected_moves = np.array([0, 1, 1, 1, 0, 1, 1, 1, 1])
-    game = TicTacToeGame()
-    board = game.create_board(text)
-    moves = game.get_valid_moves(board)
+    board = TicTacToeState(text)
+    moves = board.get_valid_moves()
 
-    assert np.array_equal(expected_moves, moves)
+    assert np.array_equal(moves, expected_moves)
 
 
 def test_get_valid_moves_after_win():
@@ -92,9 +91,8 @@ OO.
 ...
 """
     expected_moves = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0])
-    game = TicTacToeGame()
-    board = game.create_board(text)
-    moves = game.get_valid_moves(board)
+    board = TicTacToeState(text)
+    moves = board.get_valid_moves()
 
     assert np.array_equal(expected_moves, moves)
 
@@ -106,10 +104,10 @@ OO.
     ('3B', 7)
 ])
 def test_parse_move(text, expected_move):
-    game = TicTacToeGame()
-    move = game.parse_move(text, game.create_board())
+    board = TicTacToeState()
+    move = board.parse_move(text)
 
-    assert expected_move == move
+    assert move == expected_move
 
 
 @pytest.mark.parametrize('text,expected_message', [
@@ -118,25 +116,25 @@ def test_parse_move(text, expected_move):
     ('2BC', r'A move must be a row and a column\.'),
 ])
 def test_parse_move_fails(text, expected_message):
-    game = TicTacToeGame()
+    board = TicTacToeState()
     with pytest.raises(ValueError, match=expected_message):
-        game.parse_move(text, game.create_board())
+        board.parse_move(text)
 
 
 def test_display_player_x():
     expected_display = 'Player X'
 
-    display = TicTacToeGame().display_player(TicTacToeGame.X_PLAYER)
+    display = TicTacToeState().display_player(TicTacToeState.X_PLAYER)
 
-    assert expected_display == display
+    assert display == expected_display
 
 
 def test_display_player_o():
     expected_display = 'Player O'
 
-    display = TicTacToeGame().display_player(TicTacToeGame.O_PLAYER)
+    display = TicTacToeState().display_player(TicTacToeState.O_PLAYER)
 
-    assert expected_display == display
+    assert display == expected_display
 
 
 def test_make_move():
@@ -151,10 +149,9 @@ X..
 XO.
 ...
 """
-    game = TicTacToeGame()
-    board1 = game.create_board(text)
-    board2 = game.make_move(board1, move)
-    display = game.display(board2)
+    board1 = TicTacToeState(text)
+    board2 = board1.make_move(move)
+    display = board2.display()
 
     assert expected_display == display
 
@@ -171,12 +168,11 @@ XX.
 OO.
 ...
 """
-    game = TicTacToeGame()
-    board1 = game.create_board(text)
-    board2 = game.make_move(board1, move)
-    display = game.display(board2)
+    board1 = TicTacToeState(text)
+    board2 = board1.make_move(move)
+    display = board2.display()
 
-    assert expected_display == display
+    assert display == expected_display
 
 
 def test_get_active_player_o():
@@ -185,12 +181,11 @@ XX.
 .O.
 ...
 """
-    expected_player = TicTacToeGame.O_PLAYER
-    game = TicTacToeGame()
-    board = game.create_board(text)
-    player = game.get_active_player(board)
+    expected_player = TicTacToeState.O_PLAYER
+    board = TicTacToeState(text)
+    player = board.get_active_player()
 
-    assert expected_player == player
+    assert player == expected_player
 
 
 def test_get_active_player_x():
@@ -199,12 +194,11 @@ XX.
 .OO
 ...
 """
-    expected_player = TicTacToeGame.X_PLAYER
-    game = TicTacToeGame()
-    board = game.create_board(text)
-    player = game.get_active_player(board)
+    expected_player = TicTacToeState.X_PLAYER
+    board = TicTacToeState(text)
+    player = board.get_active_player()
 
-    assert expected_player == player
+    assert player == expected_player
 
 
 def test_no_winner():
@@ -213,12 +207,11 @@ XX.
 .OO
 ...
 """
-    game = TicTacToeGame()
-    expected_winner = game.NO_PLAYER
-    board = game.create_board(text)
-    winner = game.get_winner(board)
+    board = TicTacToeState(text)
+    expected_winner = board.NO_PLAYER
+    winner = board.get_winner()
 
-    assert expected_winner == winner
+    assert winner == expected_winner
 
 
 def test_horizontal_winner():
@@ -227,12 +220,11 @@ XXX
 .OO
 ...
 """
-    game = TicTacToeGame()
-    expected_winner = game.X_PLAYER
-    board = game.create_board(text)
-    winner = game.get_winner(board)
+    board = TicTacToeState(text)
+    expected_winner = board.X_PLAYER
+    winner = board.get_winner()
 
-    assert expected_winner == winner
+    assert winner == expected_winner
 
 
 def test_vertical_winner():
@@ -241,12 +233,11 @@ XXO
 .OO
 XXO
 """
-    game = TicTacToeGame()
-    expected_winner = game.O_PLAYER
-    board = game.create_board(text)
-    winner = game.get_winner(board)
+    board = TicTacToeState(text)
+    expected_winner = board.O_PLAYER
+    winner = board.get_winner()
 
-    assert expected_winner == winner
+    assert winner == expected_winner
 
 
 def test_diagonal_winner():
@@ -255,12 +246,11 @@ OX.
 XOO
 XXO
 """
-    game = TicTacToeGame()
-    expected_winner = game.O_PLAYER
-    board = game.create_board(text)
-    winner = game.get_winner(board)
+    board = TicTacToeState(text)
+    expected_winner = board.O_PLAYER
+    winner = board.get_winner()
 
-    assert expected_winner == winner
+    assert winner == expected_winner
 
 
 def test_not_ended():
@@ -270,11 +260,10 @@ XOO
 XOX
 """
     expected_is_ended = False
-    game = TicTacToeGame()
-    board = game.create_board(text)
-    is_ended = game.is_ended(board)
+    board = TicTacToeState(text)
+    is_ended = board.is_ended()
 
-    assert expected_is_ended == is_ended
+    assert is_ended == expected_is_ended
 
 
 def test_winner_ended():
@@ -284,11 +273,10 @@ XOO
 XXO
 """
     expected_is_ended = True
-    game = TicTacToeGame()
-    board = game.create_board(text)
-    is_ended = game.is_ended(board)
+    board = TicTacToeState(text)
+    is_ended = board.is_ended()
 
-    assert expected_is_ended == is_ended
+    assert is_ended == expected_is_ended
 
 
 def test_draw_ended():
@@ -298,8 +286,7 @@ XOO
 XOX
 """
     expected_is_ended = True
-    game = TicTacToeGame()
-    board = game.create_board(text)
-    is_ended = game.is_ended(board)
+    board = TicTacToeState(text)
+    is_ended = board.is_ended()
 
-    assert expected_is_ended == is_ended
+    assert is_ended == expected_is_ended

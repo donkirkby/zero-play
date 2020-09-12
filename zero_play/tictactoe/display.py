@@ -1,12 +1,12 @@
 import typing
 
 from zero_play.grid_display import GridDisplay
-from zero_play.tictactoe.game import TicTacToeGame
+from zero_play.tictactoe.state import TicTacToeState
 
 
 class TicTacToeDisplay(GridDisplay):
     def __init__(self):
-        super().__init__(TicTacToeGame())
+        super().__init__(TicTacToeState())
 
     @property
     def credit_pairs(self) -> typing.Iterable[typing.Tuple[str, str]]:

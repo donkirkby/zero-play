@@ -6,7 +6,7 @@ from zero_play.game_display import center_text_item
 from zero_play.mcts_player import MctsPlayer
 from zero_play.pixmap_differ import PixmapDiffer
 from zero_play.tictactoe.display import TicTacToeDisplay
-from zero_play.tictactoe.game import TicTacToeGame
+from zero_play.tictactoe.state import TicTacToeState
 
 
 def draw_square_grid(expected):
@@ -119,7 +119,7 @@ def test_pieces(pixmap_differ: PixmapDiffer):
 
         display = TicTacToeDisplay()
         trigger_resize(display, size+80, size)
-        board = display.game.create_board('''\
+        board = TicTacToeState('''\
 XO.
 .X.
 ...
@@ -154,7 +154,7 @@ def test_piece_hover_enter(pixmap_differ: PixmapDiffer):
         display = TicTacToeDisplay()
         trigger_resize(display, size+80, size)
 
-        board = display.game.create_board('''\
+        board = TicTacToeState('''\
 X..
 ...
 ...
@@ -179,7 +179,7 @@ def test_piece_hover_enter_mcts(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(250, 50, 60, 60)
 
         display = TicTacToeDisplay()
-        player = MctsPlayer(display.game, TicTacToeGame.X_PLAYER)
+        player = MctsPlayer(display.start_state, TicTacToeState.X_PLAYER)
         display.mcts_players = (player, )
         trigger_resize(display, size+80, size)
 
@@ -230,7 +230,7 @@ def test_piece_hover_existing(pixmap_differ: PixmapDiffer):
         display = TicTacToeDisplay()
         trigger_resize(display, size+80, size)
 
-        board = display.game.create_board('''\
+        board = TicTacToeState('''\
 X..
 ...
 ...
@@ -284,7 +284,7 @@ def test_winner(pixmap_differ: PixmapDiffer):
         display = TicTacToeDisplay()
         trigger_resize(display, size+80, size)
 
-        board = display.game.create_board('''\
+        board = TicTacToeState('''\
 XO.
 .XO
 ..X
@@ -320,7 +320,7 @@ def test_draw(pixmap_differ: PixmapDiffer):
         display = TicTacToeDisplay()
         trigger_resize(display, size+80, size)
 
-        board = display.game.create_board('''\
+        board = TicTacToeState('''\
 XOX
 XOO
 OXX
@@ -358,7 +358,7 @@ def test_coordinates(pixmap_differ: PixmapDiffer):
         trigger_resize(display, 250, 200)
 
         display.show_coordinates = True
-        board = display.game.create_board('''\
+        board = TicTacToeState('''\
   ABC
 1 ...
 2 .X.

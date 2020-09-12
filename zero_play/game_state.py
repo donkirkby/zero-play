@@ -5,7 +5,7 @@ from io import StringIO
 import numpy as np
 
 
-class Game(ABC):
+class GameState(ABC):
     DISPLAY_CHARS = 'O.X'
     NO_PLAYER = 0
     X_PLAYER = 1
@@ -16,45 +16,29 @@ class Game(ABC):
 
     @property
     @abstractmethod
-    def name(self) -> str:
+    def game_name(self) -> str:
         """ Display name for the game. """
 
     @abstractmethod
-    def create_board(self, text: str = None) -> np.ndarray:
-        """ Create an array of piece values for a game board.
+    def get_valid_moves(self) -> np.ndarray:
+        """ Decide which moves are valid for this board state.
 
-        :param text: A text representation of the board state. Depending on the
-            game, it might contain "X" for X_PLAYER, "O" for O_PLAYER, and "."
-            for empty spaces. It may also contain coordinate labels, which
-            should be ignored.
-        :return: an array where each value is the state of one board space.
-            Typical states are NO_PLAYER, X_PLAYER, and O_PLAYER.
-        """
-
-    @abstractmethod
-    def get_valid_moves(self, board: np.ndarray) -> np.ndarray:
-        """ Decide which moves are valid for the given board.
-
-        :param board: an array of piece values, like the ones returned by
-            create_board().
         :return: an array with one boolean entry for every possible game move.
-            True if that move is allowed from the given board, otherwise
-            False. Each move's index is the move value to pass to make_move().
+            True if that move is allowed, otherwise False. Each move's index is
+            the move value to pass to make_move().
         """
 
-    def is_ended(self, board: np.ndarray) -> bool:
+    def is_ended(self) -> bool:
         """ Has the game ended in the given board? """
-        if self.get_winner(board) != self.NO_PLAYER:
+        if self.get_winner() != self.NO_PLAYER:
             return True
-        valid_moves = self.get_valid_moves(board)
+        valid_moves = self.get_valid_moves()
         return not valid_moves.any()
 
     @abstractmethod
-    def display(self, board: np.ndarray, show_coordinates: bool = False) -> str:
-        """ Create human-readable display text for the given board.
+    def display(self, show_coordinates: bool = False) -> str:
+        """ Create human-readable display text for this board state.
 
-        :param board: an array of piece values, like the ones returned by
-            create_board().
         :param show_coordinates: True if the display should include coordinate
             labels.
         :return: display text. Typically, this should be valid text for passing
@@ -62,31 +46,30 @@ class Game(ABC):
         """
 
     @abstractmethod
-    def display_move(self, board: np.ndarray, move: int) -> str:
+    def display_move(self, move: int) -> str:
         """ Create human-readable display text for the given move.
 
-        :param board: an array of piece values, like the ones returned by
-            create_board().
         :param move: the move to describe.
         :return: display text. Typically, this should be valid text for passing
-            to create_board().
+            to parse_move().
         """
 
     @abstractmethod
-    def get_move_count(self, board: np.ndarray) -> int:
+    def get_move_count(self) -> int:
         """ The number of moves that have already been made in the game. """
 
     @abstractmethod
-    def get_spaces(self, board: np.ndarray) -> np.ndarray:
-        """ Extract the board spaces from the complete game state. """
+    def get_spaces(self) -> np.ndarray:
+        """ Extract the board spaces from the complete game state.
+
+        Useful for teaching machine learning models.
+        """
 
     @abstractmethod
-    def parse_move(self, text: str, board: np.ndarray) -> int:
+    def parse_move(self, text: str) -> int:
         """ Parse a human-readable description into a move index.
 
         :param text: the move description, typically coordinates
-        :param board: an array of piece values, like the ones returned by
-            create_board().
         :return: the index of a move in the result of get_valid_moves().
         :raise: ValueError if text is invalid.
         """
@@ -97,72 +80,67 @@ class Game(ABC):
             return 'Player X'
         return 'Player O'
 
-    def get_active_player(self, board: np.ndarray) -> int:
+    def get_active_player(self) -> int:
         """ Decide which player will play next.
 
         This default implementation assumes that PLAYER_X goes first, and
         the players alternate turns adding a piece to the board.
-        :param board: an array of piece values, like the ones returned by
-            create_board().
         :return: the player number to play next, typically PLAYER_X or
             PLAYER_O.
         """
+        board = self.get_spaces()
         x_count = (board == self.X_PLAYER).sum()
         y_count = (board == self.O_PLAYER).sum()
         return self.X_PLAYER if x_count == y_count else self.O_PLAYER
 
     @abstractmethod
-    def make_move(self, board: np.ndarray, move: int) -> np.ndarray:
+    def make_move(self, move: int) -> 'GameState':
         """ Get the board state after making a move.
         
-        :param board: an array of piece values, like the ones returned by
-            create_board(). It is not changed by this method.
         :param move: the index of a move in the result of get_valid_moves().
         :return: an array of piece values, updated by the move.
         """
 
-    def get_winner(self, board: np.ndarray) -> int:
+    def get_winner(self) -> int:
         """ Decide which player has won, if any.
         
-        :param board: an array of piece values, like the ones returned by
-            create_board().
         :return: the player number of the winner, or NO_PLAYER if neither has
             won.
         """
         for player in (self.X_PLAYER, self.O_PLAYER):
-            if self.is_win(board, player):
+            if self.is_win(player):
                 return player
 
         return self.NO_PLAYER
 
     @abstractmethod
-    def is_win(self, board: np.ndarray, player: int) -> bool:
-        """ Check if the given player has won on the given board.
+    def is_win(self, player: int) -> bool:
+        """ Check if the given player has won on this board state.
 
-        :param board: an array of piece values, like the ones returned by
-            create_board().
         :param player: the player number to check.
         :return: True if the player has won.
         """
 
 
 # noinspection PyAbstractClass
-class GridGame(Game):
-    def __init__(self, board_height: int, board_width: int):
-        super().__init__()
+class GridGameState(GameState):
+    def __init__(self,
+                 board_height: int,
+                 board_width: int,
+                 text: str = None,
+                 lines: typing.Sequence[str] = None,
+                 spaces: np.ndarray = None,
+                 extra_count: int = 0):
         self.board_height = board_height
         self.board_width = board_width
-
-    def create_board(self, text: str = None) -> np.ndarray:
-        return self.create_grid_board(text)
-
-    def create_grid_board(self,
-                          text: str = None,
-                          lines: typing.Sequence[str] = None,
-                          extra_count: int = 0) -> np.ndarray:
-        board = np.zeros(self.board_height*self.board_width + extra_count,
-                         dtype=int)
-        spaces = self.get_spaces(board)
+        if spaces is None:
+            self.board = np.zeros(self.board_height*self.board_width + extra_count,
+                                  dtype=int)
+        else:
+            self.board = spaces
+        spaces = self.get_spaces()
+        if extra_count == 0:
+            self.board = spaces
         if text:
             lines = text.splitlines()
         if lines:
@@ -172,32 +150,31 @@ class GridGame(Game):
                 lines = [line[2:] for line in lines]
             for i, line in enumerate(lines):
                 spaces[i] = [self.DISPLAY_CHARS.index(c) - 1 for c in line]
-        return board if extra_count else spaces
 
-    def get_move_count(self, board: np.ndarray) -> int:
-        return (self.get_spaces(board) != Game.NO_PLAYER).sum()
+    def get_move_count(self) -> int:
+        return (self.get_spaces() != GameState.NO_PLAYER).sum()
 
-    def get_spaces(self, board: np.ndarray) -> np.ndarray:
-        return board[:self.board_height*self.board_width].reshape(
+    def get_spaces(self) -> np.ndarray:
+        return self.board[:self.board_height*self.board_width].reshape(
             self.board_height,
             self.board_width)
 
-    def get_valid_moves(self, board: np.ndarray) -> np.ndarray:
-        spaces = self.get_spaces(board)
-        if (self.is_win(board, self.X_PLAYER) or
-                self.is_win(board, self.O_PLAYER)):
+    def get_valid_moves(self) -> np.ndarray:
+        spaces = self.get_spaces()
+        if (self.is_win(self.X_PLAYER) or
+                self.is_win(self.O_PLAYER)):
             return np.zeros(self.board_height*self.board_width, bool)
         return spaces.reshape(self.board_height *
-                              self.board_width) == Game.NO_PLAYER
+                              self.board_width) == GameState.NO_PLAYER
 
-    def display(self, board: np.ndarray, show_coordinates: bool = False) -> str:
+    def display(self, show_coordinates: bool = False) -> str:
         result = StringIO()
         if show_coordinates:
             result.write('  ')
             for i in range(65, 65+self.board_width):
                 result.write(chr(i))
             result.write('\n')
-        spaces = self.get_spaces(board)
+        spaces = self.get_spaces()
         for i in range(self.board_height):
             if show_coordinates:
                 result.write(chr(49+i) + ' ')
@@ -206,13 +183,13 @@ class GridGame(Game):
             result.write('\n')
         return result.getvalue()
 
-    def display_move(self, board: np.ndarray, move: int) -> str:
+    def display_move(self, move: int) -> str:
         row = move // self.board_width
         column = move % self.board_width
         column_text = chr(65 + column)
         return f'{row+1}{column_text}'
 
-    def parse_move(self, text: str, board: np.ndarray) -> int:
+    def parse_move(self, text: str) -> int:
         trimmed = text.strip().replace(' ', '')
         if len(trimmed) != 2:
             raise ValueError('A move must be a row and a column.')
@@ -227,9 +204,11 @@ class GridGame(Game):
 
         return i*self.board_width + j
 
-    def make_move(self, board: np.ndarray, move: int) -> np.ndarray:
-        moving_player = self.get_active_player(board)
-        new_board: np.ndarray = board.copy()
+    def make_move(self, move: int) -> 'GridGameState':
+        moving_player = self.get_active_player()
+        new_board: np.ndarray = self.board.copy()
         i, j = move // self.board_width, move % self.board_width
         new_board[i, j] = moving_player
-        return new_board
+
+        # noinspection PyArgumentList
+        return self.__class__(spaces=new_board)

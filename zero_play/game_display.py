@@ -6,7 +6,7 @@ from PySide2.QtCore import Signal, QThread, QSize, Slot
 from PySide2.QtGui import QResizeEvent
 from PySide2.QtWidgets import QGraphicsScene, QGraphicsSimpleTextItem, QGraphicsView, QSizePolicy
 
-from zero_play.game import Game
+from zero_play.game_state import GameState
 from zero_play.log_display import LogDisplay
 from zero_play.mcts_player import MctsPlayer
 from zero_play.mcts_worker import MctsWorker
@@ -19,15 +19,15 @@ class GameDisplay(QGraphicsView):
     move_made = Signal(np.ndarray)  # board
     game_ended = Signal(np.ndarray)  # final_board
 
-    def __init__(self, game: Game):
+    def __init__(self, start_state: GameState):
         super().__init__(scene=QGraphicsScene())
-        self.game = game
+        self.start_state = start_state
         self.mcts_workers: typing.Dict[int, MctsWorker] = {}
         self.worker_thread: typing.Optional[QThread] = None
-        self.current_board = self.game.create_board()
-        self.valid_moves = self.game.get_valid_moves(self.current_board)
+        self.current_state = self.start_state
+        self.valid_moves = self.start_state.get_valid_moves()
         self._show_coordinates = False
-        self.log_display = LogDisplay(game)
+        self.log_display = LogDisplay()
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
     @property
@@ -50,7 +50,7 @@ class GameDisplay(QGraphicsView):
         if self.worker_thread is not None:
             self.worker_thread.quit()
 
-        self.log_display = LogDisplay(self.game)
+        self.log_display = LogDisplay()
         self.mcts_workers = {player.player_number: MctsWorker(player)
                              for player in players}
         if not self.mcts_workers:
@@ -68,7 +68,7 @@ class GameDisplay(QGraphicsView):
             self.worker_thread.start()
 
     @abstractmethod
-    def update_board(self, board: np.ndarray):
+    def update_board(self, board: GameState):
         """ Update self.scene, based on the state in board.
 
         It's probably also helpful to override resizeEvent().
@@ -79,7 +79,7 @@ class GameDisplay(QGraphicsView):
     def resizeEvent(self, event: QResizeEvent):
         view_size = event.size()
         self.scene().setSceneRect(0, 0, view_size.width(), view_size.height())
-        self.update_board(self.current_board)
+        self.update_board(self.current_state)
 
     @property
     def credit_pairs(self) -> typing.Iterable[typing.Tuple[str, str]]:
@@ -90,21 +90,21 @@ class GameDisplay(QGraphicsView):
         return ()
 
     def choose_active_text(self):
-        active_player = self.game.get_active_player(self.current_board)
+        active_player = self.current_state.get_active_player()
         if active_player in self.mcts_workers:
             return 'thinking'
         return 'to move'
 
     @Slot(int)  # type: ignore
     def make_move(self, move):
-        self.log_display.record_move(self.current_board, move)
+        self.log_display.record_move(self.current_state, move)
         # noinspection PyUnresolvedReferences
-        self.move_made.emit(self.current_board)
-        self.current_board = self.game.make_move(self.current_board, move)
-        self.update_board(self.current_board)
-        if self.game.is_ended(self.current_board):
+        self.move_made.emit(self.current_state)
+        self.current_state = self.current_state.make_move(move)
+        self.update_board(self.current_state)
+        if self.current_state.is_ended():
             # noinspection PyUnresolvedReferences
-            self.game_ended.emit(self.current_board)
+            self.game_ended.emit(self.current_state)
 
         forced_move = self.get_forced_move()
         if forced_move is None:
@@ -134,11 +134,11 @@ class GameDisplay(QGraphicsView):
                                       move_probabilities)
 
     def request_move(self):
-        if self.game.is_ended(self.current_board):
+        if self.current_state.is_ended():
             return
-        player = self.game.get_active_player(self.current_board)
+        player = self.current_state.get_active_player()
         # noinspection PyUnresolvedReferences
-        self.move_needed.emit(player, self.current_board)
+        self.move_needed.emit(player, self.current_state)
 
     def close(self):
         if self.worker_thread is not None:
