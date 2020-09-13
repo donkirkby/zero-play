@@ -3,12 +3,12 @@ import pytest
 
 from zero_play.connect4.neural_net import NeuralNet
 from zero_play.mcts_player import SearchManager
-from zero_play.othello.game import OthelloGame
+from zero_play.othello.game import OthelloState
 from zero_play.playout import Playout
 
 
 def test_create_board():
-    x, o = OthelloGame.X_PLAYER, OthelloGame.O_PLAYER
+    x, o = OthelloState.X_PLAYER, OthelloState.O_PLAYER
     # 6x6 grid of spaces, plus next player.
     expected_board = [0, 0, 0, 0, 0, 0,
                       0, 0, 0, 0, 0, 0,
@@ -17,14 +17,14 @@ def test_create_board():
                       0, 0, 0, 0, 0, 0,
                       0, 0, 0, 0, 0, 0,
                       x]
-    board = OthelloGame().create_board()
+    board = OthelloState()
 
-    assert expected_board == board.tolist()
+    assert board.board.tolist() == expected_board
 
 
 # noinspection DuplicatedCode
 def test_create_board_from_text():
-    x, o = OthelloGame.X_PLAYER, OthelloGame.O_PLAYER
+    x, o = OthelloState.X_PLAYER, OthelloState.O_PLAYER
     text = """\
 ......
 ......
@@ -41,14 +41,14 @@ def test_create_board_from_text():
                       0, 0, 0, 0, x, 0,
                       0, 0, 0, x, o, 0,
                       o]
-    board = OthelloGame().create_board(text)
+    board = OthelloState(text)
 
-    assert expected_board == board.tolist()
+    assert board.board.tolist() == expected_board
 
 
 # noinspection DuplicatedCode
 def test_create_board_with_coordinates():
-    x, o = OthelloGame.X_PLAYER, OthelloGame.O_PLAYER
+    x, o = OthelloState.X_PLAYER, OthelloState.O_PLAYER
     text = """\
   ABCDEF
 1 ......
@@ -66,14 +66,14 @@ def test_create_board_with_coordinates():
                       0, 0, 0, 0, x, 0,
                       0, 0, 0, x, o, 0,
                       x]
-    board = OthelloGame().create_board(text)
+    board = OthelloState(text)
 
-    assert expected_board == board.tolist()
+    assert board.board.tolist() == expected_board
 
 
 # noinspection DuplicatedCode
 def test_display():
-    x, o = OthelloGame.X_PLAYER, OthelloGame.O_PLAYER
+    x, o = OthelloState.X_PLAYER, OthelloState.O_PLAYER
     board = np.array([0, 0, 0, 0, 0, 0,
                       0, 0, 0, 0, 0, 0,
                       0, 0, 0, 0, 0, 0,
@@ -90,14 +90,14 @@ def test_display():
 ...XO.
 >X
 """
-    text = OthelloGame().display(board)
+    text = OthelloState(spaces=board).display()
 
-    assert expected_text == text
+    assert text == expected_text
 
 
 # noinspection DuplicatedCode
 def test_display_coordinates():
-    x, o = OthelloGame.X_PLAYER, OthelloGame.O_PLAYER
+    x, o = OthelloState.X_PLAYER, OthelloState.O_PLAYER
     board = np.array([0, 0, 0, 0, 0, 0,
                       0, 0, 0, 0, 0, 0,
                       0, 0, 0, 0, 0, 0,
@@ -115,9 +115,9 @@ def test_display_coordinates():
 6 ...XO.
 >X
 """
-    text = OthelloGame().display(board, show_coordinates=True)
+    text = OthelloState(spaces=board).display(show_coordinates=True)
 
-    assert expected_text == text
+    assert text == expected_text
 
 
 def test_get_valid_moves():
@@ -138,11 +138,10 @@ def test_get_valid_moves():
                       0, 0, 1, 0, 0, 0,
                       0, 0, 0, 0, 0, 1,
                       0]  # Can't pass when other moves are valid.
-    game = OthelloGame()
-    board = game.create_board(text)
-    moves = game.get_valid_moves(board)
+    board = OthelloState(text)
+    moves = board.get_valid_moves()
 
-    assert expected_moves == moves.tolist()
+    assert moves.tolist() == expected_moves
 
 
 def test_get_valid_moves_with_gap():
@@ -162,9 +161,8 @@ def test_get_valid_moves_with_gap():
                       [0, 0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 0],
                       [0, 0, 1, 0, 0, 0]]
-    game = OthelloGame()
-    board = game.create_board(text)
-    moves = game.get_valid_moves(board)
+    board = OthelloState(text)
+    moves = board.get_valid_moves()
 
     assert moves.astype(int)[:36].reshape((6, 6)).tolist() == expected_moves
 
@@ -187,11 +185,10 @@ def test_get_no_valid_moves():
                       0, 0, 0, 0, 0, 0,
                       0, 0, 0, 0, 0, 0,
                       1]  # Only move is to pass.
-    game = OthelloGame()
-    board = game.create_board(text)
-    moves = game.get_valid_moves(board)
+    board = OthelloState(text)
+    moves = board.get_valid_moves()
 
-    assert expected_moves == moves.tolist()
+    assert moves.tolist() == expected_moves
 
 
 @pytest.mark.parametrize('text,expected_move', [
@@ -201,10 +198,10 @@ def test_get_no_valid_moves():
     ('', 36)
 ])
 def test_parse_move(text, expected_move):
-    game = OthelloGame()
-    move = game.parse_move(text, game.create_board())
+    board = OthelloState()
+    move = board.parse_move(text)
 
-    assert expected_move == move
+    assert move == expected_move
 
 
 @pytest.mark.parametrize('move,expected_text', [
@@ -212,8 +209,8 @@ def test_parse_move(text, expected_move):
     (64, 'PASS')
 ])
 def test_display_move(move, expected_text):
-    game = OthelloGame(8, 8)
-    move_text = game.display_move(game.create_board(), move)
+    state = OthelloState(board_height=8, board_width=8)
+    move_text = state.display_move(move)
 
     assert move_text == expected_text
 
@@ -225,9 +222,9 @@ def test_display_move(move, expected_text):
     ('23C', r"A move must be a row and a column\."),
 ])
 def test_parse_move_fails(text, expected_message):
-    game = OthelloGame()
+    state = OthelloState()
     with pytest.raises(ValueError, match=expected_message):
-        game.parse_move(text, game.create_board())
+        state.parse_move(text)
 
 
 def test_make_move():
@@ -250,12 +247,11 @@ def test_make_move():
 ...XXX
 >O
 """
-    game = OthelloGame()
-    board1 = game.create_board(text)
-    board2 = game.make_move(board1, move)
-    display = game.display(board2)
+    board1 = OthelloState(text)
+    board2 = board1.make_move(move)
+    display = board2.display()
 
-    assert expected_display == display
+    assert display == expected_display
 
 
 def test_make_move_pass():
@@ -278,12 +274,11 @@ def test_make_move_pass():
 ...XX.
 >X
 """
-    game = OthelloGame()
-    board1 = game.create_board(text)
-    board2 = game.make_move(board1, move)
-    display = game.display(board2)
+    board1 = OthelloState(text)
+    board2 = board1.make_move(move)
+    display = board2.display()
 
-    assert expected_display == display
+    assert display == expected_display
 
 
 def test_make_move_o():
@@ -306,12 +301,11 @@ def test_make_move_o():
 ..OOO.
 >X
 """
-    game = OthelloGame()
-    board1 = game.create_board(text)
-    board2 = game.make_move(board1, move)
-    display = game.display(board2)
+    board1 = OthelloState(text)
+    board2 = board1.make_move(move)
+    display = board2.display()
 
-    assert expected_display == display
+    assert display == expected_display
 
 
 def test_get_active_player_o():
@@ -324,12 +318,11 @@ def test_get_active_player_o():
 ...XO.
 >O
 """
-    expected_player = OthelloGame.O_PLAYER
-    game = OthelloGame()
-    board = game.create_board(text)
-    player = game.get_active_player(board)
+    expected_player = OthelloState.O_PLAYER
+    board = OthelloState(text)
+    player = board.get_active_player()
 
-    assert expected_player == player
+    assert player == expected_player
 
 
 def test_get_active_player_x():
@@ -342,12 +335,11 @@ def test_get_active_player_x():
 ...XO.
 >X
 """
-    expected_player = OthelloGame.X_PLAYER
-    game = OthelloGame()
-    board = game.create_board(text)
-    player = game.get_active_player(board)
+    expected_player = OthelloState.X_PLAYER
+    board = OthelloState(text)
+    player = board.get_active_player()
 
-    assert expected_player == player
+    assert player == expected_player
 
 
 def test_no_winner_not_ended():
@@ -360,13 +352,12 @@ OOOOOO
 OOOOOO
 >O
 """
-    game = OthelloGame()
-    expected_winner = game.NO_PLAYER
-    board = game.create_board(text)
-    winner = game.get_winner(board)
+    board = OthelloState(text)
+    expected_winner = board.NO_PLAYER
+    winner = board.get_winner()
 
-    assert expected_winner == winner
-    assert not game.is_ended(board)
+    assert winner == expected_winner
+    assert not board.is_ended()
 
 
 def test_no_winner_tie():
@@ -379,13 +370,12 @@ OOOOOO
 OOOOOO
 >O
 """
-    game = OthelloGame()
-    expected_winner = game.NO_PLAYER
-    board = game.create_board(text)
-    winner = game.get_winner(board)
+    board = OthelloState(text)
+    expected_winner = board.NO_PLAYER
+    winner = board.get_winner()
 
-    assert expected_winner == winner
-    assert game.is_ended(board)
+    assert winner == expected_winner
+    assert board.is_ended()
 
 
 def test_winner_x():
@@ -398,13 +388,12 @@ OOOOOO
 OOOOOO
 >O
 """
-    game = OthelloGame()
-    expected_winner = game.X_PLAYER
-    board = game.create_board(text)
-    winner = game.get_winner(board)
+    board = OthelloState(text)
+    expected_winner = board.X_PLAYER
+    winner = board.get_winner()
 
-    assert expected_winner == winner
-    assert game.is_win(board, expected_winner)
+    assert winner == expected_winner
+    assert board.is_win(expected_winner)
 
 
 def test_winner_o():
@@ -417,26 +406,23 @@ OOOOOO
 OOOOOO
 >O
 """
-    game = OthelloGame()
-    expected_winner = game.O_PLAYER
-    board = game.create_board(text)
-    winner = game.get_winner(board)
+    board = OthelloState(text)
+    expected_winner = board.O_PLAYER
+    winner = board.get_winner()
 
-    assert expected_winner == winner
+    assert winner == expected_winner
 
 
 def test_playout():
     """ Just checking that playouts don't raise an exception. """
-    game = OthelloGame()
-    board = game.create_board()
-    playout = Playout(game)
+    board = OthelloState()
+    playout = Playout()
 
     playout.simulate(board)
 
 
 def test_pass_is_not_win():
-    game = OthelloGame()
-    board = game.create_board("""\
+    board = OthelloState("""\
 ......
 ......
 X.....
@@ -447,15 +433,14 @@ X.....
 """)
     expected_valid_moves = [False] * 36 + [True]
 
-    valid_moves = game.get_valid_moves(board)
+    valid_moves = board.get_valid_moves()
 
-    assert expected_valid_moves == valid_moves.tolist()
-    assert not game.is_ended(board)
+    assert valid_moves.tolist() == expected_valid_moves
+    assert not board.is_ended()
 
 
 def test_no_moves_for_either():
-    game = OthelloGame()
-    board = game.create_board("""\
+    board = OthelloState("""\
 ......
 ......
 ......
@@ -466,17 +451,23 @@ X.....
 """)
     expected_valid_moves = [False] * 37
 
-    valid_moves = game.get_valid_moves(board)
+    valid_moves = board.get_valid_moves()
 
-    assert expected_valid_moves == valid_moves.tolist()
-    assert game.O_PLAYER == game.get_winner(board)
+    assert valid_moves.tolist() == expected_valid_moves
+    assert board.get_winner() == board.O_PLAYER
+
+
+def test_create_from_array():
+    board = OthelloState(spaces=np.zeros(65, dtype=np.int8))
+
+    assert board.board_width == 8
 
 
 def test_training_data():
-    game = OthelloGame()
-    neural_net = NeuralNet(game)
+    state = OthelloState()
+    neural_net = NeuralNet(state)
     neural_net.epochs_to_train = 10
-    search_manager = SearchManager(game, neural_net)
+    search_manager = SearchManager(state, neural_net)
     boards, outputs = search_manager.create_training_data(
         iterations=10,
         data_size=10)

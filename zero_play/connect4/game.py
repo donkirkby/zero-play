@@ -21,7 +21,9 @@ class Connect4State(GridGameState):
         super().__init__(board_height, board_width, lines=lines, spaces=spaces)
 
     def get_valid_moves(self) -> np.ndarray:
-        # Any zero value in top row in a valid move
+        if self.get_winner() != self.NO_PLAYER:
+            return np.zeros(self.board_width, dtype=bool)
+        # Any zero value in top row is a valid move
         return self.board[0] == 0
 
     def display(self, show_coordinates: bool = False) -> str:

@@ -17,7 +17,7 @@ from pkg_resources import iter_entry_points, EntryPoint
 
 import zero_play
 from zero_play.about_dialog import Ui_Dialog
-from zero_play.game import Game
+from zero_play.game_state import GameState
 from zero_play.game_display import GameDisplay
 from zero_play.grid_display import GridDisplay
 from zero_play.main_window import Ui_MainWindow
@@ -46,11 +46,11 @@ class AboutDialog(QDialog):
             credits_layout.addWidget(QLabel(text), row, 1)
 
 
-def get_settings(game: Game = None):
+def get_settings(game_state: GameState = None):
     settings = QSettings("Don Kirkby", "Zero Play")
-    if game is not None:
+    if game_state is not None:
         settings.beginGroup('games')
-        settings.beginGroup(game.name.replace(' ', '_'))
+        settings.beginGroup(game_state.game_name.replace(' ', '_'))
 
     return settings
 
@@ -87,7 +87,7 @@ class ZeroPlayWindow(QMainWindow):
         self.is_history_dirty = False  # Has current game been rewound?
         self.all_displays = []
         self.load_game_list(ui.game_page.layout())
-        self.game = None
+        self.start_state = None
         self.display: typing.Optional[GridDisplay] = None
         self.on_new_game()
         self.board_to_resume: typing.Optional[np.ndarray] = None
@@ -127,12 +127,12 @@ class ZeroPlayWindow(QMainWindow):
             self.destroyed.connect(display.close)
             display.game_ended.connect(self.on_game_ended)  # type: ignore
             games.append(display)
-        games.sort(key=attrgetter('game.name'))
+        games.sort(key=attrgetter('start_state.game_name'))
         column_count = math.ceil(math.sqrt(len(games)))
         for i, display in enumerate(games):
             row = i // column_count
             column = i % column_count
-            game_button = QPushButton(display.game.name)
+            game_button = QPushButton(display.start_state.game_name)
             game_button.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
             # noinspection PyUnresolvedReferences
             game_button.clicked.connect(partial(self.show_game, display))
@@ -152,7 +152,7 @@ class ZeroPlayWindow(QMainWindow):
                 self.are_coordinates_always_visible)
             self.on_view_coordinates(self.are_coordinates_always_visible)
         else:
-            self.board_to_resume = self.display.current_board
+            self.board_to_resume = self.display.current_state
             self.are_coordinates_always_visible = (
                 self.ui.action_coordinates.isChecked())
             self.ui.action_coordinates.setChecked(True)
@@ -178,7 +178,7 @@ class ZeroPlayWindow(QMainWindow):
         self.resize_display()
 
     def on_resume_here(self):
-        self.board_to_resume = self.display.current_board
+        self.board_to_resume = self.display.current_state
         self.is_history_dirty = True
         history_index = self.ui.move_history.currentIndex()
         self.display.log_display.rewind_to(history_index)
@@ -188,7 +188,7 @@ class ZeroPlayWindow(QMainWindow):
     def on_move_history(self, item_index: int):
         assert self.display is not None
         history_item = self.display.log_display.items[item_index]
-        self.display.update_board(history_item.board)
+        self.display.update_board(history_item.game_state)
         choices = self.ui.choices
         choices.clear()
         choices.setColumnCount(len(history_item.choices))
@@ -215,12 +215,12 @@ class ZeroPlayWindow(QMainWindow):
     def show_game(self, display: GameDisplay):
         QApplication.setOverrideCursor(Qt.WaitCursor)
         self.display = display
-        game = display.game
-        self.game = game
+        start_state = display.start_state
+        self.start_state = start_state
         collection_name = self.get_collection_name()
-        self.setWindowTitle(f'{collection_name} - {game.name}')
-        self.ui.game_name.setText(game.name)
-        settings = get_settings(game)
+        self.setWindowTitle(f'{collection_name} - {start_state.game_name}')
+        self.ui.game_name.setText(start_state.game_name)
+        settings = get_settings(start_state)
         is_locked = settings.value('searches_locked', False, bool)
         self.ui.searches_lock1.setChecked(is_locked)
         self.ui.searches_lock2.setChecked(is_locked)
@@ -252,7 +252,7 @@ class ZeroPlayWindow(QMainWindow):
         if new_index < 0:
             # Combo box was cleared.
             return
-        settings = get_settings(self.game)
+        settings = get_settings(self.start_state)
         if player is self.ui.player1:
             searches = self.ui.searches1
             searches_label = self.ui.searches_label1
@@ -273,9 +273,9 @@ class ZeroPlayWindow(QMainWindow):
         colspan = 4 if heuristic is None else 1
         self.ui.player_layout.addWidget(player, row, 1, 1, colspan)
 
-    def load_heuristics(self):
-        game = self.game
-        heuristics = [('Computer', Playout(game))]
+    @staticmethod
+    def load_heuristics():
+        heuristics = [('Computer', Playout())]
         # entry: EntryPoint
         # for entry in iter_entry_points('zero_play.heuristic'):
         #     try:
@@ -284,11 +284,11 @@ class ZeroPlayWindow(QMainWindow):
         #         library_path = os.environ.get('LD_LIBRARY_PATH')
         #         if library_path is not None:
         #             raise
-        #         message = (f'Unable to load entry {entry.name}. Do you need to '
-        #                    f'set LD_LIBRARY_PATH?')
+        #         message = (f'Unable to load entry {entry.name}. Do you need to'
+        #                    f' set LD_LIBRARY_PATH?')
         #         raise ImportError(message) from ex
         #     try:
-        #         heuristic: Heuristic = heuristic_class(game)
+        #         heuristic: Heuristic = heuristic_class(start_state)
         #     except ValueError:
         #         continue
         #     heuristics.append((entry.name, heuristic))
@@ -305,20 +305,20 @@ class ZeroPlayWindow(QMainWindow):
             options=QFileDialog.DontUseNativeDialog)
 
     def on_start(self):
-        self.display.update_board(self.display.game.create_board())
+        self.display.update_board(self.display.start_state)
         self.is_history_dirty = False
         ui = self.ui
         player_fields = [(ui.player1.currentData(), ui.searches1.value()),
                          (ui.player2.currentData(), ui.searches2.value())]
         is_shuffled = ui.shuffle_players.isChecked()
-        settings = get_settings(self.game)
+        settings = get_settings(self.start_state)
         settings.setValue('shuffle_players', is_shuffled)
         if is_shuffled:
             shuffle(player_fields)
-        mcts_choices = {self.game.X_PLAYER: player_fields[0],
-                        self.game.O_PLAYER: player_fields[1]}
+        mcts_choices = {self.start_state.X_PLAYER: player_fields[0],
+                        self.start_state.O_PLAYER: player_fields[1]}
         self.display.mcts_players = [
-            MctsPlayer(self.game, player_number, iteration_count=searches)
+            MctsPlayer(self.start_state, player_number, iteration_count=searches)
             for player_number, (heuristic, searches) in mcts_choices.items()
             if heuristic is not None]
         layout: QGridLayout = ui.display_page.layout()
@@ -347,7 +347,7 @@ class ZeroPlayWindow(QMainWindow):
         else:
             self.ui.stacked_widget.setCurrentWidget(self.ui.display_page)
             self.resize_display()
-            self.display.update_board(self.display.current_board)
+            self.display.update_board(self.display.current_state)
             self.display.request_move()
 
     def on_view_coordinates(self, is_checked: bool):
@@ -360,14 +360,14 @@ class ZeroPlayWindow(QMainWindow):
     def on_searches_changed(self, search_count: int):
         if self.ui.stacked_widget.currentWidget() is not self.ui.players_page:
             return
-        if self.game is not None:
-            settings = get_settings(self.game)
+        if self.start_state is not None:
+            settings = get_settings(self.start_state)
             settings.setValue('searches', search_count)
             settings.remove('game_count')
             settings.remove('last_score')
             settings.remove('streak_length')
 
-    def on_game_ended(self, board: np.ndarray):
+    def on_game_ended(self, game_state: GameState):
         if (self.is_history_dirty or
                 self.display is None or
                 self.ui.searches_lock1.isChecked()):
@@ -378,14 +378,14 @@ class ZeroPlayWindow(QMainWindow):
         except ValueError:
             # Didn't have exactly one MCTS player
             return
-        winning_player = self.game.get_winner(board)
+        winning_player = game_state.get_winner()
         if winning_player == mcts_player.player_number:
             score = -1
-        elif winning_player == Game.NO_PLAYER:
+        elif winning_player == GameState.NO_PLAYER:
             score = 0
         else:
             score = 1
-        settings = get_settings(self.game)
+        settings = get_settings(self.start_state)
         strength_adjuster = StrengthAdjuster(
             strength=mcts_player.iteration_count,
             game_count=settings.value('game_count', 0, int),
@@ -400,7 +400,7 @@ class ZeroPlayWindow(QMainWindow):
     def on_lock_changed(self, is_checked):
         self.ui.searches_lock1.setChecked(is_checked)
         self.ui.searches_lock2.setChecked(is_checked)
-        settings = get_settings(self.game)
+        settings = get_settings(self.start_state)
         settings.setValue('searches_locked', is_checked)
 
 

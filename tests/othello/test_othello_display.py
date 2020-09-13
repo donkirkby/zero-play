@@ -17,7 +17,7 @@ def test_piece_click_invalid(pixmap_differ: PixmapDiffer):
 
     display.on_click(display.spaces[0][0])
 
-    state = display.game.display(display.current_board)
+    state = display.start_state.display(display.current_state)
 
     assert state == expected_state
 
@@ -36,7 +36,7 @@ def test_piece_click_valid():
     display.on_click(display.spaces[2][1])
     display.on_click(display.spaces[1][1])
 
-    state = display.game.display(display.current_board)
+    state = display.start_state.display(display.current_state)
 
     assert state == expected_state
 
@@ -61,10 +61,10 @@ OOO...
 >O
 """
     display = OthelloDisplay(6, 6)
-    display.update_board(display.game.create_board(start_state))
+    display.update_board(display.start_state.create_board(start_state))
     display.on_click(display.spaces[0][2])
 
-    state = display.game.display(display.current_board)
+    state = display.start_state.display(display.current_state)
 
     assert state == expected_state
 

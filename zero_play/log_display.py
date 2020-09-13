@@ -9,7 +9,7 @@ class LogItem:
     step: int
     player: str
     move_text: str
-    board: GameState
+    game_state: GameState
     comment: str = ''
 
     # [(move_display, probability, value_count, avg_value)]
@@ -25,7 +25,7 @@ class LogItem:
         return (self.step == other.step and
                 self.player == other.player and
                 self.move_text == other.move_text and
-                self.board == other.board and
+                self.game_state == other.game_state and
                 self.comment == other.comment and
                 self.choices == other.choices)
 
@@ -51,7 +51,7 @@ class LogDisplay:
                                                          int,
                                                          float]]):
         for item in reversed(self.items):
-            if item.board == game_state:
+            if item.game_state == game_state:
                 break
         else:
             raise ValueError('Board not found in log.')

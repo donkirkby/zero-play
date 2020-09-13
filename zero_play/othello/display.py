@@ -1,12 +1,13 @@
 import typing
 
 from zero_play.grid_display import GridDisplay
-from zero_play.othello.game import OthelloGame
+from zero_play.othello.game import OthelloState
 
 
 class OthelloDisplay(GridDisplay):
     def __init__(self, board_height: int = 8, board_width: int = 8):
-        super().__init__(OthelloGame(board_height, board_width))
+        super().__init__(OthelloState(board_height=board_height,
+                                      board_width=board_width))
 
     def get_forced_move(self):
         pass_move = len(self.valid_moves) - 1

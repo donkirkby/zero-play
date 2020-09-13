@@ -6,7 +6,7 @@ from PySide2.QtGui import QColor, QBrush, QFont, QResizeEvent
 from PySide2.QtWidgets import QGraphicsItem, QGraphicsEllipseItem, \
     QGraphicsSceneHoverEvent, QGraphicsSceneMouseEvent
 
-from zero_play.game_state import GridGameState
+from zero_play.game_state import GridGameState, GameState
 from zero_play.game_display import GameDisplay, center_text_item
 
 
@@ -120,7 +120,8 @@ class GridDisplay(GameDisplay):
                 y = y0 + i * cell_size + cell_size // 8
                 piece.setRect(x, y, cell_size * 3 // 4, cell_size * 3 // 4)
 
-    def update_board(self, state: GridGameState):
+    def update_board(self, state: GameState):
+        assert isinstance(state, GridGameState)
         self.current_state = state
         self.valid_moves = self.current_state.get_valid_moves()
         is_ended = self.current_state.is_ended()
