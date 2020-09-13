@@ -26,6 +26,7 @@ class NeuralNet(Heuristic):
         self.action_size = len(start_state.get_valid_moves())
         self.epochs_completed = 0
         self.epochs_to_train = 100
+        self.start_state = start_state
         args = Namespace(lr=0.001,
                          dropout=0.3,
                          epochs=10,
@@ -69,7 +70,7 @@ class NeuralNet(Heuristic):
     def get_summary(self) -> typing.Sequence[str]:
         return 'neural net', self.checkpoint_name
 
-    def analyse(self, board: GridGameState) -> typing.Tuple[float, np.ndarray]:
+    def analyse(self, board: GameState) -> typing.Tuple[float, np.ndarray]:
         if board.is_ended():
             return self.analyse_end_game(board)
 
@@ -88,7 +89,7 @@ class NeuralNet(Heuristic):
         if folder is not None:
             folder_path = Path(folder)
         else:
-            game_name = self.start_state.name.replace(' ', '-').lower()
+            game_name = self.start_state.game_name.replace(' ', '-').lower()
             folder_path = Path('data') / game_name
         return folder_path
 

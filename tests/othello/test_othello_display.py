@@ -1,5 +1,6 @@
 from tests.tictactoe.test_tictactoe_display import trigger_resize
 from zero_play.othello.display import OthelloDisplay
+from zero_play.othello.game import OthelloState
 from zero_play.pixmap_differ import PixmapDiffer
 
 
@@ -17,7 +18,7 @@ def test_piece_click_invalid(pixmap_differ: PixmapDiffer):
 
     display.on_click(display.spaces[0][0])
 
-    state = display.start_state.display(display.current_state)
+    state = display.current_state.display()
 
     assert state == expected_state
 
@@ -36,7 +37,7 @@ def test_piece_click_valid():
     display.on_click(display.spaces[2][1])
     display.on_click(display.spaces[1][1])
 
-    state = display.start_state.display(display.current_state)
+    state = display.current_state.display()
 
     assert state == expected_state
 
@@ -61,10 +62,10 @@ OOO...
 >O
 """
     display = OthelloDisplay(6, 6)
-    display.update_board(display.start_state.create_board(start_state))
+    display.update_board(OthelloState(start_state))
     display.on_click(display.spaces[0][2])
 
-    state = display.start_state.display(display.current_state)
+    state = display.current_state.display()
 
     assert state == expected_state
 

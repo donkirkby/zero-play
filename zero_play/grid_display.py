@@ -87,7 +87,8 @@ class GridDisplay(GameDisplay):
         x0 += margin*cell_size
         y0 += margin*cell_size
         font = QFont(self.default_font)
-        font.setPointSize(int(cell_size // 2))
+        font_size = max(1, int(cell_size // 2))
+        font.setPointSize(font_size)
         for i in range(self.start_state.board_height - 1):
             r = cell_size * (i+1)
             self.row_dividers[i].setLine(x0, y0+r, x0+size, y0+r)
@@ -107,7 +108,8 @@ class GridDisplay(GameDisplay):
                              cell_size * extra_columns * 7 // 8,
                              cell_size * extra_columns * 3 // 4,
                              cell_size * extra_columns * 3 // 4)
-        font.setPointSize(int(cell_size * extra_columns // 6))
+        font_size = max(1, int(cell_size * extra_columns // 6))
+        font.setPointSize(font_size)
         self.move_text.setFont(font)
         self.text_x = x0 + size + cell_size * extra_columns // 2
         self.text_y = (y0 + cell_size * self.start_state.board_height // 2 +

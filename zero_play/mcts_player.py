@@ -18,7 +18,7 @@ class SearchNode:
     exploration_weight = 1.0
 
     def __init__(self,
-                 game_state: GameState = None,
+                 game_state: GameState,
                  parent: 'SearchNode' = None,
                  move: int = None):
         """ Initialize an instance.

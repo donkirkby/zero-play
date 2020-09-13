@@ -20,7 +20,7 @@ class GameState(ABC):
         """ Display name for the game. """
 
     @abstractmethod
-    def __eq__(self, other: 'GameState') -> bool:
+    def __eq__(self, other) -> bool:
         """ Compare with another game state. """
 
     @abstractmethod
@@ -160,7 +160,9 @@ class GridGameState(GameState):
         board_repr = board_repr.replace('[ ', '[')
         return f'{self.__class__.__name__}(spaces={board_repr})'
 
-    def __eq__(self, other: 'GridGameState'):
+    def __eq__(self, other):
+        if not isinstance(other, GridGameState):
+            return False
         return np.array_equal(self.board, other.board)
 
     def get_move_count(self) -> int:
@@ -222,5 +224,6 @@ class GridGameState(GameState):
         i, j = move // self.board_width, move % self.board_width
         new_board[i, j] = moving_player
 
-        # noinspection PyArgumentList
-        return self.__class__(spaces=new_board)
+        return self.__class__(board_height=self.board_height,
+                              board_width=self.board_width,
+                              spaces=new_board)

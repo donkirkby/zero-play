@@ -6,8 +6,15 @@ from zero_play.game_state import GridGameState
 class TicTacToeState(GridGameState):
     game_name = 'Tic Tac Toe'
 
-    def __init__(self, text: str = None, spaces: np.ndarray = None):
-        super().__init__(board_height=3, board_width=3, text=text, spaces=spaces)
+    def __init__(self,
+                 text: str = None,
+                 spaces: np.ndarray = None,
+                 board_height: int = 3,
+                 board_width: int = 3):
+        super().__init__(board_height=board_height,
+                         board_width=board_width,
+                         text=text,
+                         spaces=spaces)
 
     def is_win(self, player: int) -> bool:
         """ Has the given player collected a triplet in any direction? """
