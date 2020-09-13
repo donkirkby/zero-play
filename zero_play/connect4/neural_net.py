@@ -9,22 +9,21 @@ from tensorflow.python.keras.callbacks import TensorBoard
 from tensorflow.python.keras.layers import Dense, Conv2D, Dropout, Flatten
 from tensorflow.python.keras.models import load_model
 
-from zero_play.game import GridGame, Game
+from zero_play.game_state import GridGameState, GameState
 from zero_play.heuristic import Heuristic
 
 logger = logging.getLogger(__name__)
 
 
 class NeuralNet(Heuristic):
-    def __init__(self, game: Game):
-        if not isinstance(game, GridGame):
-            raise ValueError(f'{game.__class__} is not a subclass of GridGame.')
-        super().__init__(game)
-        # game params
-        self.board_height = game.board_height
-        self.board_width = game.board_width
-        example_board = game.create_board()
-        self.action_size = len(game.get_valid_moves(example_board))
+    def __init__(self, start_state: GameState):
+        if not isinstance(start_state, GridGameState):
+            raise ValueError(f'{start_state.__class__} is not a subclass of GridGameState.')
+        super().__init__()
+        # start_state params
+        self.board_height = start_state.board_height
+        self.board_width = start_state.board_width
+        self.action_size = len(start_state.get_valid_moves())
         self.epochs_completed = 0
         self.epochs_to_train = 100
         args = Namespace(lr=0.001,
@@ -70,11 +69,11 @@ class NeuralNet(Heuristic):
     def get_summary(self) -> typing.Sequence[str]:
         return 'neural net', self.checkpoint_name
 
-    def analyse(self, board: np.ndarray) -> typing.Tuple[float, np.ndarray]:
-        if self.game.is_ended(board):
+    def analyse(self, board: GridGameState) -> typing.Tuple[float, np.ndarray]:
+        if board.is_ended():
             return self.analyse_end_game(board)
 
-        outputs = self.model.predict(self.game.get_spaces(board).reshape(
+        outputs = self.model.predict(board.get_spaces().reshape(
             (1,
              self.board_height,
              self.board_width,
@@ -89,7 +88,7 @@ class NeuralNet(Heuristic):
         if folder is not None:
             folder_path = Path(folder)
         else:
-            game_name = self.game.name.replace(' ', '-').lower()
+            game_name = self.start_state.name.replace(' ', '-').lower()
             folder_path = Path('data') / game_name
         return folder_path
 

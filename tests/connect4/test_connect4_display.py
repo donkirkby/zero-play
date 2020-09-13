@@ -3,6 +3,7 @@ from PySide2.QtGui import QPainter, QColor, QPen
 
 from tests.tictactoe.test_tictactoe_display import set_font_size, draw_text, trigger_resize
 from zero_play.connect4.display import Connect4Display
+from zero_play.connect4.game import Connect4State
 from zero_play.pixmap_differ import PixmapDiffer
 
 
@@ -34,7 +35,7 @@ def test_pieces(pixmap_differ: PixmapDiffer):
         expected.drawEllipse(290, 50, 60, 60)
 
         display = Connect4Display()
-        board = display.game.create_board('''\
+        board = Connect4State('''\
 .......
 .......
 .......

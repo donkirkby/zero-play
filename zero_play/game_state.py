@@ -20,6 +20,10 @@ class GameState(ABC):
         """ Display name for the game. """
 
     @abstractmethod
+    def __eq__(self, other: 'GameState') -> bool:
+        """ Compare with another game state. """
+
+    @abstractmethod
     def get_valid_moves(self) -> np.ndarray:
         """ Decide which moves are valid for this board state.
 
@@ -150,6 +154,14 @@ class GridGameState(GameState):
                 lines = [line[2:] for line in lines]
             for i, line in enumerate(lines):
                 spaces[i] = [self.DISPLAY_CHARS.index(c) - 1 for c in line]
+
+    def __repr__(self):
+        board_repr = " ".join(repr(self.board).split())
+        board_repr = board_repr.replace('[ ', '[')
+        return f'{self.__class__.__name__}(spaces={board_repr})'
+
+    def __eq__(self, other: 'GridGameState'):
+        return np.array_equal(self.board, other.board)
 
     def get_move_count(self) -> int:
         return (self.get_spaces() != GameState.NO_PLAYER).sum()

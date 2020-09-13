@@ -6,7 +6,7 @@ from operator import itemgetter
 
 import numpy as np
 
-from zero_play.game import Game
+from zero_play.game_state import GameState
 from zero_play.heuristic import Heuristic
 from zero_play.player import Player
 
@@ -17,21 +17,17 @@ class SearchNode:
     # Controls exploration of new nodes vs. exploitation of good nodes.
     exploration_weight = 1.0
 
-    def __init__(self, game: Game,
-                 board: np.ndarray = None,
+    def __init__(self,
+                 game_state: GameState = None,
                  parent: 'SearchNode' = None,
                  move: int = None):
         """ Initialize an instance.
 
-        :param board: the board state that this node represents
+        :param game_state: the board state that this node represents
         :param parent: the board state that this node came from
         :param move: the move to get from parent to this node
         """
-        self.game = game
-        if board is None:
-            self.board = game.create_board()
-        else:
-            self.board = board
+        self.game_state = game_state
         self.parent = parent
         self.move = move
         self.children: typing.Optional[typing.List[SearchNode]] = None
@@ -40,13 +36,11 @@ class SearchNode:
         self.value_count = 0
 
     def __repr__(self):
-        board_repr = " ".join(repr(self.board).split())
-        board_repr = board_repr.replace('[ ', '[')
-        return f"SearchNode({self.game!r}, {board_repr})"
+        return f"SearchNode({self.game_state!r})"
 
     def __eq__(self, other):
         if isinstance(other, SearchNode):
-            return np.array_equal(self.board, other.board)
+            return self.game_state == other.game_state
         return NotImplemented
 
     def select_leaf(self):
@@ -75,13 +69,10 @@ class SearchNode:
         if self.children is not None:
             return self.children
         children = []
-        for move, is_valid in enumerate(self.game.get_valid_moves(self.board)):
+        for move, is_valid in enumerate(self.game_state.get_valid_moves()):
             if is_valid:
-                child_board = self.game.make_move(self.board, move)
-                children.append(SearchNode(self.game,
-                                           child_board,
-                                           self,
-                                           move))
+                child_state = self.game_state.make_move(move)
+                children.append(SearchNode(child_state, self, move))
         self.children = children
         return children
 
@@ -93,7 +84,7 @@ class SearchNode:
             self.parent.record_value(-value)
 
     def evaluate(self, heuristic: Heuristic):
-        value, child_predictions = heuristic.analyse(self.board)
+        value, child_predictions = heuristic.analyse(self.game_state)
         self.child_predictions = child_predictions
         self.record_value(value)
 
@@ -136,29 +127,29 @@ class SearchNode:
 
 
 class SearchManager:
-    def __init__(self, game: Game, heuristic: Heuristic):
-        self.game = game
+    def __init__(self, start_state: GameState, heuristic: Heuristic):
+        self.start_state = start_state
         self.heuristic = heuristic
         self.current_node = self.reset()
 
     def reset(self) -> SearchNode:
-        self.current_node = SearchNode(self.game)
+        self.current_node = SearchNode(self.start_state)
         return self.current_node
 
-    def find_node(self, board):
-        if not np.array_equal(board, self.current_node.board):
+    def find_node(self, game_state: GameState):
+        if not game_state == self.current_node.game_state:
             for child in self.current_node.find_all_children():
-                if np.array_equal(board, child.board):
+                if game_state == child.game_state:
                     self.current_node = child
                     break
             else:
                 parent = self.current_node.parent
-                if parent is not None and np.array_equal(parent.board, board):
+                if parent is not None and game_state == parent.game_state:
                     self.current_node = parent
                 else:
-                    self.current_node = SearchNode(self.game, board)
+                    self.current_node = SearchNode(game_state)
 
-    def search(self, board: np.ndarray, iterations: int):
+    def search(self, board: GameState, iterations: int):
         self.find_node(board)
         for _ in range(iterations):
             leaf = self.current_node.select_leaf()
@@ -180,20 +171,20 @@ class SearchManager:
 
     def get_move_probabilities(
             self,
-            board: np.ndarray,
+            game_state: GameState,
             limit: int = 10) -> typing.List[typing.Tuple[str,
                                                          float,
                                                          int,
                                                          float]]:
         """ Report the probability that each move is the best choice.
 
-        :param board: the starting position
+        :param game_state: the starting position
         :param limit: the maximum number of moves to report
         :return: [(move_display, probability, value_count, avg_value)], where
         value_count is the number of times the value was probed from the move,
         and avg_value is the average value from all those probes.
         """
-        self.find_node(board)
+        self.find_node(game_state)
         children = self.current_node.find_all_children()
         temperature = 1.0
         probabilities = self.current_node.rank_children(children, temperature)
@@ -202,7 +193,7 @@ class SearchManager:
                                  reverse=True)
         top_children = ranked_children[:limit]
         child_node: SearchNode
-        top_moves = [(self.game.display_move(board, child_node.move),
+        top_moves = [(game_state.display_move(child_node.move),
                       probability,
                       child_node.value_count,
                       child_node.average_value)
@@ -212,15 +203,15 @@ class SearchManager:
 
     def create_training_data(self, iterations: int, data_size: int):
         game_states = []
-        self.search(self.current_node.board, iterations=1)  # One extra to start.
+        self.search(self.current_node.game_state, iterations=1)  # One extra to start.
         report_size = 0
-        board_shape = self.game.get_spaces(self.current_node.board).shape
+        board_shape = self.current_node.game_state.get_spaces().shape
         boards = np.zeros((data_size,) + board_shape, int)
-        move_count = self.game.get_valid_moves(self.current_node.board).size
+        move_count = self.current_node.game_state.get_valid_moves().size
         outputs = np.zeros((data_size, move_count + 1))
         data_count = 0
         while True:
-            self.search(self.current_node.board, iterations)
+            self.search(self.current_node.game_state, iterations)
             assert self.current_node.children is not None
             assert self.current_node.child_predictions is not None
             move_weights = np.zeros(self.current_node.child_predictions.size)
@@ -230,20 +221,20 @@ class SearchManager:
             total_weight = move_weights.sum()
             if total_weight:
                 move_weights /= total_weight
-            game_states.append([self.current_node.board, move_weights])
+            game_states.append([self.current_node.game_state, move_weights])
             move = np.random.choice(move_weights.size, p=move_weights)
             for child in self.current_node.children:
                 if child.move == move:
                     self.current_node = child
                     break
-            if self.game.is_ended(self.current_node.board):
-                final_value, _ = self.heuristic.analyse(self.current_node.board)
-                final_player = -self.game.get_active_player(self.current_node.board)
-                for board, move_weights in game_states:
+            if self.current_node.game_state.is_ended():
+                final_value, _ = self.heuristic.analyse(self.current_node.game_state)
+                final_player = -self.current_node.game_state.get_active_player()
+                for game_state, move_weights in game_states:
                     value = final_value
-                    if self.game.get_active_player(board) != final_player:
+                    if game_state.get_active_player() != final_player:
                         value *= -1
-                    boards[data_count] = self.game.get_spaces(board)
+                    boards[data_count] = game_state.get_spaces()
                     outputs[data_count, :move_count] = move_weights
                     outputs[data_count, -1] = value
                     data_count += 1
@@ -269,13 +260,14 @@ class MctsPlayer(Player):
     """
     DEFAULT_ITERATIONS = 80
 
-    def __init__(self, game: Game,
-                 player_number: int = Game.X_PLAYER,
+    def __init__(self,
+                 start_state: GameState,
+                 player_number: int = GameState.X_PLAYER,
                  iteration_count: int = DEFAULT_ITERATIONS,
                  heuristic: Heuristic = None):
-        super().__init__(game, player_number, heuristic)
+        super().__init__(player_number, heuristic)
         self.iteration_count = iteration_count
-        self.search_manager = SearchManager(game, self.heuristic)
+        self.search_manager = SearchManager(start_state, self.heuristic)
 
     @property
     def heuristic(self) -> Heuristic:
@@ -288,31 +280,30 @@ class MctsPlayer(Player):
         if search_manager is not None:
             search_manager.heuristic = value
 
-    def end_game(self, board: np.ndarray, opponent: Player):
+    def end_game(self, game_state: np.ndarray, opponent: Player):
         self.search_manager.reset()
 
-    def choose_move(self, board: np.ndarray) -> int:
+    def choose_move(self, game_state: GameState) -> int:
         """ Choose a move for the given board.
 
-        :param board: an array of piece values, like the ones returned by
-            game.create_board().
+        :param game_state: the current state of the game.
         :return: the chosen move's index in the list of valid moves.
         """
-        self.search_manager.search(board, self.iteration_count)
-        if self.game.get_move_count(board) < 15:
+        self.search_manager.search(game_state, self.iteration_count)
+        if game_state.get_move_count() < 15:
             return self.search_manager.choose_weighted_move()
         return self.search_manager.get_best_move()
 
-    def get_move_probabilities(self, board: np.ndarray) -> typing.List[
+    def get_move_probabilities(self, game_state: GameState) -> typing.List[
             typing.Tuple[str, float, int, float]]:
         """ Report the probability that each move is the best choice.
 
-        :param board: the board to analyse
+        :param game_state: the board to analyse
         :return: [(move_display, probability, value_count, avg_value)], where
         value_count is the number of times the value was probed from the move,
         and avg_value is the average value from all those probes.
         """
-        return self.search_manager.get_move_probabilities(board)
+        return self.search_manager.get_move_probabilities(game_state)
 
     def get_summary(self) -> typing.Sequence[str]:
         return (('mcts',) + tuple(self.heuristic.get_summary()) +

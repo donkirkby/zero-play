@@ -34,11 +34,6 @@ setup(name='zero_play',
                       'ml-gpu': ['tensorflow-gpu']},
       entry_points={
           'gui_scripts': ['zero_play=zero_play.zero_play:main'],
-          # The game entry point lets you add rules for new games.
-          # The zero_play.game.Game class is a useful base class.
-          'zero_play.game': ['tictactoe=zero_play.tictactoe.game:TicTacToeGame',
-                             'connect4=zero_play.connect4.game:Connect4Game',
-                             'othello=zero_play.othello.game:OthelloGame'],
           # The game_display entry point lets you add screens for new games.
           # The zero_play.game_display.GameDisplay class is a useful base class.
           'zero_play.game_display': [

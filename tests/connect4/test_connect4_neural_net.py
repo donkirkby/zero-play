@@ -3,14 +3,12 @@ from pathlib import Path
 
 import numpy as np
 
-from zero_play.connect4.game import Connect4Game
+from zero_play.connect4.game import Connect4State
 from zero_play.connect4.neural_net import NeuralNet
 
 
 def test_end_game_value():
-    game = Connect4Game()
-    heuristic = NeuralNet(game)
-    board = game.create_board("""\
+    board = Connect4State("""\
 .......
 .......
 .......
@@ -18,6 +16,7 @@ def test_end_game_value():
 OOO....
 XXXX...
 """)
+    heuristic = NeuralNet(board)
     expected_value = 1.0
     expected_policy = [1/7] * 7
 
@@ -33,8 +32,8 @@ def test_train():
     boards = np.array(boards_list)
     outputs = np.array(outputs_list)
 
-    game = Connect4Game()
-    neural_net = NeuralNet(game)
+    board = Connect4State()
+    neural_net = NeuralNet(board)
 
     history = neural_net.train(boards, outputs)
 

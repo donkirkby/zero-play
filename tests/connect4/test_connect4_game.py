@@ -1,21 +1,22 @@
 import numpy as np
 import pytest
 
-from zero_play.connect4.game import Connect4Game
+from zero_play.connect4.game import Connect4State
 
 
 def test_create_board():
-    expected_board = np.array([[0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0]])
-    board = Connect4Game().create_board()
+    expected_spaces = np.array([[0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0]])
+    board = Connect4State()
 
-    assert np.array_equal(expected_board, board)
+    assert np.array_equal(board.get_spaces(), expected_spaces)
 
 
+# noinspection DuplicatedCode
 def test_create_board_from_text():
     text = """\
 .......
@@ -25,17 +26,18 @@ def test_create_board_from_text():
 ....X..
 ...XO..
 """
-    expected_board = np.array([[0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 1, 0, 0],
-                               [0, 0, 0, 1, -1, 0, 0]])
-    board = Connect4Game().create_board(text)
+    expected_spaces = np.array([[0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 1, 0, 0],
+                                [0, 0, 0, 1, -1, 0, 0]])
+    board = Connect4State(text)
 
-    assert np.array_equal(expected_board, board)
+    assert np.array_equal(board.get_spaces(), expected_spaces)
 
 
+# noinspection DuplicatedCode
 def test_create_board_with_coordinates():
     text = """\
 1234567
@@ -52,18 +54,19 @@ def test_create_board_with_coordinates():
                                [0, 0, 0, 0, 0, 0, 0],
                                [0, 0, 0, 0, 1, 0, 0],
                                [0, 0, 0, 1, -1, 0, 0]])
-    board = Connect4Game().create_board(text)
+    board = Connect4State(text)
 
-    assert np.array_equal(expected_board, board)
+    assert np.array_equal(board.get_spaces(), expected_board)
 
 
+# noinspection DuplicatedCode
 def test_display():
-    board = np.array([[0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 1, 0, 0],
-                      [0, 0, 0, 1, -1, 0, 0]])
+    spaces = np.array([[0, 0, 0, 0, 0, 0, 0],
+                       [0, 0, 0, 0, 0, 0, 0],
+                       [0, 0, 0, 0, 0, 0, 0],
+                       [0, 0, 0, 0, 0, 0, 0],
+                       [0, 0, 0, 0, 1, 0, 0],
+                       [0, 0, 0, 1, -1, 0, 0]])
     expected_text = """\
 .......
 .......
@@ -72,18 +75,19 @@ def test_display():
 ....X..
 ...XO..
 """
-    text = Connect4Game().display(board)
+    text = Connect4State(spaces=spaces).display()
 
-    assert expected_text == text
+    assert text == expected_text
 
 
+# noinspection DuplicatedCode
 def test_display_coordinates():
-    board = np.array([[0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 1, 0, 0],
-                      [0, 0, 0, 1, -1, 0, 0]])
+    spaces = np.array([[0, 0, 0, 0, 0, 0, 0],
+                       [0, 0, 0, 0, 0, 0, 0],
+                       [0, 0, 0, 0, 0, 0, 0],
+                       [0, 0, 0, 0, 0, 0, 0],
+                       [0, 0, 0, 0, 1, 0, 0],
+                       [0, 0, 0, 1, -1, 0, 0]])
     expected_text = """\
 1234567
 .......
@@ -93,7 +97,7 @@ def test_display_coordinates():
 ....X..
 ...XO..
 """
-    text = Connect4Game().display(board, show_coordinates=True)
+    text = Connect4State(spaces=spaces).display(show_coordinates=True)
 
     assert expected_text == text
 
@@ -109,9 +113,8 @@ def test_get_valid_moves():
 ...XO..
 """
     expected_moves = np.array([1, 1, 1, 1, 0, 1, 1])
-    game = Connect4Game()
-    board = game.create_board(text)
-    moves = game.get_valid_moves(board)
+    board = Connect4State(text)
+    moves = board.get_valid_moves()
 
     assert np.array_equal(expected_moves, moves)
 
@@ -122,10 +125,10 @@ def test_get_valid_moves():
     (' 7', 6)
 ])
 def test_parse_move(text, expected_move):
-    game = Connect4Game()
-    move = game.parse_move(text, game.create_board())
+    game = Connect4State()
+    move = game.parse_move(text)
 
-    assert expected_move == move
+    assert move == expected_move
 
 
 @pytest.mark.parametrize('text,expected_message', [
@@ -133,25 +136,25 @@ def test_parse_move(text, expected_move):
     ('2B', r"invalid literal for int\(\) with base 10: '2B'"),
 ])
 def test_parse_move_fails(text, expected_message):
-    game = Connect4Game()
+    game = Connect4State()
     with pytest.raises(ValueError, match=expected_message):
-        game.parse_move(text, game.create_board())
+        game.parse_move(text)
 
 
 def test_display_player_x():
     expected_display = 'Player X'
 
-    display = Connect4Game().display_player(Connect4Game.X_PLAYER)
+    display = Connect4State().display_player(Connect4State.X_PLAYER)
 
-    assert expected_display == display
+    assert display == expected_display
 
 
 def test_display_player_o():
     expected_display = 'Player O'
 
-    display = Connect4Game().display_player(Connect4Game.O_PLAYER)
+    display = Connect4State().display_player(Connect4State.O_PLAYER)
 
-    assert expected_display == display
+    assert display == expected_display
 
 
 def test_make_move():
@@ -172,12 +175,11 @@ def test_make_move():
 ....X..
 ...XO..
 """
-    game = Connect4Game()
-    board1 = game.create_board(text)
-    board2 = game.make_move(board1, move)
-    display = game.display(board2)
+    board1 = Connect4State(text)
+    board2 = board1.make_move(move)
+    display = board2.display()
 
-    assert expected_display == display
+    assert display == expected_display
 
 
 def test_make_move_o():
@@ -198,12 +200,11 @@ def test_make_move_o():
 ....X..
 ...XO..
 """
-    game = Connect4Game()
-    board1 = game.create_board(text)
-    board2 = game.make_move(board1, move)
-    display = game.display(board2)
+    board1 = Connect4State(text)
+    board2 = board1.make_move(move)
+    display = board2.display()
 
-    assert expected_display == display
+    assert display == expected_display
 
 
 def test_get_active_player_o():
@@ -215,12 +216,11 @@ def test_get_active_player_o():
 ....X..
 ...XO..
 """
-    expected_player = Connect4Game.O_PLAYER
-    game = Connect4Game()
-    board = game.create_board(text)
-    player = game.get_active_player(board)
+    expected_player = Connect4State.O_PLAYER
+    board = Connect4State(text)
+    player = board.get_active_player()
 
-    assert expected_player == player
+    assert player == expected_player
 
 
 def test_get_active_player_x():
@@ -232,12 +232,11 @@ def test_get_active_player_x():
 ....X..
 ...XO..
 """
-    expected_player = Connect4Game.X_PLAYER
-    game = Connect4Game()
-    board = game.create_board(text)
-    player = game.get_active_player(board)
+    expected_player = Connect4State.X_PLAYER
+    board = Connect4State(text)
+    player = board.get_active_player()
 
-    assert expected_player == player
+    assert player == expected_player
 
 
 def test_no_winner():
@@ -249,12 +248,11 @@ def test_no_winner():
 ...OO..
 X.XXXO.
 """
-    game = Connect4Game()
-    expected_winner = game.NO_PLAYER
-    board = game.create_board(text)
-    winner = game.get_winner(board)
+    board = Connect4State(text)
+    expected_winner = board.NO_PLAYER
+    winner = board.get_winner()
 
-    assert expected_winner == winner
+    assert winner == expected_winner
 
 
 def test_horizontal_winner():
@@ -266,12 +264,11 @@ def test_horizontal_winner():
 ...OO..
 .XXXXO.
 """
-    game = Connect4Game()
-    expected_winner = game.X_PLAYER
-    board = game.create_board(text)
-    winner = game.get_winner(board)
+    board = Connect4State(text)
+    expected_winner = board.X_PLAYER
+    winner = board.get_winner()
 
-    assert expected_winner == winner
+    assert winner == expected_winner
 
 
 def test_horizontal_end_winner():
@@ -283,12 +280,11 @@ def test_horizontal_end_winner():
 ...OO..
 ..OXXXX
 """
-    game = Connect4Game()
-    expected_winner = game.X_PLAYER
-    board = game.create_board(text)
-    winner = game.get_winner(board)
+    board = Connect4State(text)
+    expected_winner = board.X_PLAYER
+    winner = board.get_winner()
 
-    assert expected_winner == winner
+    assert winner == expected_winner
 
 
 def test_longer_winner():
@@ -300,12 +296,11 @@ def test_longer_winner():
 ..OOO..
 XXXXXO.
 """
-    game = Connect4Game()
-    expected_winner = game.X_PLAYER
-    board = game.create_board(text)
-    winner = game.get_winner(board)
+    board = Connect4State(text)
+    expected_winner = board.X_PLAYER
+    winner = board.get_winner()
 
-    assert expected_winner == winner
+    assert winner == expected_winner
 
 
 def test_vertical_winner():
@@ -316,12 +311,11 @@ def test_vertical_winner():
 ....XO.
 ..XXXO.
 """
-    game = Connect4Game()
-    expected_winner = game.O_PLAYER
-    board = game.create_board(text)
-    winner = game.get_winner(board)
+    board = Connect4State(text)
+    expected_winner = board.O_PLAYER
+    winner = board.get_winner()
 
-    assert expected_winner == winner
+    assert winner == expected_winner
 
 
 def test_diagonal1_winner():
@@ -332,12 +326,11 @@ def test_diagonal1_winner():
 ..OXO..
 ..XXXO.
 """
-    game = Connect4Game()
-    expected_winner = game.O_PLAYER
-    board = game.create_board(text)
-    winner = game.get_winner(board)
+    board = Connect4State(text)
+    expected_winner = board.O_PLAYER
+    winner = board.get_winner()
 
-    assert expected_winner == winner
+    assert winner == expected_winner
 
 
 def test_diagonal2_winner():
@@ -348,12 +341,11 @@ def test_diagonal2_winner():
 ..OXOXO
 ..OXXXO
 """
-    game = Connect4Game()
-    expected_winner = game.X_PLAYER
-    board = game.create_board(text)
-    winner = game.get_winner(board)
+    board = Connect4State(text)
+    expected_winner = board.X_PLAYER
+    winner = board.get_winner()
 
-    assert expected_winner == winner
+    assert winner == expected_winner
 
 
 def test_diagonal2_bottom_winner():
@@ -365,12 +357,11 @@ def test_diagonal2_bottom_winner():
 ..XOO..
 .XOXOX.
 """
-    game = Connect4Game()
-    expected_winner = game.X_PLAYER
-    board = game.create_board(text)
-    winner = game.get_winner(board)
+    board = Connect4State(text)
+    expected_winner = board.X_PLAYER
+    winner = board.get_winner()
 
-    assert expected_winner == winner
+    assert winner == expected_winner
 
 
 def test_diagonal2_left_winner():
@@ -382,9 +373,8 @@ def test_diagonal2_left_winner():
 .OXX...
 OXXO...
 """
-    game = Connect4Game()
-    expected_winner = game.O_PLAYER
-    board = game.create_board(text)
-    winner = game.get_winner(board)
+    board = Connect4State(text)
+    expected_winner = board.O_PLAYER
+    winner = board.get_winner()
 
-    assert expected_winner == winner
+    assert winner == expected_winner
