@@ -161,5 +161,8 @@ class OthelloState(GridGameState):
             return self.O_PLAYER
         return self.NO_PLAYER
 
+    def get_piece_count(self, player: int):
+        return (self.board[:-1] == player).sum()
+
     def is_win(self, player: int) -> bool:
         return self.get_winner() == player
