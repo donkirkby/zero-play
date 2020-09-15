@@ -23,7 +23,7 @@ class OthelloDisplay(GridDisplay):
                                                  brush=white_pen)
         self.black_count = scene.addSimpleText('0')
         self.white_count = scene.addSimpleText('0')
-        self.black_count_x = self.white_count_x = self.count_y = 0
+        self.black_count_x = self.white_count_x = self.count_y = 0.0
 
     def resizeEvent(self, event: QResizeEvent):
         super().resizeEvent(event)

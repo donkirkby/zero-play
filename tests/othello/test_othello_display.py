@@ -127,7 +127,7 @@ def test_piece_count_after_update(pixmap_differ: PixmapDiffer):
     with pixmap_differ.create_painters(
             size+80,
             size,
-            'othello_pieces') as (actual, expected):
+            'othello_piece_count_after_update') as (actual, expected):
         expected_display = OthelloDisplay()
         trigger_resize(expected_display, size+80, size)
         state2 = OthelloState(board_width=8, board_height=8, text="""\
