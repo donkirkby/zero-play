@@ -105,11 +105,6 @@ class Ui_MainWindow(object):
 
         self.player_layout.addWidget(self.searches_lock2, 2, 4, 1, 1)
 
-        self.start = QPushButton(self.players_page)
-        self.start.setObjectName(u"start")
-
-        self.player_layout.addWidget(self.start, 4, 1, 1, 4)
-
         self.player1 = QComboBox(self.players_page)
         self.player1.setObjectName(u"player1")
         sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
@@ -203,6 +198,11 @@ class Ui_MainWindow(object):
 
         self.player_layout.addWidget(self.searches2, 2, 2, 1, 1)
 
+        self.start = QPushButton(self.players_page)
+        self.start.setObjectName(u"start")
+
+        self.player_layout.addWidget(self.start, 4, 1, 1, 4)
+
         self.player_layout.setColumnStretch(1, 10)
         self.player_layout.setColumnStretch(2, 1)
 
@@ -242,6 +242,23 @@ class Ui_MainWindow(object):
         self.gridLayout.addItem(self.horizontalSpacer, 1, 2, 1, 1)
 
         self.stacked_widget.addWidget(self.history_page)
+        self.rules_page = QWidget()
+        self.rules_page.setObjectName(u"rules_page")
+        self.gridLayout_4 = QGridLayout(self.rules_page)
+        self.gridLayout_4.setObjectName(u"gridLayout_4")
+        self.rules_text = QTextBrowser(self.rules_page)
+        self.rules_text.setObjectName(u"rules_text")
+
+        self.gridLayout_4.addWidget(self.rules_text, 0, 0, 1, 1)
+
+        self.rules_close = QPushButton(self.rules_page)
+        self.rules_close.setObjectName(u"rules_close")
+        sizePolicy4.setHeightForWidth(self.rules_close.sizePolicy().hasHeightForWidth())
+        self.rules_close.setSizePolicy(sizePolicy4)
+
+        self.gridLayout_4.addWidget(self.rules_close, 1, 0, 1, 1)
+
+        self.stacked_widget.addWidget(self.rules_page)
         self.display_page = QWidget()
         self.display_page.setObjectName(u"display_page")
         self.gridLayout_2 = QGridLayout(self.display_page)
@@ -304,8 +321,10 @@ class Ui_MainWindow(object):
         self.menu_new.setObjectName(u"menu_new")
         self.menu_view = QMenu(self.menubar)
         self.menu_view.setObjectName(u"menu_view")
-        self.menu_Help = QMenu(self.menubar)
-        self.menu_Help.setObjectName(u"menu_Help")
+        self.menu_help = QMenu(self.menubar)
+        self.menu_help.setObjectName(u"menu_help")
+        self.menu_rules = QMenu(self.menu_help)
+        self.menu_rules.setObjectName(u"menu_rules")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
@@ -313,7 +332,7 @@ class Ui_MainWindow(object):
 
         self.menubar.addAction(self.menu_file.menuAction())
         self.menubar.addAction(self.menu_view.menuAction())
-        self.menubar.addAction(self.menu_Help.menuAction())
+        self.menubar.addAction(self.menu_help.menuAction())
         self.menu_file.addAction(self.menu_new.menuAction())
         self.menu_file.addAction(self.action_open)
         self.menu_file.addAction(self.action_save)
@@ -325,11 +344,12 @@ class Ui_MainWindow(object):
         self.menu_new.addAction(self.action_plot)
         self.menu_new.addAction(self.action_training_session)
         self.menu_view.addAction(self.action_coordinates)
-        self.menu_Help.addAction(self.action_about)
+        self.menu_help.addAction(self.action_about)
+        self.menu_help.addAction(self.menu_rules.menuAction())
 
         self.retranslateUi(MainWindow)
 
-        self.stacked_widget.setCurrentIndex(2)
+        self.stacked_widget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -354,7 +374,6 @@ class Ui_MainWindow(object):
         self.tic_tac_toe.setText(QCoreApplication.translate("MainWindow", u"Tic Tac Toe", None))
         self.othello.setText(QCoreApplication.translate("MainWindow", u"Othello", None))
         self.searches_lock2.setText(QCoreApplication.translate("MainWindow", u"Lock", None))
-        self.start.setText(QCoreApplication.translate("MainWindow", u"Start", None))
         self.cancel.setText(QCoreApplication.translate("MainWindow", u"Cancel", None))
         self.searches_label1.setText(QCoreApplication.translate("MainWindow", u"searches", None))
         self.searches_lock1.setText(QCoreApplication.translate("MainWindow", u"Lock", None))
@@ -364,14 +383,17 @@ class Ui_MainWindow(object):
         self.player_label1.setText(QCoreApplication.translate("MainWindow", u"Player 1:", None))
         self.player_label2.setText(QCoreApplication.translate("MainWindow", u"Player 2:", None))
         self.shuffle_players.setText(QCoreApplication.translate("MainWindow", u"Shuffle Player Order", None))
+        self.start.setText(QCoreApplication.translate("MainWindow", u"Start", None))
         self.close_humans.setText(QCoreApplication.translate("MainWindow", u"OK", None))
         self.players_label.setText(QCoreApplication.translate("MainWindow", u"Players", None))
         self.new_human.setText(QCoreApplication.translate("MainWindow", u"New", None))
+        self.rules_close.setText(QCoreApplication.translate("MainWindow", u"Close", None))
         self.toggle_review.setText(QCoreApplication.translate("MainWindow", u"Review / Resume", None))
         self.resume_here.setText(QCoreApplication.translate("MainWindow", u"Resume Here", None))
         self.menu_file.setTitle(QCoreApplication.translate("MainWindow", u"&File", None))
         self.menu_new.setTitle(QCoreApplication.translate("MainWindow", u"&New", None))
         self.menu_view.setTitle(QCoreApplication.translate("MainWindow", u"&View", None))
-        self.menu_Help.setTitle(QCoreApplication.translate("MainWindow", u"&Help", None))
+        self.menu_help.setTitle(QCoreApplication.translate("MainWindow", u"&Help", None))
+        self.menu_rules.setTitle(QCoreApplication.translate("MainWindow", u"&Rules", None))
     # retranslateUi
 

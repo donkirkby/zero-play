@@ -7,7 +7,7 @@ from operator import attrgetter
 from random import shuffle
 
 import numpy as np
-from PySide2.QtCore import QSettings
+from PySide2.QtCore import QSettings, QFile, QTextStream
 
 from PySide2.QtGui import QResizeEvent, Qt
 from PySide2.QtWidgets import (QApplication, QMainWindow, QFileDialog,
@@ -23,7 +23,11 @@ from zero_play.grid_display import GridDisplay
 from zero_play.main_window import Ui_MainWindow
 from zero_play.mcts_player import MctsPlayer
 from zero_play.playout import Playout
+from zero_play.rules_formatter import convert_markdown
 from zero_play.strength_adjuster import StrengthAdjuster
+from zero_play import zero_play_rules_rc
+
+assert zero_play_rules_rc  # Need to import this module to load resources.
 
 try:
     from zero_play.plot_canvas import PlotCanvas
@@ -76,6 +80,7 @@ class ZeroPlayWindow(QMainWindow):
         ui.action_about.triggered.connect(self.on_about)
         ui.toggle_review.clicked.connect(self.on_toggle_review)
         ui.resume_here.clicked.connect(self.on_resume_here)
+        ui.rules_close.clicked.connect(self.on_close_rules)
         ui.move_history.currentIndexChanged.connect(self.on_move_history)
         ui.player1.currentIndexChanged.connect(
             lambda new_index: self.on_player_changed(ui.player1, new_index))
@@ -132,11 +137,18 @@ class ZeroPlayWindow(QMainWindow):
         for i, display in enumerate(games):
             row = i // column_count
             column = i % column_count
-            game_button = QPushButton(display.start_state.game_name)
+            game_name = display.start_state.game_name
+            game_button = QPushButton(game_name)
             game_button.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+
             # noinspection PyUnresolvedReferences
             game_button.clicked.connect(partial(self.show_game, display))
             game_layout.addWidget(game_button, row, column)
+
+            if display.rules_path is not None:
+                game_rules_action = self.ui.menu_rules.addAction(game_name)
+                game_rules_action.triggered.connect(partial(self.on_rules,
+                                                            display))
 
     def on_toggle_review(self):
         choices = self.ui.choices
@@ -402,6 +414,29 @@ class ZeroPlayWindow(QMainWindow):
         self.ui.searches_lock2.setChecked(is_checked)
         settings = get_settings(self.start_state)
         settings.setValue('searches_locked', is_checked)
+
+    def on_rules(self, display: GameDisplay):
+        self.ui.stacked_widget.setCurrentWidget(self.ui.rules_page)
+        rules_path = display.rules_path
+        if rules_path is None:
+            game_name = display.start_state.game_name
+            rules_html = f'No rules found for {game_name}.'
+        else:
+            rules_file = QFile(rules_path)
+            rules_file.open(QFile.ReadOnly | QFile.Text)
+            rules_markdown = QTextStream(rules_file).readAll()
+            rules_html = convert_markdown(rules_markdown)
+
+        self.ui.rules_text.setHtml(rules_html)
+
+    def on_close_rules(self):
+        if self.display is None:
+            page = self.ui.game_page
+        elif self.display.current_state == self.display.start_state:
+            page = self.ui.players_page
+        else:
+            page = self.ui.display_page
+        self.ui.stacked_widget.setCurrentWidget(page)
 
 
 def main():

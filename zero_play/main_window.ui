@@ -18,7 +18,7 @@
     <item>
      <widget class="QStackedWidget" name="stacked_widget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="game_page">
        <layout class="QGridLayout" name="gridLayout_3">
@@ -71,13 +71,6 @@
            <widget class="QCheckBox" name="searches_lock2">
             <property name="text">
              <string>Lock</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1" colspan="4">
-           <widget class="QPushButton" name="start">
-            <property name="text">
-             <string>Start</string>
             </property>
            </widget>
           </item>
@@ -208,6 +201,13 @@
             </property>
            </widget>
           </item>
+          <item row="4" column="1" colspan="4">
+           <widget class="QPushButton" name="start">
+            <property name="text">
+             <string>Start</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
@@ -262,6 +262,26 @@
            </size>
           </property>
          </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="rules_page">
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <widget class="QTextBrowser" name="rules_text"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="rules_close">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Close</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -360,15 +380,21 @@
     </property>
     <addaction name="action_coordinates"/>
    </widget>
-   <widget class="QMenu" name="menu_Help">
+   <widget class="QMenu" name="menu_help">
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <widget class="QMenu" name="menu_rules">
+     <property name="title">
+      <string>&amp;Rules</string>
+     </property>
+    </widget>
     <addaction name="action_about"/>
+    <addaction name="menu_rules"/>
    </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_view"/>
-   <addaction name="menu_Help"/>
+   <addaction name="menu_help"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="action_open">

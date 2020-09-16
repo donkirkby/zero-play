@@ -1,8 +1,15 @@
+- name: Rules
+  link: /rules/connect4.html
+  dropdown:
+    - name: Connect 4
+      link: /rules/connect4.html
+    - name: Tic Tac Toe
+      link: /rules/tictactoe.html
 - name: Journal
-  link: /journal
+  link: /journal/
   dropdown:
   - name: Latest
-    link: /journal
+    link: /journal/
   - name: 2019
     link: /journal/2019.html
   - name: 2018

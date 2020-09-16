@@ -2,8 +2,9 @@ remote_theme: chrisrhymes/bulma-clean-theme
 title: Zero Play
 google_analytics: UA-4644630-2
 
-#defaults:
-#  - scope:
-#      path: ""
-#    values:
-#      hero_image: images/index_hero.jpg
+defaults:
+  - scope:
+      path: ""
+    values:
+      hero_image: images/index_hero.jpg
+      hero_darken: true

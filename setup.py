@@ -29,7 +29,7 @@ setup(name='zero_play',
           'Programming Language :: Python :: 3.8'],
       keywords='boardgames alphazero machine learning mcts',
       packages=setuptools.find_packages(),
-      install_requires=['numpy<1.19.0', 'matplotlib', 'PySide2'],
+      install_requires=['numpy<1.19.0', 'matplotlib', 'PySide2', 'markdown'],
       extras_require={'ml': ['tensorflow'],
                       'ml-gpu': ['tensorflow-gpu']},
       entry_points={

@@ -14,6 +14,7 @@ from zero_play.mcts_worker import MctsWorker
 
 class GameDisplay(QGraphicsView):
     default_font = 'Sans Serif,9,-1,5,50,0,0,0,0,0'
+    rules_path: typing.Optional[str] = None
 
     move_needed = Signal(int, np.ndarray)  # active_player, board
     move_made = Signal(np.ndarray)  # board
