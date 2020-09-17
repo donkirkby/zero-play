@@ -78,18 +78,11 @@ To add a new screen to the project:
 3. Select a widget type, like "Widget", and choose a file name.
 
 Another useful tool for working on this project is the resource compiler that
-packages up the rules files into `zero_play_rules_rc.py`
+packages up the rules files into `zero_play_rules_rc.py`. It's launched with
+the `zero_play_rcc` command.
 
-You can update the `zero_play_rules.qrc` file by hand, or you can generate it:
-
-    cd docs/rules
-    pyside2-rcc --project > zero_play_rules.qrc
-    cd ../..
-
-After changing the `zero_play_rules.qrc` file or the rules files, recompile the
-resource file. Run this from the project's root folder:
-
-    pyside2-rcc -o zero_play/zero_play_rules_rc.py --root /zero_play_rules docs/rules/zero_play_rules.qrc
+    cd zero_play
+    zero_play_rcc --name zero_play_rules ../docs/rules
 
 [Qt Creator]: https://www.qt.io/download-qt-installer
 [Qt Designer documentation]: https://doc.qt.io/qt-5/designer-quick-start.html

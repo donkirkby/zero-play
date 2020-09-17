@@ -1,7 +1,0 @@
-<!DOCTYPE RCC><RCC version="1.0">
-<qresource>
-<file>./connect4.md</file>
-<file>./tictactoe.md</file>
-<file>./zero_play_rules.qrc</file>
-</qresource>
-</RCC>
