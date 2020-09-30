@@ -9,7 +9,7 @@ from random import shuffle
 import numpy as np
 from PySide2.QtCore import QSettings, QFile, QTextStream
 
-from PySide2.QtGui import QResizeEvent, Qt
+from PySide2.QtGui import QResizeEvent, Qt, QIcon, QPixmap
 from PySide2.QtWidgets import (QApplication, QMainWindow, QFileDialog,
                                QTableWidgetItem, QGridLayout, QPushButton,
                                QSizePolicy, QDialog, QWidget, QLabel, QComboBox)
@@ -26,8 +26,10 @@ from zero_play.playout import Playout
 from zero_play.rules_formatter import convert_markdown
 from zero_play.strength_adjuster import StrengthAdjuster
 from zero_play import zero_play_rules_rc
+from zero_play import zero_play_images_rc
 
 assert zero_play_rules_rc  # Need to import this module to load resources.
+assert zero_play_images_rc  # Need to import this module to load resources.
 
 try:
     from zero_play.plot_canvas import PlotCanvas
@@ -65,6 +67,8 @@ class ZeroPlayWindow(QMainWindow):
     To create your own collection, declare a sub class, and override these
     methods: get_collection_name(), filter_games().
     """
+    icon_path = ":/zero_play_images/main_icon.png"
+
     def __init__(self):
         super().__init__()
         self.setAttribute(Qt.WA_DeleteOnClose, True)
@@ -92,6 +96,9 @@ class ZeroPlayWindow(QMainWindow):
         self.is_history_dirty = False  # Has current game been rewound?
         self.all_displays = []
         self.load_game_list(ui.game_page.layout())
+        icon_pixmap = QPixmap(self.icon_path)  # After displays load resources!
+        icon = QIcon(icon_pixmap)
+        self.setWindowIcon(icon)
         self.start_state = None
         self.display: typing.Optional[GridDisplay] = None
         self.on_new_game()

@@ -97,11 +97,11 @@ class PixmapDiffer:
 
         white = QColor('white')
         self.actual_pixmap = QPixmap(width, height)
+        self.actual_pixmap.fill(white)
         self.actual = QPainter(self.actual_pixmap)
-        self.actual.fillRect(0, 0, width, height, white)
         self.expected_pixmap = QPixmap(width, height)
+        self.expected_pixmap.fill(white)
         self.expected = QPainter(self.expected_pixmap)
-        self.expected.fillRect(0, 0, width, height, white)
 
         return self.actual, self.expected
 
