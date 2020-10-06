@@ -97,7 +97,7 @@ class GameDisplay(QGraphicsView):
         return 'to move'
 
     @Slot(int)  # type: ignore
-    def make_move(self, move):
+    def make_move(self, move: int):
         self.log_display.record_move(self.current_state, move)
         # noinspection PyUnresolvedReferences
         self.move_made.emit(self.current_state)
@@ -121,10 +121,10 @@ class GameDisplay(QGraphicsView):
         """
         return None
 
-    @Slot(np.ndarray, int, list)  # type: ignore
+    @Slot(GameState, int, list)  # type: ignore
     def analyse_move(
             self,
-            board: np.ndarray,
+            board: GameState,
             analysing_player: int,
             move_probabilities: typing.List[typing.Tuple[str,
                                                          float,
