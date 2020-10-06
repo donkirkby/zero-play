@@ -100,12 +100,12 @@ class GameDisplay(QGraphicsView):
     def make_move(self, move: int):
         self.log_display.record_move(self.current_state, move)
         # noinspection PyUnresolvedReferences
-        self.move_made.emit(self.current_state)
+        self.move_made.emit(self.current_state)  # type: ignore
         self.current_state = self.current_state.make_move(move)
         self.update_board(self.current_state)
         if self.current_state.is_ended():
             # noinspection PyUnresolvedReferences
-            self.game_ended.emit(self.current_state)
+            self.game_ended.emit(self.current_state)  # type: ignore
 
         forced_move = self.get_forced_move()
         if forced_move is None:
