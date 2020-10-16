@@ -195,7 +195,7 @@ class GridDisplay(GameDisplay):
                       if player == self.start_state.X_PLAYER
                       else self.player2_colour)
 
-    def get_player_icon(self, player) -> QPixmap:
+    def get_player_icon(self, player: int) -> QPixmap:
         return (self.player1_icon
                 if player == self.start_state.X_PLAYER
                 else self.player2_icon)

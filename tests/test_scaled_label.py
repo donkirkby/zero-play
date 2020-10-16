@@ -1,4 +1,4 @@
-from PySide2.QtGui import QPainter, Qt, QFontDatabase, QFont
+from PySide2.QtGui import QPainter, Qt
 from PySide2.QtWidgets import QWidget, QVBoxLayout, QSizePolicy, QLabel, QHBoxLayout
 
 from zero_play.grid_display import GridDisplay
@@ -29,7 +29,7 @@ def test_text(pixmap_differ: PixmapDiffer):
         ex_label1.setFont(ex_font)
         ex_font.setPointSize(small_font_size)
         ex_label2.setFont(ex_font)
-        ex_size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Ignored)
+        ex_size_policy = QSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         ex_label1.setSizePolicy(ex_size_policy)
         ex_label1.setAlignment(Qt.AlignBottom)
         ex_label2.setAlignment(Qt.AlignTop)
