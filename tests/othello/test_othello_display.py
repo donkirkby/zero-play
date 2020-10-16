@@ -1,5 +1,4 @@
-from tests.tictactoe.test_tictactoe_display import (trigger_resize, draw_text,
-                                                    set_font_size)
+from tests.tictactoe.test_tictactoe_display import render_display
 from zero_play.othello.display import OthelloDisplay
 from zero_play.othello.game import OthelloState
 from zero_play.pixmap_differ import PixmapDiffer
@@ -22,6 +21,7 @@ def test_piece_click_invalid(pixmap_differ: PixmapDiffer):
     state = display.current_state.display()
 
     assert state == expected_state
+    display.close()
 
 
 def test_piece_click_valid():
@@ -41,6 +41,7 @@ def test_piece_click_valid():
     state = display.current_state.display()
 
     assert state == expected_state
+    display.close()
 
 
 def test_piece_click_then_pass(pixmap_differ: PixmapDiffer):
@@ -69,68 +70,41 @@ OOO...
     state = display.current_state.display()
 
     assert state == expected_state
+    display.close()
 
 
 def test_invalid_hover_enter(pixmap_differ: PixmapDiffer):
     size = 240
     with pixmap_differ.create_painters(
-            size+40,
+            size,
             size,
             'othello_invalid_hover_enter') as (actual, expected):
 
         display = OthelloDisplay()
-        trigger_resize(display, size+40, size)
-        display.scene().render(expected)
+        display.resize(324, 264)
+        render_display(display, expected, is_closed=False)
 
         display.on_hover_enter(display.spaces[0][0])
 
-        display.scene().render(actual)
+        render_display(display, actual)
 
 
 # noinspection DuplicatedCode
 def test_piece_count(pixmap_differ: PixmapDiffer):
-    size = 240
-    with pixmap_differ.create_painters(
-            size+80,
-            size,
-            'othello_pieces') as (actual, expected):
-        expected_display = OthelloDisplay()
-        trigger_resize(expected_display, size+80, size)
-        expected_scene = expected_display.scene()
-        expected_scene.addRect(252, 0,
-                               100, 60,
-                               pen=expected_display.background_colour,
-                               brush=expected_display.background_colour)
-        black = expected_display.get_player_brush(1)
-        white = expected_display.get_player_brush(-1)
-        expected_scene.addEllipse(265, 30,
-                                  10, 10,
-                                  brush=black)
-        expected_scene.addEllipse(285, 30,
-                                  10, 10,
-                                  brush=white)
-
-        expected_scene.render(expected)
-        set_font_size(expected, 10)
-        draw_text(expected, 271, 50, '2')
-        draw_text(expected, 291, 50, '2')
-
-        display = OthelloDisplay()
-        trigger_resize(display, size+80, size)
-
-        display.scene().render(actual)
+    display = OthelloDisplay()
+    assert display.ui.black_count.text() == '2'
+    assert display.ui.white_count.text() == '2'
+    black_count_icon = display.ui.black_count_pixmap.pixmap()
+    assert black_count_icon.toImage() == display.player1_icon.toImage()
+    white_count_icon = display.ui.white_count_pixmap.pixmap()
+    assert white_count_icon.toImage() == display.player2_icon.toImage()
+    display.close()
 
 
 # noinspection DuplicatedCode
 def test_piece_count_after_update(pixmap_differ: PixmapDiffer):
-    size = 240
-    with pixmap_differ.create_painters(
-            size+80,
-            size,
-            'othello_piece_count_after_update') as (actual, expected):
-        expected_display = OthelloDisplay()
-        trigger_resize(expected_display, size+80, size)
-        state2 = OthelloState(board_width=8, board_height=8, text="""\
+    display = OthelloDisplay()
+    state2 = OthelloState(board_width=8, board_height=8, text="""\
 ........
 ........
 ........
@@ -141,28 +115,7 @@ def test_piece_count_after_update(pixmap_differ: PixmapDiffer):
 ........
 >O
 """)
-        expected_display.update_board(state2)
-        expected_scene = expected_display.scene()
-        expected_scene.addRect(252, 0,
-                               100, 60,
-                               pen=expected_display.background_colour,
-                               brush=expected_display.background_colour)
-        black = expected_display.get_player_brush(1)
-        white = expected_display.get_player_brush(-1)
-        expected_scene.addEllipse(265, 30,
-                                  10, 10,
-                                  brush=black)
-        expected_scene.addEllipse(285, 30,
-                                  10, 10,
-                                  brush=white)
-
-        expected_scene.render(expected)
-        set_font_size(expected, 10)
-        draw_text(expected, 271, 50, '4')
-        draw_text(expected, 291, 50, '1')
-
-        display = OthelloDisplay()
-        trigger_resize(display, size+80, size)
-        display.update_board(state2)
-
-        display.scene().render(actual)
+    display.update_board(state2)
+    assert display.ui.black_count.text() == '4'
+    assert display.ui.white_count.text() == '1'
+    display.close()

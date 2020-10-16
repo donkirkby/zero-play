@@ -4,7 +4,7 @@ import typing
 import numpy as np
 from PySide2.QtCore import Signal, QThread, QSize, Slot
 from PySide2.QtGui import QResizeEvent
-from PySide2.QtWidgets import QGraphicsScene, QGraphicsSimpleTextItem, QGraphicsView, QSizePolicy
+from PySide2.QtWidgets import QGraphicsSimpleTextItem, QSizePolicy, QWidget
 
 from zero_play.game_state import GameState
 from zero_play.log_display import LogDisplay
@@ -12,7 +12,7 @@ from zero_play.mcts_player import MctsPlayer
 from zero_play.mcts_worker import MctsWorker
 
 
-class GameDisplay(QGraphicsView):
+class GameDisplay(QWidget):
     default_font = 'Sans Serif,9,-1,5,50,0,0,0,0,0'
     rules_path: typing.Optional[str] = None
 
@@ -21,7 +21,7 @@ class GameDisplay(QGraphicsView):
     game_ended = Signal(np.ndarray)  # final_board
 
     def __init__(self, start_state: GameState):
-        super().__init__(scene=QGraphicsScene())
+        super().__init__()
         self.start_state = start_state
         self.mcts_workers: typing.Dict[int, MctsWorker] = {}
         self.worker_thread: typing.Optional[QThread] = None
@@ -148,6 +148,6 @@ class GameDisplay(QGraphicsView):
 
 def center_text_item(item: QGraphicsSimpleTextItem, x: float, y: float):
     bounds = item.boundingRect()
-    x -= bounds.width() / 2
-    y -= bounds.height() / 2
+    x -= bounds.width() // 2
+    y -= bounds.height() // 2
     item.setPos(x, y)

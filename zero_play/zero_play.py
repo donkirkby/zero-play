@@ -9,7 +9,7 @@ from random import shuffle
 import numpy as np
 from PySide2.QtCore import QSettings, QFile, QTextStream
 
-from PySide2.QtGui import QResizeEvent, Qt, QIcon, QPixmap
+from PySide2.QtGui import Qt, QIcon, QPixmap
 from PySide2.QtWidgets import (QApplication, QMainWindow, QFileDialog,
                                QTableWidgetItem, QGridLayout, QPushButton,
                                QSizePolicy, QDialog, QWidget, QLabel, QComboBox)
@@ -194,7 +194,6 @@ class ZeroPlayWindow(QMainWindow):
         self.ui.choices.setVisible(is_review_visible)
         self.ui.toggle_review.setText(self.review_names[is_review_visible])
         choices.setVisible(is_review_visible)
-        self.resize_display()
 
     def on_resume_here(self):
         self.board_to_resume = self.display.current_state
@@ -228,7 +227,6 @@ class ZeroPlayWindow(QMainWindow):
             self.display.close()
             self.display = None
         self.ui.stacked_widget.setCurrentWidget(self.ui.game_page)
-        self.ui.action_view_game.setChecked(True)
         self.setWindowTitle(self.get_collection_name())
 
     def show_game(self, display: GameDisplay):
@@ -341,31 +339,19 @@ class ZeroPlayWindow(QMainWindow):
             for player_number, (heuristic, searches) in mcts_choices.items()
             if heuristic is not None]
         layout: QGridLayout = ui.display_page.layout()
-        layout.removeWidget(ui.display_view)
-        ui.display_view.setVisible(False)
+        layout.replaceWidget(ui.game_display, self.display)
+        ui.game_display.setVisible(False)
+        ui.game_display = self.display
         self.display.setVisible(True)
-        ui.display_view = self.display
-        layout.addWidget(self.display, 0, 0, 1, 3)
         self.display.show_coordinates = ui.action_coordinates.isChecked()
 
         self.on_view_game()
-
-    def resizeEvent(self, event: QResizeEvent):
-        super().resizeEvent(event)
-        self.resize_display()
-
-    def resize_display(self):
-        if self.display is None:
-            return
-        size = self.ui.display_view.maximumViewportSize()
-        self.display.resize(size)
 
     def on_view_game(self):
         if self.display is None:
             self.on_new_game()
         else:
             self.ui.stacked_widget.setCurrentWidget(self.ui.display_page)
-            self.resize_display()
             self.display.update_board(self.display.current_state)
             self.display.request_move()
 

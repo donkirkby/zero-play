@@ -106,9 +106,9 @@ class PixmapDiffer:
         return self.actual, self.expected
 
     def end(self):
-        if self.actual.isActive():
+        if self.actual and self.actual.isActive():
             self.actual.end()
-        if self.expected.isActive():
+        if self.expected and self.expected.isActive():
             self.expected.end()
 
     def assert_equal(self):
@@ -119,18 +119,20 @@ class PixmapDiffer:
         expected_image: QImage = self.expected.device().toImage()
         diff_pixmap = QPixmap(actual_image.width(), actual_image.height())
         diff = QPainter(diff_pixmap)
-        white = QColor('white')
-        diff.fillRect(0, 0, actual_image.width(), actual_image.height(), white)
-        for x in range(actual_image.width()):
-            for y in range(actual_image.height()):
-                actual_colour = actual_image.pixelColor(x, y)
-                expected_colour = expected_image.pixelColor(x, y)
-                diff.setPen(self.diff_colour(actual_colour,
-                                             expected_colour,
-                                             x,
-                                             y))
-                diff.drawPoint(x, y)
-        diff.end()
+        try:
+            white = QColor('white')
+            diff.fillRect(0, 0, actual_image.width(), actual_image.height(), white)
+            for x in range(actual_image.width()):
+                for y in range(actual_image.height()):
+                    actual_colour = actual_image.pixelColor(x, y)
+                    expected_colour = expected_image.pixelColor(x, y)
+                    diff.setPen(self.diff_colour(actual_colour,
+                                                 expected_colour,
+                                                 x,
+                                                 y))
+                    diff.drawPoint(x, y)
+        finally:
+            diff.end()
         diff_image: QImage = diff.device().toImage()
 
         display_diff(actual_image,
@@ -148,12 +150,14 @@ class PixmapDiffer:
         diff_height = self.diff_max_y - self.diff_min_y + 1
         diff_section = QImage(diff_width, diff_height, QImage.Format_RGB32)
         diff_section_painter = QPainter(diff_section)
-        diff_section_painter.drawPixmap(0, 0,
-                                        diff_width, diff_height,
-                                        QPixmap.fromImage(diff_image),
-                                        self.diff_min_x, self.diff_min_y,
-                                        diff_width, diff_height)
-        diff_section_painter.end()
+        try:
+            diff_section_painter.drawPixmap(0, 0,
+                                            diff_width, diff_height,
+                                            QPixmap.fromImage(diff_image),
+                                            self.diff_min_x, self.diff_min_y,
+                                            diff_width, diff_height)
+        finally:
+            diff_section_painter.end()
         # To see an image dumped in the Travis CI log, copy the text from the
         # log, and paste it in test_pixmap_differ.test_decode_image.
         print(f'Encoded image of differing section '

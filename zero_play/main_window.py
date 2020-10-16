@@ -37,13 +37,6 @@ class Ui_MainWindow(object):
         self.action_save = QAction(MainWindow)
         self.action_save.setObjectName(u"action_save")
         self.action_save.setVisible(False)
-        self.action_view_game = QAction(MainWindow)
-        self.action_view_game.setObjectName(u"action_view_game")
-        self.action_view_game.setCheckable(True)
-        self.action_view_game.setChecked(True)
-        self.action_view_log = QAction(MainWindow)
-        self.action_view_log.setObjectName(u"action_view_log")
-        self.action_view_log.setCheckable(True)
         self.action_save_log = QAction(MainWindow)
         self.action_save_log.setObjectName(u"action_save_log")
         self.action_save_log.setVisible(False)
@@ -268,39 +261,39 @@ class Ui_MainWindow(object):
         sizePolicy4.setHeightForWidth(self.toggle_review.sizePolicy().hasHeightForWidth())
         self.toggle_review.setSizePolicy(sizePolicy4)
 
-        self.gridLayout_2.addWidget(self.toggle_review, 4, 2, 1, 1)
+        self.gridLayout_2.addWidget(self.toggle_review, 3, 2, 1, 1)
+
+        self.move_history = QComboBox(self.display_page)
+        self.move_history.setObjectName(u"move_history")
+        sizePolicy6 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy6.setHorizontalStretch(1)
+        sizePolicy6.setVerticalStretch(0)
+        sizePolicy6.setHeightForWidth(self.move_history.sizePolicy().hasHeightForWidth())
+        self.move_history.setSizePolicy(sizePolicy6)
+
+        self.gridLayout_2.addWidget(self.move_history, 3, 1, 1, 1)
+
+        self.choices = QTableWidget(self.display_page)
+        self.choices.setObjectName(u"choices")
+        sizePolicy7 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        sizePolicy7.setHorizontalStretch(0)
+        sizePolicy7.setVerticalStretch(0)
+        sizePolicy7.setHeightForWidth(self.choices.sizePolicy().hasHeightForWidth())
+        self.choices.setSizePolicy(sizePolicy7)
+
+        self.gridLayout_2.addWidget(self.choices, 1, 0, 1, 3)
 
         self.resume_here = QPushButton(self.display_page)
         self.resume_here.setObjectName(u"resume_here")
         sizePolicy5.setHeightForWidth(self.resume_here.sizePolicy().hasHeightForWidth())
         self.resume_here.setSizePolicy(sizePolicy5)
 
-        self.gridLayout_2.addWidget(self.resume_here, 4, 0, 1, 1)
+        self.gridLayout_2.addWidget(self.resume_here, 3, 0, 1, 1)
 
-        self.choices = QTableWidget(self.display_page)
-        self.choices.setObjectName(u"choices")
-        sizePolicy6 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        sizePolicy6.setHorizontalStretch(0)
-        sizePolicy6.setVerticalStretch(0)
-        sizePolicy6.setHeightForWidth(self.choices.sizePolicy().hasHeightForWidth())
-        self.choices.setSizePolicy(sizePolicy6)
+        self.game_display = QLabel(self.display_page)
+        self.game_display.setObjectName(u"game_display")
 
-        self.gridLayout_2.addWidget(self.choices, 2, 0, 1, 3)
-
-        self.display_view = QGraphicsView(self.display_page)
-        self.display_view.setObjectName(u"display_view")
-
-        self.gridLayout_2.addWidget(self.display_view, 1, 0, 1, 3)
-
-        self.move_history = QComboBox(self.display_page)
-        self.move_history.setObjectName(u"move_history")
-        sizePolicy7 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        sizePolicy7.setHorizontalStretch(1)
-        sizePolicy7.setVerticalStretch(0)
-        sizePolicy7.setHeightForWidth(self.move_history.sizePolicy().hasHeightForWidth())
-        self.move_history.setSizePolicy(sizePolicy7)
-
-        self.gridLayout_2.addWidget(self.move_history, 4, 1, 1, 1)
+        self.gridLayout_2.addWidget(self.game_display, 0, 0, 1, 3)
 
         self.stacked_widget.addWidget(self.display_page)
         self.plot_page = QWidget()
@@ -349,7 +342,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.stacked_widget.setCurrentIndex(0)
+        self.stacked_widget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -363,8 +356,6 @@ class Ui_MainWindow(object):
         self.action_training_session.setText(QCoreApplication.translate("MainWindow", u"&Training Session", None))
         self.action_game.setText(QCoreApplication.translate("MainWindow", u"&Game", None))
         self.action_save.setText(QCoreApplication.translate("MainWindow", u"&Save...", None))
-        self.action_view_game.setText(QCoreApplication.translate("MainWindow", u"&Game", None))
-        self.action_view_log.setText(QCoreApplication.translate("MainWindow", u"&Log", None))
         self.action_save_log.setText(QCoreApplication.translate("MainWindow", u"Save &Log...", None))
         self.action_coordinates.setText(QCoreApplication.translate("MainWindow", u"Coordinates", None))
         self.action_about.setText(QCoreApplication.translate("MainWindow", u"&About...", None))
@@ -390,6 +381,7 @@ class Ui_MainWindow(object):
         self.rules_close.setText(QCoreApplication.translate("MainWindow", u"Close", None))
         self.toggle_review.setText(QCoreApplication.translate("MainWindow", u"Review / Resume", None))
         self.resume_here.setText(QCoreApplication.translate("MainWindow", u"Resume Here", None))
+        self.game_display.setText(QCoreApplication.translate("MainWindow", u"Game Display", None))
         self.menu_file.setTitle(QCoreApplication.translate("MainWindow", u"&File", None))
         self.menu_new.setTitle(QCoreApplication.translate("MainWindow", u"&New", None))
         self.menu_view.setTitle(QCoreApplication.translate("MainWindow", u"&View", None))
