@@ -1,4 +1,4 @@
-from PySide2.QtGui import QPainter, Qt
+from PySide2.QtGui import QPainter, Qt, QFontDatabase, QFont
 from PySide2.QtWidgets import QWidget, QVBoxLayout, QSizePolicy, QLabel, QHBoxLayout
 
 from zero_play.grid_display import GridDisplay
@@ -18,9 +18,16 @@ def test_text(pixmap_differ: PixmapDiffer):
         ex_label1 = QLabel('Lorem ipsum')
         ex_label2 = QLabel('Lorem ipsum')
         ex_font = ex_label1.font()
-        ex_font.setPointSize(35)
+        if ex_font.family() == 'Sans Serif':
+            # Fonts are different on Travis CI.
+            big_font_size = 30
+            small_font_size = 25
+        else:
+            big_font_size = 35
+            small_font_size = 28
+        ex_font.setPointSize(big_font_size)
         ex_label1.setFont(ex_font)
-        ex_font.setPointSize(28)
+        ex_font.setPointSize(small_font_size)
         ex_label2.setFont(ex_font)
         ex_size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Ignored)
         ex_label1.setSizePolicy(ex_size_policy)

@@ -26,7 +26,8 @@ docker run --rm --name travis-build -dit \
   --mount type=bind,source=`pwd`,target=/home/travis/zero-play \
   $DOCKER_TAG /sbin/init
 
-echo "Now run 'su - travis', followed by all the steps from your Travis CI log."
+echo "Now run 'su - travis' and activate the virtualenv at ~/virtualenv/python3.8."
+echo "Then follow all the steps from your Travis CI script."
 echo "The project is mounted in /home/travis/zero-play."
 docker exec -it travis-build bash -l
 docker stop travis-build
