@@ -1,5 +1,5 @@
 from PySide2.QtCore import QSize
-from PySide2.QtGui import QFont, QPainter, QColor, QPen
+from PySide2.QtGui import QFont, QPainter, QColor, QPen, Qt
 from PySide2.QtWidgets import QGraphicsScene, QGraphicsView
 
 from zero_play.game_display import center_text_item, GameDisplay
@@ -47,7 +47,10 @@ def render_display(display: GameDisplay,
             display_size = find_display_size(display, view, painter_size)
             message = (f"Try resizing display to "
                        f"{display_size.width()}x{display_size.height()}.")
-            painter.drawText(0, painter_size.height()//2, message)
+            painter.drawText(0, 0,
+                             painter_size.width(), painter_size.height(),
+                             Qt.AlignCenter | Qt.TextWordWrap,
+                             message)
             return
         assert scene_size == painter_size
         view.scene().render(painter)

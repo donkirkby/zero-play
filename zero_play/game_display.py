@@ -78,8 +78,6 @@ class GameDisplay(QWidget):
         """
 
     def resizeEvent(self, event: QResizeEvent):
-        view_size = event.size()
-        self.scene().setSceneRect(0, 0, view_size.width(), view_size.height())
         self.update_board(self.current_state)
 
     @property
