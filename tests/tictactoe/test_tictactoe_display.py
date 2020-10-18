@@ -1,10 +1,9 @@
-from PySide2.QtCore import QSize
-from PySide2.QtGui import QFont, QPainter, QColor, QPen, Qt
-from PySide2.QtWidgets import QGraphicsScene, QGraphicsView
+from PySide2.QtGui import QFont, QPainter, QColor, QPen
+from PySide2.QtWidgets import QGraphicsScene
 
-from zero_play.game_display import center_text_item, GameDisplay
+from zero_play.game_display import center_text_item
 from zero_play.mcts_player import MctsPlayer
-from zero_play.pixmap_differ import PixmapDiffer
+from zero_play.pixmap_differ import PixmapDiffer, render_display
 from zero_play.tictactoe.display import TicTacToeDisplay
 from zero_play.tictactoe.state import TicTacToeState
 
@@ -15,84 +14,6 @@ def draw_square_grid(expected):
     expected.drawLine(0, 160, 240, 160)
     expected.drawLine(80, 0, 80, 240)
     expected.drawLine(160, 0, 160, 240)
-
-
-def render_display(display: GameDisplay,
-                   painter: QPainter,
-                   is_closed: bool = True):
-    """ Check scene size, render, then clear scene.
-
-    You have to clear the scene to avoid a crash after running several unit
-    tests.
-    :param display: display widget whose children contain a QGraphicsView to
-        render.
-    :param painter: a canvas to render on
-    :param is_closed: True if the display should be closed after rendering. Be
-        sure to close the display before exiting the test, if it contains any
-        items with reference cycles back to the scene.
-    """
-    __tracebackhide__ = True
-    try:
-        for child in display.children():
-            if isinstance(child, QGraphicsView):
-                view = child
-                break
-        else:
-            raise ValueError("No QGraphicsView in display's children.")
-
-        view.grab()  # Force layout to recalculate, if needed.
-        scene_size = view.contentsRect().size()
-        painter_size = painter.device().size()
-        if scene_size != painter_size:
-            display_size = find_display_size(display, view, painter_size)
-            message = (f"Try resizing display to "
-                       f"{display_size.width()}x{display_size.height()}.")
-            painter.drawText(0, 0,
-                             painter_size.width(), painter_size.height(),
-                             Qt.AlignCenter | Qt.TextWordWrap,
-                             message)
-            return
-        assert scene_size == painter_size
-        view.scene().render(painter)
-    finally:
-        if is_closed:
-            display.close()
-
-
-def find_display_size(display: GameDisplay,
-                      view: QGraphicsView,
-                      target_size: QSize) -> QSize:
-    max_width = None
-    max_height = None
-    min_width = min_height = 1
-    display_width = display.width()
-    display_height = display.height()
-    while True:
-        scene_size = view.contentsRect().size()
-        if scene_size.width() == target_size.width():
-            min_width = max_width = display_width
-        elif scene_size.width() < target_size.width():
-            min_width = display_width+1
-        else:
-            max_width = display_width-1
-        if scene_size.height() == target_size.height():
-            min_height = max_height = display_height
-        elif scene_size.height() < target_size.height():
-            min_height = display_height+1
-        else:
-            max_height = display_height-1
-        if max_width is None:
-            display_width *= 2
-        else:
-            display_width = (min_width + max_width) // 2
-        if max_height is None:
-            display_height *= 2
-        else:
-            display_height = (min_height + max_height) // 2
-        if min_width == max_width and min_height == max_height:
-            return QSize(display_width, display_height)
-        display.resize(display_width, display_height)
-        view.grab()  # Force layout recalculation.
 
 
 # noinspection DuplicatedCode

@@ -1,10 +1,9 @@
 from PySide2.QtCore import QLine
 from PySide2.QtGui import QPainter, QColor, QPen
 
-from tests.tictactoe.test_tictactoe_display import render_display
 from zero_play.connect4.display import Connect4Display
 from zero_play.connect4.game import Connect4State
-from zero_play.pixmap_differ import PixmapDiffer
+from zero_play.pixmap_differ import PixmapDiffer, render_display
 
 
 def draw_grid(expected):

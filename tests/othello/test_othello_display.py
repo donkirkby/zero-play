@@ -1,7 +1,6 @@
-from tests.tictactoe.test_tictactoe_display import render_display
 from zero_play.othello.display import OthelloDisplay
 from zero_play.othello.game import OthelloState
-from zero_play.pixmap_differ import PixmapDiffer
+from zero_play.pixmap_differ import PixmapDiffer, render_display
 
 
 def test_piece_click_invalid(pixmap_differ: PixmapDiffer):
