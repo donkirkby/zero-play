@@ -3,7 +3,8 @@ from contextlib import contextmanager
 from pathlib import Path
 import turtle
 
-from PySide2.QtCore import QByteArray, QBuffer, QIODevice, QTextCodec, QSize
+from PySide2.QtCore import (QByteArray, QBuffer, QIODevice, QTextCodec, QSize,
+                            QRect)
 from PySide2.QtGui import QPixmap, QPainter, QColor, QImage, Qt
 from PySide2.QtWidgets import QGraphicsView
 
@@ -254,8 +255,8 @@ def render_display(display: GameDisplay,
             display_size = find_display_size(display, view, painter_size)
             message = (f"Try resizing display to "
                        f"{display_size.width()}x{display_size.height()}.")
-            painter.drawText(0, 0,
-                             painter_size.width(), painter_size.height(),
+            painter.drawText(QRect(0, 0,
+                                   painter_size.width(), painter_size.height()),
                              Qt.AlignCenter | Qt.TextWordWrap,
                              message)
             return
