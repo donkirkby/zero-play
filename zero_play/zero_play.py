@@ -100,7 +100,7 @@ class ZeroPlayWindow(QMainWindow):
         icon = QIcon(icon_pixmap)
         self.setWindowIcon(icon)
         self.start_state = None
-        self.display: typing.Optional[GridDisplay] = None
+        self.display: typing.Optional[GameDisplay] = None
         self.on_new_game()
         self.board_to_resume: typing.Optional[np.ndarray] = None
         self.review_names = [name.strip()
@@ -224,7 +224,7 @@ class ZeroPlayWindow(QMainWindow):
 
     def on_new_game(self):
         if self.display is not None:
-            self.display.close()
+            self.display.stop_workers()
             self.display = None
         self.ui.stacked_widget.setCurrentWidget(self.ui.game_page)
         self.setWindowTitle(self.get_collection_name())

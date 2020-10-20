@@ -48,8 +48,7 @@ class GameDisplay(QWidget):
 
     @mcts_players.setter
     def mcts_players(self, players: typing.Sequence[MctsPlayer]):
-        if self.worker_thread is not None:
-            self.worker_thread.quit()
+        self.stop_workers()
 
         self.log_display = LogDisplay()
         self.mcts_workers = {player.player_number: MctsWorker(player)
@@ -140,6 +139,9 @@ class GameDisplay(QWidget):
         self.move_needed.emit(player, self.current_state)
 
     def close(self):
+        self.stop_workers()
+
+    def stop_workers(self):
         if self.worker_thread is not None:
             self.worker_thread.quit()
 
