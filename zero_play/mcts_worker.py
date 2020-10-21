@@ -1,4 +1,7 @@
+from traceback import print_exc
+
 from PySide2.QtCore import QObject, Signal, Slot
+from PySide2.QtWidgets import QMessageBox
 
 from zero_play.game_state import GameState
 from zero_play.mcts_player import MctsPlayer
@@ -15,12 +18,20 @@ class MctsWorker(QObject):
 
     @Slot(int, GameState)  # type: ignore
     def choose_move(self, active_player: int, game_state: GameState):
-        if self.player.player_number != active_player:
-            return
+        # noinspection PyBroadException
+        try:
+            if self.player.player_number != active_player:
+                return
 
-        move = self.player.choose_move(game_state)
-        # noinspection PyUnresolvedReferences
-        self.move_chosen.emit(move)  # type: ignore
+            move = self.player.choose_move(game_state)
+            # noinspection PyUnresolvedReferences
+            self.move_chosen.emit(move)  # type: ignore
+        except Exception:
+            print_exc()
+            message = QMessageBox()
+            message.setWindowTitle('Error')
+            message.setText(f'Failed to choose a move.')
+            message.exec_()
 
     @Slot(GameState)  # type: ignore
     def analyse_move(self, game_state: GameState):

@@ -19,7 +19,6 @@ import zero_play
 from zero_play.about_dialog import Ui_Dialog
 from zero_play.game_state import GameState
 from zero_play.game_display import GameDisplay
-from zero_play.grid_display import GridDisplay
 from zero_play.main_window import Ui_MainWindow
 from zero_play.mcts_player import MctsPlayer
 from zero_play.playout import Playout
