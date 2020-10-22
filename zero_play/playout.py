@@ -20,6 +20,8 @@ class Playout(Heuristic):
             value, policy = self.analyse_end_game(start_state)
             return value
         valid_moves, = np.nonzero(start_state.get_valid_moves())
+        if len(valid_moves) == 0:
+            raise ValueError('No valid moves found.\n' + start_state.display())
         move = np.random.choice(valid_moves)
         new_state = start_state.make_move(move)
         return -self.simulate(new_state)
