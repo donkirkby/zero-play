@@ -68,8 +68,8 @@ class Ui_Dialog(object):
     # setupUi
 
     def retranslateUi(self, Dialog):
-        Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"About Zero Play", None))
-        self.version_label.setText(QCoreApplication.translate("Dialog", u"Version:", None))
+        Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"About {application_name}", None))
+        self.version_label.setText(QCoreApplication.translate("Dialog", u"Zero Play Version:", None))
         self.version.setText(QCoreApplication.translate("Dialog", u"0.0", None))
     # retranslateUi
 

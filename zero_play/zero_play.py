@@ -45,10 +45,13 @@ class AboutDialog(QDialog):
         self.ui.setupUi(self)
         self.ui.version.setText(zero_play.__version__)
         credits_layout = self.ui.credits_layout
-        for title, text in credit_pairs:
-            row = credits_layout.rowCount()
+        row = 0
+        for row, (title, text) in enumerate(credit_pairs):
             credits_layout.addWidget(QLabel(title), row, 0, Qt.AlignRight)
             credits_layout.addWidget(QLabel(text), row, 1)
+        row += 1
+        credits_layout.addWidget(self.ui.version_label, row, 0)
+        credits_layout.addWidget(self.ui.version, row, 1)
 
 
 def get_settings(game_state: GameState = None):
@@ -122,6 +125,7 @@ class ZeroPlayWindow(QMainWindow):
         credit_pairs = chain(*(display.credit_pairs
                                for display in self.all_displays))
         dialog = AboutDialog(credit_pairs, self)
+        dialog.setWindowTitle(f'About {self.get_collection_name()}')
         dialog.exec_()
 
     def load_game_list(self, game_layout: QGridLayout):
