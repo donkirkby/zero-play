@@ -209,14 +209,14 @@ class GridDisplay(GameDisplay):
     def on_hover_enter(self, piece_item: GraphicsPieceItem):
         if self.is_piece_played(piece_item):
             return
-        active_player = self.current_state.get_active_player()
-        if active_player in self.mcts_workers:
+        if not self.can_move():
             return
         move = self.calculate_move(piece_item.row, piece_item.column)
         is_valid = self.valid_moves[move]
         if not is_valid:
             return
-        piece_item.setBrush(self.get_player_brush(active_player))
+        piece_item.setBrush(self.get_player_brush(
+            self.current_state.get_active_player()))
         piece_item.setPen(self.line_colour)
         piece_item.setOpacity(0.5)
 
@@ -228,6 +228,8 @@ class GridDisplay(GameDisplay):
         piece_item.setOpacity(1)
 
     def on_click(self, piece_item: GraphicsPieceItem):
+        if not self.can_move():
+            return
         move = self.calculate_move(piece_item.row, piece_item.column)
         is_valid = self.valid_moves[move]
         if is_valid:

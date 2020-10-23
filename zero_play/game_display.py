@@ -30,6 +30,7 @@ class GameDisplay(QWidget):
         self._show_coordinates = False
         self.log_display = LogDisplay()
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.is_reviewing = False
 
     @property
     def show_coordinates(self):
@@ -144,6 +145,11 @@ class GameDisplay(QWidget):
     def stop_workers(self):
         if self.worker_thread is not None:
             self.worker_thread.quit()
+
+    def can_move(self):
+        if self.is_reviewing:
+            return False
+        return not self.current_state.get_active_player() in self.mcts_workers
 
 
 def center_text_item(item: QGraphicsSimpleTextItem, x: float, y: float):

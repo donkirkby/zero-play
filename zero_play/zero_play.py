@@ -196,6 +196,8 @@ class ZeroPlayWindow(QMainWindow):
         self.ui.move_history.setVisible(is_review_visible)
         self.ui.choices.setVisible(is_review_visible)
         self.ui.toggle_review.setText(self.review_names[is_review_visible])
+        if self.display is not None:
+            self.display.is_reviewing = is_review_visible
         choices.setVisible(is_review_visible)
 
     def on_resume_here(self):
