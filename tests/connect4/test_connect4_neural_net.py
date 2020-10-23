@@ -17,7 +17,7 @@ OOO....
 XXXX...
 """)
     heuristic = NeuralNet(board)
-    expected_value = 1.0
+    expected_value = -1.0
     expected_policy = [1/7] * 7
 
     value, policy = heuristic.analyse(board)

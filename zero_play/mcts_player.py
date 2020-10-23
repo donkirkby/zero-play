@@ -77,11 +77,15 @@ class SearchNode:
         return children
 
     def record_value(self, value):
+        if (not self.parent or
+                self.parent.game_state.get_active_player() !=
+                self.game_state.get_active_player()):
+            value *= -1
         self.average_value = ((self.average_value * self.value_count + value) /
                               (self.value_count + 1))
         self.value_count += 1
         if self.parent:
-            self.parent.record_value(-value)
+            self.parent.record_value(value)
 
     def evaluate(self, heuristic: Heuristic):
         value, child_predictions = heuristic.analyse(self.game_state)

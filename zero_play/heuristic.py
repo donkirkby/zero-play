@@ -16,8 +16,8 @@ class Heuristic(metaclass=ABCMeta):
         """ Analyse the value of a board position and predict a move.
 
         :param board: the current state of the board
-        :return: the estimated value of the board for the player who made the
-            last move, from -1 (loss) to 0 (draw) to +1 (win), and also a
+        :return: the estimated value of the board for the active player, from
+            -1 (loss) to 0 (draw) to +1 (win), and also a
             policy for choosing the next move: weights for each move that sum
             up to 1.0.
         """
@@ -39,11 +39,10 @@ class Heuristic(metaclass=ABCMeta):
     def analyse_end_game(self, board: GameState) -> typing.Tuple[float, np.ndarray]:
         """ Calculate the value based on the winner.
 
-        :param board: an array of piece values, that must be in an ended game
-        :return: 1 if the last player to move won the game, -1 for a loss, and
+        :param board: state of a game, that must be in an ended game
+        :return: 1 if the now active player won the game, -1 for a loss, and
         0 for a draw, plus an evenly distributed policy (probably irrelevant)
         """
         winner = board.get_winner()
         active_player = board.get_active_player()
-        previous_player = -active_player
-        return winner * previous_player, self.create_even_policy(board)
+        return winner * active_player, self.create_even_policy(board)

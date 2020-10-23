@@ -115,7 +115,7 @@ def test_select_first_child():
     leaf = node.select_leaf()
 
     assert leaf == expected_leaf
-    assert node.average_value == 1.0
+    assert node.average_value == -1.0
 
 
 def test_select_second_child():
@@ -156,7 +156,7 @@ def test_select_good_grandchild():
     node = SearchNode(start_state)
     node.select_leaf().record_value(0)  # Root node returns itself.
     node.select_leaf().record_value(0)  # Move 0 AT 1A, value is a tie.
-    node.select_leaf().record_value(1)  # Move 1 AT 1B, value is a win.
+    node.select_leaf().record_value(-1)  # Move 1 AT 1B, value is a win.
     # Expect it to exploit the win at 1B, and try the first grandchild at 1A.
     expected_leaf_board = TicTacToeState("""\
   ABC
@@ -332,7 +332,7 @@ def test_annotate():
     assert best_move == '1A'
     assert best_probability == approx(0.999013)
     assert best_count == 9
-    assert best_value == approx(-1/9)
+    assert best_value == approx(2/9)
 
 
 def test_create_training_data():
