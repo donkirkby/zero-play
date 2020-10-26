@@ -34,7 +34,8 @@ setup(name='zero_play',
                       'ml-gpu': ['tensorflow-gpu']},
       entry_points={
           'gui_scripts': ['zero_play=zero_play.zero_play:main'],
-          'console_scripts': ['zero_play_rcc=zero_play.zero_play_rcc:main'],
+          'console_scripts': ['zero_play_rcc=zero_play.zero_play_rcc:main',
+                              'zero_perf=zero_play.zero_perf:main'],
           # The game_display entry point lets you add screens for new games.
           # The zero_play.game_display.GameDisplay class is a useful base class.
           'zero_play.game_display': [
