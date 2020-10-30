@@ -192,16 +192,17 @@ class SearchManager:
         children = self.current_node.find_all_children()
         temperature = 1.0
         probabilities = self.current_node.rank_children(children, temperature)
-        ranked_children = sorted(zip(probabilities, children),
+        value_counts = [child.value_count for child in children]
+        ranked_children = sorted(zip(value_counts, probabilities, children),
                                  key=itemgetter(0),
                                  reverse=True)
         top_children = ranked_children[:limit]
         child_node: SearchNode
         top_moves = [(game_state.display_move(child_node.move),
                       probability,
-                      child_node.value_count,
+                      value_count,
                       child_node.average_value)
-                     for probability, child_node in top_children
+                     for value_count, probability, child_node in top_children
                      if child_node.move is not None]
         return top_moves
 
