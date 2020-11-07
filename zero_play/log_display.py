@@ -50,6 +50,19 @@ class LogDisplay:
                                                          float,
                                                          int,
                                                          float]]):
+        """ Record analysis of the choices for a move.
+
+        :param game_state: the state before the move
+        :param analysing_player: the player doing the analysis; if both players
+            report analysis, the active player's will be kept
+        :param move_probabilities: the detailed analysis of best valid moves
+            [(choice, probability, count, value)] where choice is the move
+            display, probability is the recommended probability of choosing that
+            move, count is the number of times the move or a descendant was
+            analysed during the search, and value is the estimated value of the
+            move, where 1 is 100% wins for the active player and -1 is 100%
+            losses.
+        """
         for item in reversed(self.items):
             if item.game_state == game_state:
                 break
@@ -63,8 +76,13 @@ class LogDisplay:
                 probability,
                 count,
                 value) in enumerate(move_probabilities, 1):
-            if choice == item.move_text and i != 1:
-                item.comment = f'choice {i}'
+            if choice == item.move_text:
+                if i != 1:
+                    item.comment = f'choice {i}'
+                break
+        else:
+            # Didn't find chosen move in analysed moves, probably a poor choice.
+            item.comment = '?'
 
     def rewind_to(self, step: int):
         del self.items[step:]
