@@ -1,3 +1,5 @@
+import pytest
+
 from zero_play.log_display import LogDisplay, LogItem
 from zero_play.othello.game import OthelloState
 from zero_play.tictactoe.state import TicTacToeState
@@ -27,7 +29,7 @@ def test_analyse_move():
     log.analyse_move(board, TicTacToeState.X_PLAYER, move_probabilities)
 
     assert log.items == [
-        LogItem(step, 'Player X', '2A', board, 'choice 3', move_probabilities)]
+        LogItem(step, 'Player X', '2A', board, '-0.1, choice 3', move_probabilities)]
 
 
 def test_analyse_move_other_player():
@@ -43,7 +45,7 @@ def test_analyse_move_other_player():
     log.analyse_move(board, TicTacToeState.O_PLAYER, move_probabilities)
 
     assert log.items == [
-        LogItem(step, 'Player X', '2A', board, 'choice 3', move_probabilities)]
+        LogItem(step, 'Player X', '2A', board, '-0.1, choice 3', move_probabilities)]
 
 
 def test_analyse_move_both_players():
@@ -74,24 +76,32 @@ def test_analyse_move_both_players():
                 'Player X',
                 '2A',
                 board,
-                'choice 3',
+                '0.0, choice 3',
                 move_probabilities_active_player)]
 
 
-def test_analyse_best_move():
+@pytest.mark.parametrize('value, expected_comment',
+                         [(-1.0, '-1.0'),
+                          (-0.89, '-0.9'),
+                          (0.0, '0.0'),
+                          (0.89, '0.9'),
+                          (1.0, '1.0')])
+def test_analyse_only_move(value: float, expected_comment: str):
     log = LogDisplay()
     step = 1
     move = 0
-    move_probabilities = [('1A', 0.9, 9, 0.9),
-                          ('1B', 0.1, 1, 0.1),
-                          ('2A', 0.0, 0, -0.1)]
+    move_probabilities = [('1A', 0.9, 9, value)]
     board = TicTacToeState()
 
     log.record_move(board, move)
     log.analyse_move(board, TicTacToeState.X_PLAYER, move_probabilities)
 
-    assert log.items == [
-        LogItem(step, 'Player X', '1A', board, '', move_probabilities)]
+    assert log.items == [LogItem(step,
+                                 'Player X',
+                                 '1A',
+                                 board,
+                                 expected_comment,
+                                 move_probabilities)]
 
 
 def test_analyze_bad_move():

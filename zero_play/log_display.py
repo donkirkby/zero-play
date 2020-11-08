@@ -1,5 +1,6 @@
 import typing
 from dataclasses import dataclass
+from decimal import Decimal
 
 from zero_play.game_state import GameState
 
@@ -72,13 +73,16 @@ class LogDisplay:
         if item.choices and active_player != analysing_player:
             return
         item.choices = move_probabilities
+        q = Decimal('0.1')
         for i, (choice,
                 probability,
                 count,
                 value) in enumerate(move_probabilities, 1):
+            dec_value = Decimal(value).quantize(q)
             if choice == item.move_text:
+                item.comment = f'{dec_value}'
                 if i != 1:
-                    item.comment = f'choice {i}'
+                    item.comment += f', choice {i}'
                 break
         else:
             # Didn't find chosen move in analysed moves, probably a poor choice.
