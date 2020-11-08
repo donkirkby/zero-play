@@ -2,6 +2,8 @@ import logging
 
 import math
 import typing
+from concurrent.futures import (Future, wait, FIRST_COMPLETED, ALL_COMPLETED,
+                                ProcessPoolExecutor)
 from operator import itemgetter
 
 import numpy as np
@@ -76,7 +78,9 @@ class SearchNode:
         self.children = children
         return children
 
-    def record_value(self, value):
+    def record_value(self, value: float, child_predictions: np.ndarray = None):
+        if child_predictions is not None:
+            self.child_predictions = child_predictions
         if (not self.parent or
                 self.parent.game_state.get_active_player() !=
                 self.game_state.get_active_player()):
@@ -89,8 +93,7 @@ class SearchNode:
 
     def evaluate(self, heuristic: Heuristic):
         value, child_predictions = heuristic.analyse(self.game_state)
-        self.child_predictions = child_predictions
-        self.record_value(value)
+        self.record_value(value, child_predictions)
 
     def choose_child(self, temperature: float) -> 'SearchNode':
         """ Choose a child randomly, ones with higher counts are more likely.
@@ -131,10 +134,18 @@ class SearchNode:
 
 
 class SearchManager:
-    def __init__(self, start_state: GameState, heuristic: Heuristic):
+    def __init__(self, start_state: GameState,
+                 heuristic: Heuristic,
+                 process_count: int = 1):
         self.start_state = start_state
         self.heuristic = heuristic
         self.current_node = self.reset()
+        self.process_count = process_count
+        if process_count <= 1:
+            self.executor = None
+        else:
+            self.executor = ProcessPoolExecutor(process_count)
+        self.tasks: typing.Dict[Future, SearchNode] = {}
 
     def reset(self) -> SearchNode:
         self.current_node = SearchNode(self.start_state)
@@ -155,11 +166,34 @@ class SearchManager:
 
     def search(self, board: GameState, iterations: int):
         self.find_node(board)
+        max_tasks = self.process_count * 2
         for _ in range(iterations):
             leaf = self.current_node.select_leaf()
-            leaf.evaluate(self.heuristic)
+            if self.executor is None:
+                leaf.evaluate(self.heuristic)
+            else:
+                future = self.executor.submit(self.heuristic.analyse,
+                                              leaf.game_state)
+                self.tasks[future] = leaf
+                if len(self.tasks) >= max_tasks:
+                    timeout = None
+                else:
+                    timeout = 0
+                self.check_tasks(timeout, return_when=FIRST_COMPLETED)
+        if self.tasks:
+            self.check_tasks(timeout=None, return_when=ALL_COMPLETED)
+
         if self.current_node.children is None:
             self.current_node.select_leaf()
+
+    def check_tasks(self, timeout, return_when):
+        done, not_done = wait(self.tasks.keys(),
+                              timeout,
+                              return_when=return_when)
+        for done_future in done:
+            done_leaf = self.tasks.pop(done_future)
+            value, child_predictions = done_future.result()
+            done_leaf.record_value(value, child_predictions)
 
     def get_best_move(self) -> int:
         best_children = self.current_node.find_best_children()
@@ -269,10 +303,13 @@ class MctsPlayer(Player):
                  start_state: GameState,
                  player_number: int = GameState.X_PLAYER,
                  iteration_count: int = DEFAULT_ITERATIONS,
-                 heuristic: Heuristic = None):
+                 heuristic: Heuristic = None,
+                 process_count: int = 1):
         super().__init__(player_number, heuristic)
         self.iteration_count = iteration_count
-        self.search_manager = SearchManager(start_state, self.heuristic)
+        self.search_manager = SearchManager(start_state,
+                                            self.heuristic,
+                                            process_count)
 
     @property
     def heuristic(self) -> Heuristic:

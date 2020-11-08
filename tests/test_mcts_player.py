@@ -224,6 +224,34 @@ XOXOXOO
     assert display == expected_display
 
 
+def test_choose_move_in_pool():
+    np.random.seed(0)
+    start_state = Connect4State()
+    state1 = Connect4State("""\
+.......
+.......
+.......
+...XX..
+OXOXO..
+XOXOXOO
+""")
+    expected_display = """\
+.......
+.......
+.......
+..XXX..
+OXOXO..
+XOXOXOO
+"""
+    player = MctsPlayer(start_state, iteration_count=200, process_count=2)
+
+    move = player.choose_move(state1)
+    state2 = state1.make_move(move)
+    display = state2.display()
+
+    assert display == expected_display
+
+
 def test_choose_moves_at_random():
     """ Early moves are chosen from a weighted random population. """
     np.random.seed(0)

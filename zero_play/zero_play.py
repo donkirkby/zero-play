@@ -4,6 +4,7 @@ import typing
 from functools import partial
 from itertools import chain
 from operator import attrgetter
+from os import cpu_count
 from random import shuffle
 
 import numpy as np
@@ -95,6 +96,7 @@ class ZeroPlayWindow(QMainWindow):
         ui.searches1.valueChanged.connect(self.on_searches_changed)
         ui.searches_lock1.stateChanged.connect(self.on_lock_changed)
         ui.searches_lock2.stateChanged.connect(self.on_lock_changed)
+        self.cpu_count = cpu_count()
         self.is_history_dirty = False  # Has current game been rewound?
         self.all_displays = []
         self.load_game_list(ui.game_page.layout())
@@ -340,7 +342,10 @@ class ZeroPlayWindow(QMainWindow):
         mcts_choices = {self.start_state.X_PLAYER: player_fields[0],
                         self.start_state.O_PLAYER: player_fields[1]}
         self.display.mcts_players = [
-            MctsPlayer(self.start_state, player_number, iteration_count=searches)
+            MctsPlayer(self.start_state,
+                       player_number,
+                       iteration_count=searches,
+                       process_count=self.cpu_count)
             for player_number, (heuristic, searches) in mcts_choices.items()
             if heuristic is not None]
         layout: QGridLayout = ui.display_page.layout()

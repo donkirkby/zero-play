@@ -31,6 +31,14 @@ def parse_args():
                         type=int,
                         default=100,
                         help='Number of search iterations for player 2.')
+    parser.add_argument('--processes1',
+                        type=int,
+                        default=1,
+                        help='Number of parallel search processes for player 1.')
+    parser.add_argument('--processes2',
+                        type=int,
+                        default=1,
+                        help='Number of parallel search processes for player 2.')
     parser.add_argument('--display',
                         action='store_true',
                         help='Display moves in the games.')
@@ -47,8 +55,12 @@ def main():
     game_state_class = getattr(module, class_name)
     start_state: GameState = game_state_class()
 
-    player1 = MctsPlayer(start_state, iteration_count=args.iter1)
-    player2 = MctsPlayer(start_state, iteration_count=args.iter2)
+    player1 = MctsPlayer(start_state,
+                         iteration_count=args.iter1,
+                         process_count=args.processes1)
+    player2 = MctsPlayer(start_state,
+                         iteration_count=args.iter2,
+                         process_count=args.processes2)
     controller = PlayController(start_state, [player1, player2])
     controller.play(args.game_count, args.flip, args.display)
 
