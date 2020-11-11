@@ -48,3 +48,18 @@ is the adjustment of AI strength after wins and losses.
 ### Oct 2020
 As the Shibumi games are gaining more controls, I decided to move most of the
 controls out of the `QGraphicsScene`, so developers can use Qt's layout classes.
+
+### Nov 2020
+Spargo was quite slow, so I added support for multiprocessing in issue #33. It
+definitely improved performance, but not as much as I'd hoped.
+
+![Multiprocessing times]
+
+I see definite improvement up to three CPUs, and maybe to four, but nothing
+beyond that. I guess hyperthreading doesn't help my workload, because my laptop
+has four physical cores and eight logical processors. That makes sense for
+mostly numerical calculations, I guess, but it's strange that the fourth
+processor improves so little. I wonder if I've got inefficient communication
+somewhere slowing things down.
+
+[Multiprocessing times]: 2020/multiprocessing_times.png
