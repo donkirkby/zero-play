@@ -103,7 +103,7 @@ class ZeroPlayWindow(QMainWindow):
         icon_pixmap = QPixmap(self.icon_path)  # After displays load resources!
         icon = QIcon(icon_pixmap)
         self.setWindowIcon(icon)
-        self.start_state = None
+        self.start_state: typing.Optional[GameState] = None
         self.display: typing.Optional[GameDisplay] = None
         self.on_new_game()
         self.board_to_resume: typing.Optional[np.ndarray] = None
@@ -339,8 +339,8 @@ class ZeroPlayWindow(QMainWindow):
         settings.setValue('shuffle_players', is_shuffled)
         if is_shuffled:
             shuffle(player_fields)
-        mcts_choices = {self.start_state.X_PLAYER: player_fields[0],
-                        self.start_state.O_PLAYER: player_fields[1]}
+        mcts_choices = {self.start_state.players[0]: player_fields[0],
+                        self.start_state.players[1]: player_fields[1]}
         self.display.mcts_players = [
             MctsPlayer(self.start_state,
                        player_number,

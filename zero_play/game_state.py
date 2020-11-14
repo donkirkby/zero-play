@@ -10,6 +10,7 @@ class GameState(ABC):
     NO_PLAYER = 0
     X_PLAYER = 1
     O_PLAYER = -1
+    players = (X_PLAYER, O_PLAYER)
 
     def __repr__(self):
         return f"{self.__class__.__name__}()"
