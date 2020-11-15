@@ -148,3 +148,12 @@ def test_two_moves_per_turn():
         value_total += value
 
     assert value_total == expected_value_total
+
+
+def test_long_simulation():
+    start_state = TakeOneTwiceGame(1500)
+    playout = Playout()
+
+    value = playout.simulate(start_state)
+
+    assert value == 1
