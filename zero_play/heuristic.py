@@ -45,4 +45,10 @@ class Heuristic(metaclass=ABCMeta):
         """
         winner = board.get_winner()
         active_player = board.get_active_player()
-        return winner * active_player, self.create_even_policy(board)
+        if winner == board.NO_PLAYER:
+            value = 0
+        elif winner == active_player:
+            value = 1
+        else:
+            value = -1
+        return value, self.create_even_policy(board)
