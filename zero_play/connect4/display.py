@@ -5,7 +5,7 @@ from zero_play.grid_display import GridDisplay, GraphicsPieceItem
 
 
 class Connect4Display(GridDisplay):
-    rules_path = ':/zero_play_rules/connect4.md'
+    rules_path = ':/zero_play_rules/connect4.html'
 
     def __init__(self):
         super().__init__(Connect4State())

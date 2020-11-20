@@ -8,7 +8,7 @@ from os import cpu_count
 from random import shuffle
 
 import numpy as np
-from PySide2.QtCore import QSettings, QFile, QTextStream
+from PySide2.QtCore import QSettings
 
 from PySide2.QtGui import Qt, QIcon, QPixmap
 from PySide2.QtWidgets import (QApplication, QMainWindow, QFileDialog,
@@ -23,7 +23,6 @@ from zero_play.game_display import GameDisplay
 from zero_play.main_window import Ui_MainWindow
 from zero_play.mcts_player import MctsPlayer
 from zero_play.playout import Playout
-from zero_play.rules_formatter import convert_markdown
 from zero_play.strength_adjuster import StrengthAdjuster
 from zero_play import zero_play_rules_rc
 from zero_play import zero_play_images_rc
@@ -424,13 +423,9 @@ class ZeroPlayWindow(QMainWindow):
         if rules_path is None:
             game_name = display.start_state.game_name
             rules_html = f'No rules found for {game_name}.'
+            self.ui.rules_text.setHtml(rules_html)
         else:
-            rules_file = QFile(rules_path)
-            rules_file.open(QFile.ReadOnly | QFile.Text)
-            rules_markdown = QTextStream(rules_file).readAll()
-            rules_html = convert_markdown(rules_markdown)
-
-        self.ui.rules_text.setHtml(rules_html)
+            self.ui.rules_text.setSource('qrc' + rules_path)
 
     def on_close_rules(self):
         if self.display is None:

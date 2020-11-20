@@ -5,7 +5,7 @@ from zero_play.tictactoe.state import TicTacToeState
 
 
 class TicTacToeDisplay(GridDisplay):
-    rules_path = ':/zero_play_rules/tictactoe.md'
+    rules_path = ':/zero_play_rules/tictactoe.html'
 
     def __init__(self):
         super().__init__(TicTacToeState())
