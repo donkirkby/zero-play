@@ -30,7 +30,7 @@ class DiagramWriter:
         painter.setPen(pen)
 
     @contextmanager
-    def create_painter(self) -> typing.ContextManager[QPainter]:
+    def create_painter(self) -> typing.Iterator[QPainter]:
         white = QColor('white')
         pixmap = QPixmap(self.width, self.height)
         pixmap.fill(white)
@@ -92,7 +92,7 @@ class Connect4Diagram(DiagramWriter):
     def draw(self, painter: QPainter):
         super().draw(painter)
         pen = painter.pen()
-        pen.setColor('darkgrey')
+        pen.setColor(QColor('darkgrey'))
         painter.setPen(pen)
         w = self.width
         h = self.height
