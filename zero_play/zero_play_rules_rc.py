@@ -145,45 +145,51 @@ e\xdb6q\xbd\x9e\xdf\xd9\xdb\x17\x03C\x93\xf3&e\
 \x08\x14\x8b@\xa0X\x04\x02\xc5\x22\x10\xfe\x03\x02\x02\xf7\
 \xca\xf6X\xfa\x83\x00\x00\x00\x00IEND\xaeB`\
 \x82\
-\x00\x00\x02O\
+\x00\x00\x02\xa1\
 <\
-h1>Connect 4 Rul\
-es</h1>\x0a<p>Playe\
-rs: 2</p>\x0a<h3>Go\
-al</h3>\x0a<p>Place\
- your pieces to \
-make a line of f\
-our in a row, ei\
-ther vertically,\
-\x0ahorizontally, o\
-r diagonally.</p\
->\x0a<p><img alt=\x22E\
-xample\x22 src=\x22con\
-nect4.png\x22 /></p\
->\x0a<h3>Setup</h3>\
-\x0a<p>Choose which\
- player will pla\
-y black and go f\
-irst.</p>\x0a<h3>Pl\
-ay</h3>\x0a<p>Start\
-ing with the bla\
-ck player, take \
-turns adding you\
-r piece in one o\
-f the empty\x0aspac\
-es, but the piec\
-e will fall to t\
-he lowest empty \
-space in the col\
-umn. If you\x0amake\
- a line of four \
-in a row, you wi\
-n immediately. I\
-f the board is f\
-ull without\x0aany \
-line of four in \
-a row, the game \
-is a draw.</p>\
+!DOCTYPE html>\x0a<\
+html>\x0a<head><met\
+a charset=\x22UTF-8\
+\x22></head>\x0a<body>\
+\x0a<h1>Connect 4 R\
+ules</h1>\x0a<p>Pla\
+yers: 2</p>\x0a<h3>\
+Goal</h3>\x0a<p>Pla\
+ce your pieces t\
+o make a line of\
+ four in a row, \
+either verticall\
+y,\x0ahorizontally,\
+ or diagonally.<\
+/p>\x0a<p><img alt=\
+\x22Example\x22 src=\x22c\
+onnect4.png\x22 /><\
+/p>\x0a<h3>Setup</h\
+3>\x0a<p>Choose whi\
+ch player will p\
+lay black and go\
+ first.</p>\x0a<h3>\
+Play</h3>\x0a<p>Sta\
+rting with the b\
+lack player, tak\
+e turns adding y\
+our piece in one\
+ of the empty\x0asp\
+aces, but the pi\
+ece will fall to\
+ the lowest empt\
+y space in the c\
+olumn. If you\x0ama\
+ke a line of fou\
+r in a row, you \
+win immediately.\
+ If the board is\
+ full without\x0aan\
+y line of four i\
+n a row, the gam\
+e is a draw.</p>\
+</body>\x0a</html>\x0a\
+\
 \x00\x00\x06\x8c\
 \x89\
 PNG\x0d\x0a\x1a\x0a\x00\x00\x00\x0dIHDR\x00\
@@ -291,42 +297,47 @@ o;g\xe3\xda\xa9\xc2:W\x0c\xda\x15\x82s5\xa0\
 \x98L\xe3\xd3\x9e\xf1:\x8eH\xde\xe2k\x93\x05#\xa0\
 \x1d(\x80v\xa0\xc0\x7fg\xec\xf1\xe5\xdb\xda\xffK\x00\
 \x00\x00\x00IEND\xaeB`\x82\
-\x00\x00\x02\x13\
+\x00\x00\x02e\
 <\
-h1>Tic Tac Toe R\
-ules</h1>\x0a<p>Pla\
-yers: 2</p>\x0a<h3>\
-Goal</h3>\x0a<p>Pla\
-ce your pieces t\
-o make a line of\
- three in a row,\
- either vertical\
-ly,\x0ahorizontally\
-, or diagonally.\
-</p>\x0a<p><img alt\
-=\x22Example\x22 src=\x22\
-tictactoe.png\x22 /\
-></p>\x0a<h3>Setup<\
-/h3>\x0a<p>Choose w\
-hich player will\
- play black and \
-go first.</p>\x0a<h\
-3>Play</h3>\x0a<p>S\
-tarting with the\
- black player, t\
-ake turns adding\
- your mark in on\
-e of the empty\x0as\
-paces. If you ma\
-ke a line of thr\
-ee in a row, you\
- win immediately\
-. If the board\x0ai\
-s full without a\
-ny line of three\
- in a row, the g\
-ame is a draw.</\
-p>\
+!DOCTYPE html>\x0a<\
+html>\x0a<head><met\
+a charset=\x22UTF-8\
+\x22></head>\x0a<body>\
+\x0a<h1>Tic Tac Toe\
+ Rules</h1>\x0a<p>P\
+layers: 2</p>\x0a<h\
+3>Goal</h3>\x0a<p>P\
+lace your pieces\
+ to make a line \
+of three in a ro\
+w, either vertic\
+ally,\x0ahorizontal\
+ly, or diagonall\
+y.</p>\x0a<p><img a\
+lt=\x22Example\x22 src\
+=\x22tictactoe.png\x22\
+ /></p>\x0a<h3>Setu\
+p</h3>\x0a<p>Choose\
+ which player wi\
+ll play black an\
+d go first.</p>\x0a\
+<h3>Play</h3>\x0a<p\
+>Starting with t\
+he black player,\
+ take turns addi\
+ng your mark in \
+one of the empty\
+\x0aspaces. If you \
+make a line of t\
+hree in a row, y\
+ou win immediate\
+ly. If the board\
+\x0ais full without\
+ any line of thr\
+ee in a row, the\
+ game is a draw.\
+</p></body>\x0a</ht\
+ml>\x0a\
 "
 
 qt_resource_name = b"\
@@ -358,13 +369,13 @@ qt_resource_struct = b"\
 \x00\x00\x00\x00\x00\x02\x00\x00\x00\x04\x00\x00\x00\x02\
 \x00\x00\x00\x00\x00\x00\x00\x00\
 \x00\x00\x00D\x00\x00\x00\x00\x00\x01\x00\x00\x08\x86\
-\x00\x00\x01u\xe7\xc2\xb0e\
-\x00\x00\x00d\x00\x00\x00\x00\x00\x01\x00\x00\x0a\xd9\
-\x00\x00\x01u\xe7\xb2\x10e\
-\x00\x00\x00\x82\x00\x00\x00\x00\x00\x01\x00\x00\x11i\
-\x00\x00\x01u\xe7\xc2\xb0i\
+\x00\x00\x01u\xed\xc6\xa4\x91\
+\x00\x00\x00d\x00\x00\x00\x00\x00\x01\x00\x00\x0b+\
+\x00\x00\x01u\xec_l\xb9\
+\x00\x00\x00\x82\x00\x00\x00\x00\x00\x01\x00\x00\x11\xbb\
+\x00\x00\x01u\xed\xc6\xa4\x95\
 \x00\x00\x00$\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\
-\x00\x00\x01u\xe7\xb2\x10M\
+\x00\x00\x01u\xec_l\xa1\
 "
 
 def qInitResources():

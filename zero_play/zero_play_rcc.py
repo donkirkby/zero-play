@@ -4,6 +4,17 @@ from subprocess import run
 
 from zero_play.rules_formatter import convert_markdown
 
+HTML_PREFIX = """\
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body>
+"""
+HTML_SUFFIX = """\
+</body>
+</html>
+"""
+
 
 def parse_args():
     parser = ArgumentParser(description='Compile resources for a Zero Play project.')
@@ -38,7 +49,8 @@ def main():
             html_resource = resource.with_suffix('.html')
             if html_resource.exists():
                 raise FileExistsError(f'HTML already exists in {html_resource}.')
-            html_resource.write_text(convert_markdown(resource.read_text()))
+            html_fragment = convert_markdown(resource.read_text())
+            html_resource.write_text(HTML_PREFIX + html_fragment + HTML_SUFFIX)
             files_to_tidy.append(html_resource)
             resource = html_resource
         rel_path = resource.relative_to(folder)
