@@ -8,6 +8,7 @@ seaborn = "*"
 pytest = "*"
 coverage = "*"
 mypy = "*"
+sqlalchemy-stubs = "*"
 
 [packages]
 numpy = "<1.19.0"
@@ -15,6 +16,8 @@ matplotlib = "*"
 pyside2 = "==5.15.0"  # Waiting for a fix: https://bugreports.qt.io/browse/PYSIDE-1404
 tensorflow = "*"
 markdown = "*"
+alembic = "*"
+sqlalchemy = "*"
 
 [requires]
 python_version = "3.8"

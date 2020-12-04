@@ -68,6 +68,10 @@ class GameDisplay(QWidget):
                 worker.moveToThread(self.worker_thread)
             self.worker_thread.start()
 
+    def get_player(self, player_number: int) -> typing.Optional[MctsPlayer]:
+        worker = self.mcts_workers.get(player_number)
+        return worker and worker.player
+
     @abstractmethod
     def update_board(self, board: GameState):
         """ Update self.scene, based on the state in board.

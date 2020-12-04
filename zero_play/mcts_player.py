@@ -70,7 +70,9 @@ class SearchNode:
     def find_all_children(self) -> typing.List['SearchNode']:
         if self.children is not None:
             return self.children
-        children = []
+        children: typing.List['SearchNode'] = []
+        if self.game_state.is_ended():
+            return children
         for move, is_valid in enumerate(self.game_state.get_valid_moves()):
             if is_valid:
                 child_state = self.game_state.make_move(move)
@@ -197,13 +199,13 @@ class SearchManager:
 
     def get_best_move(self) -> int:
         best_children = self.current_node.find_best_children()
-        self.current_node = np.random.choice(best_children)
-        assert self.current_node.move is not None
-        return self.current_node.move
+        self.current_node = child = np.random.choice(best_children)
+        assert child.move is not None
+        return child.move
 
     def choose_weighted_move(self) -> int:
         temperature = 1.0
-        child = self.current_node.choose_child(temperature)
+        self.current_node = child = self.current_node.choose_child(temperature)
         assert child.move is not None
         return child.move
 

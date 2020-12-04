@@ -85,12 +85,13 @@ X..
 
 
 def test_get_valid_moves_after_win():
+    """ Win gets checked in search, so don't also check in valid moves. """
     text = """\
 XXX
 OO.
 ...
 """
-    expected_moves = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0])
+    expected_moves = np.array([0, 0, 0, 0, 0, 1, 1, 1, 1])
     board = TicTacToeState(text)
     moves = board.get_valid_moves()
 

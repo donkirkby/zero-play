@@ -59,6 +59,9 @@ class GameState(ABC):
             to parse_move().
         """
 
+    def get_players(self) -> typing.Iterable[int]:
+        return self.X_PLAYER, self.O_PLAYER
+
     @abstractmethod
     def get_move_count(self) -> int:
         """ The number of moves that have already been made in the game. """
@@ -167,7 +170,7 @@ class GridGameState(GameState):
         return np.array_equal(self.board, other.board)
 
     def get_move_count(self) -> int:
-        return (self.get_spaces() != GameState.NO_PLAYER).sum()
+        return int((self.get_spaces() != GameState.NO_PLAYER).sum())
 
     def get_spaces(self) -> np.ndarray:
         return self.board[:self.board_height*self.board_width].reshape(
@@ -176,9 +179,6 @@ class GridGameState(GameState):
 
     def get_valid_moves(self) -> np.ndarray:
         spaces = self.get_spaces()
-        if (self.is_win(self.X_PLAYER) or
-                self.is_win(self.O_PLAYER)):
-            return np.zeros(self.board_height*self.board_width, bool)
         return spaces.reshape(self.board_height *
                               self.board_width) == GameState.NO_PLAYER
 

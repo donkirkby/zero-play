@@ -397,3 +397,46 @@ OXO
 
     assert repr(boards) == repr(expected_boards)
     assert repr(outputs) == repr(expected_outputs)
+
+
+def test_win_scores_one():
+    """ Expose bug where search continues after a game-ending position. """
+    state1 = TicTacToeState("""\
+..X
+XX.
+OO.
+""")
+
+    player = MctsPlayer(TicTacToeState(), state1.X_PLAYER, iteration_count=100)
+
+    move = player.choose_move(state1)
+
+    search_node1 = player.search_manager.current_node.parent
+    for child_node in search_node1.children:
+        if child_node.move == 8:
+            assert child_node.average_value == 1.0
+    assert move == 8
+
+
+def test_choose_move_sets_current_node():
+    np.random.seed(0)
+    start_state = Connect4State()
+    state1 = Connect4State("""\
+.......
+.......
+.......
+.......
+OXOXOXO
+XOXOXOX
+""")
+    player = MctsPlayer(start_state, iteration_count=20)
+
+    move1 = player.choose_move(state1)
+    current_node1 = player.search_manager.current_node
+    state2 = state1.make_move(move1)
+    move2 = player.choose_move(state2)
+    current_node2 = player.search_manager.current_node
+    state3 = state2.make_move(move2)
+
+    assert current_node1.game_state == state2
+    assert current_node2.game_state == state3
