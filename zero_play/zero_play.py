@@ -20,6 +20,7 @@ from alembic import command
 from alembic.config import Config
 from pkg_resources import iter_entry_points, EntryPoint
 from sqlalchemy import create_engine
+from sqlalchemy.orm import Session as BaseSession
 
 import zero_play
 from zero_play.about_dialog import Ui_Dialog
@@ -97,7 +98,7 @@ class ZeroPlayWindow(QMainWindow):
         ui = self.ui = Ui_MainWindow()
         ui.setupUi(self)
         self.plot_canvas = PlotCanvas(ui.centralwidget)
-        ui.plot_page.layout().addWidget(self.plot_canvas)
+        ui.plot_history_page.layout().addWidget(self.plot_canvas, 1, 0, 1, 2)
         ui.cancel.clicked.connect(self.on_cancel)
         ui.start.clicked.connect(self.on_start)
         ui.action_game.triggered.connect(self.on_new_game)
@@ -132,6 +133,8 @@ class ZeroPlayWindow(QMainWindow):
                              for name in ui.toggle_review.text().split('/')]
         self.are_coordinates_always_visible = False
         self.game_start_time = datetime.now()
+        ui.start_stop_plot.clicked.connect(self.requery_plot)
+        ui.history_game.currentIndexChanged.connect(self.requery_plot)
         self._db_session = None
         self.on_toggle_review()
 
@@ -147,7 +150,7 @@ class ZeroPlayWindow(QMainWindow):
         yield from entries
 
     @property
-    def db_session(self):
+    def db_session(self) -> BaseSession:
         if self._db_session is None:
             db_url = get_database_url()
             engine = create_engine(db_url)
@@ -188,6 +191,8 @@ class ZeroPlayWindow(QMainWindow):
             # noinspection PyUnresolvedReferences
             game_button.clicked.connect(partial(self.show_game, display))
             game_layout.addWidget(game_button, row, column)
+
+            self.ui.history_game.addItem(game_name, userData=display)
 
             if display.rules_path is not None:
                 game_rules_action = self.ui.menu_rules.addAction(game_name)
@@ -403,7 +408,13 @@ class ZeroPlayWindow(QMainWindow):
             self.display.show_coordinates = is_checked
 
     def on_plot(self):
-        self.ui.stacked_widget.setCurrentWidget(self.ui.plot_page)
+        self.ui.stacked_widget.setCurrentWidget(self.ui.plot_history_page)
+        self.requery_plot()
+
+    def requery_plot(self):
+        display: GameDisplay = self.ui.history_game.currentData()
+        self.plot_canvas.game = display.start_state
+        self.plot_canvas.requery(self.db_session)
 
     def on_searches_changed(self, search_count: int):
         if self.ui.stacked_widget.currentWidget() is not self.ui.players_page:
@@ -421,11 +432,7 @@ class ZeroPlayWindow(QMainWindow):
                 self.ui.searches_lock1.isChecked()):
             return
         db_session = self.db_session
-        game_record = db_session.query(GameRecord).filter_by(
-            name=game_state.game_name).one_or_none()
-        if game_record is None:
-            game_record = GameRecord(name=game_state.game_name)
-            db_session.add(game_record)
+        game_record = GameRecord.find_or_create(db_session, game_state)
         game_end_time = datetime.now()
         game_duration = game_end_time - self.game_start_time
         match_record = MatchRecord(game=game_record,

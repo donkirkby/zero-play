@@ -1,5 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+import sqlalchemy.orm
 
-Base = declarative_base()
-Session = sessionmaker()
+Base = declarative_base()  # base class for models
+Session = sqlalchemy.orm.sessionmaker()  # connection to database
+SessionBase = sqlalchemy.orm.Session  # Use as type hint for Session objects.

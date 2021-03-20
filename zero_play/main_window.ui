@@ -18,7 +18,7 @@
     <item>
      <widget class="QStackedWidget" name="stacked_widget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="game_page">
        <layout class="QGridLayout" name="gridLayout_3">
@@ -212,7 +212,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="history_page">
+      <widget class="QWidget" name="humans_page">
        <layout class="QGridLayout" name="gridLayout">
         <item row="1" column="1">
          <widget class="QPushButton" name="close_humans">
@@ -248,10 +248,10 @@
          </widget>
         </item>
         <item row="0" column="1" colspan="3">
-         <widget class="QTableWidget" name="tableWidget"/>
+         <widget class="QTableWidget" name="players_table"/>
         </item>
         <item row="1" column="2">
-         <spacer name="horizontalSpacer">
+         <spacer name="spacer">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -342,8 +342,81 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="plot_page">
-       <layout class="QVBoxLayout" name="plot_layout"/>
+      <widget class="QWidget" name="plot_strength_page">
+       <layout class="QGridLayout" name="gridLayout_5">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Game:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" colspan="2">
+         <widget class="QComboBox" name="plot_game"/>
+        </item>
+        <item row="2" column="1" colspan="2">
+         <widget class="QLineEdit" name="lineEdit">
+          <property name="whatsThis">
+           <string extracomment="comma-separated list of search counts"/>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Opponent min:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1" colspan="2">
+         <widget class="QLineEdit" name="lineEdit_2"/>
+        </item>
+        <item row="6" column="2">
+         <widget class="QPushButton" name="reset_plot">
+          <property name="text">
+           <string>Reset</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
+         <widget class="QPushButton" name="start_stop_plot">
+          <property name="text">
+           <string>Start / Stop</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="strengths_label">
+          <property name="text">
+           <string>Player Strengths:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Opponent max:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1" colspan="2">
+         <widget class="QLineEdit" name="lineEdit_3"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="plot_history_page">
+       <layout class="QGridLayout" name="gridLayout_6" columnstretch="1,8">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>Game:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="history_game"/>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>

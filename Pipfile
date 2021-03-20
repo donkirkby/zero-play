@@ -11,7 +11,7 @@ mypy = "*"
 sqlalchemy-stubs = "*"
 
 [packages]
-numpy = "<1.19.0"
+numpy = "*"
 matplotlib = "*"
 pyside2 = "==5.15.0"  # Waiting for a fix: https://bugreports.qt.io/browse/PYSIDE-1404
 tensorflow = "*"

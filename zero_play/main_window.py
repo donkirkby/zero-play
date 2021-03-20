@@ -202,39 +202,39 @@ class Ui_MainWindow(object):
         self.verticalLayout.addLayout(self.player_layout)
 
         self.stacked_widget.addWidget(self.players_page)
-        self.history_page = QWidget()
-        self.history_page.setObjectName(u"history_page")
-        self.gridLayout = QGridLayout(self.history_page)
+        self.humans_page = QWidget()
+        self.humans_page.setObjectName(u"humans_page")
+        self.gridLayout = QGridLayout(self.humans_page)
         self.gridLayout.setObjectName(u"gridLayout")
-        self.close_humans = QPushButton(self.history_page)
+        self.close_humans = QPushButton(self.humans_page)
         self.close_humans.setObjectName(u"close_humans")
         sizePolicy4.setHeightForWidth(self.close_humans.sizePolicy().hasHeightForWidth())
         self.close_humans.setSizePolicy(sizePolicy4)
 
         self.gridLayout.addWidget(self.close_humans, 1, 1, 1, 1)
 
-        self.players_label = QLabel(self.history_page)
+        self.players_label = QLabel(self.humans_page)
         self.players_label.setObjectName(u"players_label")
 
         self.gridLayout.addWidget(self.players_label, 0, 0, 1, 1)
 
-        self.new_human = QPushButton(self.history_page)
+        self.new_human = QPushButton(self.humans_page)
         self.new_human.setObjectName(u"new_human")
         sizePolicy4.setHeightForWidth(self.new_human.sizePolicy().hasHeightForWidth())
         self.new_human.setSizePolicy(sizePolicy4)
 
         self.gridLayout.addWidget(self.new_human, 1, 3, 1, 1)
 
-        self.tableWidget = QTableWidget(self.history_page)
-        self.tableWidget.setObjectName(u"tableWidget")
+        self.players_table = QTableWidget(self.humans_page)
+        self.players_table.setObjectName(u"players_table")
 
-        self.gridLayout.addWidget(self.tableWidget, 0, 1, 1, 3)
+        self.gridLayout.addWidget(self.players_table, 0, 1, 1, 3)
 
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.gridLayout.addItem(self.horizontalSpacer, 1, 2, 1, 1)
+        self.gridLayout.addItem(self.spacer, 1, 2, 1, 1)
 
-        self.stacked_widget.addWidget(self.history_page)
+        self.stacked_widget.addWidget(self.humans_page)
         self.rules_page = QWidget()
         self.rules_page.setObjectName(u"rules_page")
         self.gridLayout_4 = QGridLayout(self.rules_page)
@@ -296,11 +296,78 @@ class Ui_MainWindow(object):
         self.gridLayout_2.addWidget(self.game_display, 0, 0, 1, 3)
 
         self.stacked_widget.addWidget(self.display_page)
-        self.plot_page = QWidget()
-        self.plot_page.setObjectName(u"plot_page")
-        self.plot_layout = QVBoxLayout(self.plot_page)
-        self.plot_layout.setObjectName(u"plot_layout")
-        self.stacked_widget.addWidget(self.plot_page)
+        self.plot_strength_page = QWidget()
+        self.plot_strength_page.setObjectName(u"plot_strength_page")
+        self.gridLayout_5 = QGridLayout(self.plot_strength_page)
+        self.gridLayout_5.setObjectName(u"gridLayout_5")
+        self.label = QLabel(self.plot_strength_page)
+        self.label.setObjectName(u"label")
+
+        self.gridLayout_5.addWidget(self.label, 0, 0, 1, 1)
+
+        self.plot_game = QComboBox(self.plot_strength_page)
+        self.plot_game.setObjectName(u"plot_game")
+
+        self.gridLayout_5.addWidget(self.plot_game, 0, 1, 1, 2)
+
+        self.lineEdit = QLineEdit(self.plot_strength_page)
+        self.lineEdit.setObjectName(u"lineEdit")
+
+        self.gridLayout_5.addWidget(self.lineEdit, 2, 1, 1, 2)
+
+        self.label_2 = QLabel(self.plot_strength_page)
+        self.label_2.setObjectName(u"label_2")
+
+        self.gridLayout_5.addWidget(self.label_2, 3, 0, 1, 1)
+
+        self.lineEdit_2 = QLineEdit(self.plot_strength_page)
+        self.lineEdit_2.setObjectName(u"lineEdit_2")
+
+        self.gridLayout_5.addWidget(self.lineEdit_2, 3, 1, 1, 2)
+
+        self.reset_plot = QPushButton(self.plot_strength_page)
+        self.reset_plot.setObjectName(u"reset_plot")
+
+        self.gridLayout_5.addWidget(self.reset_plot, 6, 2, 1, 1)
+
+        self.start_stop_plot = QPushButton(self.plot_strength_page)
+        self.start_stop_plot.setObjectName(u"start_stop_plot")
+
+        self.gridLayout_5.addWidget(self.start_stop_plot, 6, 1, 1, 1)
+
+        self.strengths_label = QLabel(self.plot_strength_page)
+        self.strengths_label.setObjectName(u"strengths_label")
+
+        self.gridLayout_5.addWidget(self.strengths_label, 2, 0, 1, 1)
+
+        self.label_3 = QLabel(self.plot_strength_page)
+        self.label_3.setObjectName(u"label_3")
+
+        self.gridLayout_5.addWidget(self.label_3, 4, 0, 1, 1)
+
+        self.lineEdit_3 = QLineEdit(self.plot_strength_page)
+        self.lineEdit_3.setObjectName(u"lineEdit_3")
+
+        self.gridLayout_5.addWidget(self.lineEdit_3, 4, 1, 1, 2)
+
+        self.stacked_widget.addWidget(self.plot_strength_page)
+        self.plot_history_page = QWidget()
+        self.plot_history_page.setObjectName(u"plot_history_page")
+        self.gridLayout_6 = QGridLayout(self.plot_history_page)
+        self.gridLayout_6.setObjectName(u"gridLayout_6")
+        self.label_4 = QLabel(self.plot_history_page)
+        self.label_4.setObjectName(u"label_4")
+
+        self.gridLayout_6.addWidget(self.label_4, 0, 0, 1, 1)
+
+        self.history_game = QComboBox(self.plot_history_page)
+        self.history_game.setObjectName(u"history_game")
+
+        self.gridLayout_6.addWidget(self.history_game, 0, 1, 1, 1)
+
+        self.gridLayout_6.setColumnStretch(0, 1)
+        self.gridLayout_6.setColumnStretch(1, 8)
+        self.stacked_widget.addWidget(self.plot_history_page)
 
         self.verticalLayout_2.addWidget(self.stacked_widget)
 
@@ -342,7 +409,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.stacked_widget.setCurrentIndex(1)
+        self.stacked_widget.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -382,6 +449,16 @@ class Ui_MainWindow(object):
         self.toggle_review.setText(QCoreApplication.translate("MainWindow", u"Review / Resume", None))
         self.resume_here.setText(QCoreApplication.translate("MainWindow", u"Resume Here", None))
         self.game_display.setText(QCoreApplication.translate("MainWindow", u"Game Display", None))
+        self.label.setText(QCoreApplication.translate("MainWindow", u"Game:", None))
+#if QT_CONFIG(whatsthis)
+        self.lineEdit.setWhatsThis("")
+#endif // QT_CONFIG(whatsthis)
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Opponent min:", None))
+        self.reset_plot.setText(QCoreApplication.translate("MainWindow", u"Reset", None))
+        self.start_stop_plot.setText(QCoreApplication.translate("MainWindow", u"Start / Stop", None))
+        self.strengths_label.setText(QCoreApplication.translate("MainWindow", u"Player Strengths:", None))
+        self.label_3.setText(QCoreApplication.translate("MainWindow", u"Opponent max:", None))
+        self.label_4.setText(QCoreApplication.translate("MainWindow", u"Game:", None))
         self.menu_file.setTitle(QCoreApplication.translate("MainWindow", u"&File", None))
         self.menu_new.setTitle(QCoreApplication.translate("MainWindow", u"&New", None))
         self.menu_view.setTitle(QCoreApplication.translate("MainWindow", u"&View", None))
