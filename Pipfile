@@ -9,12 +9,13 @@ pytest = "*"
 coverage = "*"
 mypy = "*"
 sqlalchemy-stubs = "*"
+types-setuptools = "*"
 
 [packages]
 numpy = "*"
 matplotlib = "*"
 pyside2 = "==5.15.0"  # Waiting for a fix: https://bugreports.qt.io/browse/PYSIDE-1404
-tensorflow = "*"
+tensorflow = "==2.4.2"
 markdown = "*"
 alembic = "*"
 sqlalchemy = "*"
