@@ -4,7 +4,10 @@ updates:
   directory: "/"
   schedule:
     interval: daily
-    time: "13:00"
-  open-pull-requests-limit: 10
+  ignore:
+    - dependency-name: pyside2
+      version-update: semver-patch
 - package-ecosystem: bundler
   directory: "/docs"
+  schedule:
+    interval: daily
