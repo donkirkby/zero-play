@@ -11,7 +11,7 @@ from zero_play.models import Base
 # noinspection PyUnresolvedReferences
 from zero_play.models import game, player, match, match_player, match_note
 
-config = context.config
+config = context.config  # type: ignore
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
