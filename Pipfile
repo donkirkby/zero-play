@@ -15,7 +15,7 @@ types-setuptools = "*"
 numpy = "*"
 matplotlib = "*"
 pyside2 = "==5.15.0"  # Waiting for a fix: https://bugreports.qt.io/browse/PYSIDE-1404
-tensorflow = "==2.6.0"
+tensorflow = "==2.6.1"
 markdown = "*"
 alembic = "*"
 sqlalchemy = "*"
