@@ -548,7 +548,7 @@ def main():
     app = QApplication(sys.argv)
     window = ZeroPlayWindow()
     window.show()
-    return app.exec_()
+    return app.exec()
 
 
 if __name__ == "__main__":

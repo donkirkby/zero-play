@@ -20,8 +20,9 @@ jobs:
           python-version: 3.8
       - name: Install missing package and fake XServer
         run: |
-          # Work around missing deps: https://bugreports.qt.io/browse/QTBUG-84749
-          sudo apt-get install libxcb-xinerama0 libxkbcommon-x11-0 xserver-xephyr
+          # Work around missing deps: https://bugreports.qt.io/browse/PYSIDE-1547
+          sudo apt-get update
+          sudo apt-get install -y -q freeglut3-dev xvfb libxkbcommon-x11-0 xserver-xephyr
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
