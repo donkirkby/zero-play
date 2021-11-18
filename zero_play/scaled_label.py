@@ -24,7 +24,11 @@ class ScaledLabel(QLabel):
             metrics = QFontMetrics(font)
 
             # Be careful which overload of boundingRect() you call.
-            rect = metrics.boundingRect(target_rect, Qt.AlignLeft, text)
+            rect = metrics.boundingRect(target_rect,
+                                        Qt.AlignLeft,
+                                        text,
+                                        tabstops=0,
+                                        tabarray=None)
             if (target_rect.width() < rect.width() or
                     target_rect.height() < rect.height()):
                 max_size = new_size - 1

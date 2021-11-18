@@ -24,7 +24,11 @@ class ScaledRadioButton(QRadioButton):
             metrics = QFontMetrics(font)
 
             # Be careful which overload of boundingRect() you call.
-            rect = metrics.boundingRect(target_rect, Qt.AlignLeft, text)
+            rect = metrics.boundingRect(target_rect,
+                                        Qt.AlignLeft,
+                                        text,
+                                        tabstops=0,
+                                        tabarray=None)
             full_width = indicator_width + indicator_spacing + rect.width()
             height = rect.height()
             if icon:
