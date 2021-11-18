@@ -106,8 +106,9 @@ class SearchNode:
         """
         children = self.find_all_children()
         probabilities = self.rank_children(children, temperature)
-        child = np.random.choice(children, p=probabilities)
-        return child
+        child_count = len(children)
+        child_index = np.random.choice(child_count, p=probabilities)
+        return children[child_index]
 
     @staticmethod
     def rank_children(children, temperature):
@@ -243,7 +244,7 @@ class SearchManager:
         return top_moves
 
     def create_training_data(self, iterations: int, data_size: int):
-        game_states = []
+        game_states: typing.List[typing.Tuple[GameState, np.ndarray]] = []
         self.search(self.current_node.game_state, iterations=1)  # One extra to start.
         report_size = 0
         board_shape = self.current_node.game_state.get_spaces().shape
@@ -262,7 +263,7 @@ class SearchManager:
             total_weight = move_weights.sum()
             if total_weight:
                 move_weights /= total_weight
-            game_states.append([self.current_node.game_state, move_weights])
+            game_states.append((self.current_node.game_state, move_weights))
             move = np.random.choice(move_weights.size, p=move_weights)
             for child in self.current_node.children:
                 if child.move == move:
@@ -324,7 +325,7 @@ class MctsPlayer(Player):
         if search_manager is not None:
             search_manager.heuristic = value
 
-    def end_game(self, game_state: np.ndarray, opponent: Player):
+    def end_game(self, game_state: GameState, opponent: Player):
         self.search_manager.reset()
 
     def choose_move(self, game_state: GameState) -> int:
