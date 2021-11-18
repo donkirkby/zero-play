@@ -2,7 +2,7 @@ import turtle
 from unittest.mock import Mock
 
 import pytest
-from PySide2.QtGui import QPixmap, QPainter, QColor
+from PySide6.QtGui import QPixmap, QPainter, QColor
 
 from zero_play.pixmap_differ import encode_image, decode_image
 

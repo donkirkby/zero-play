@@ -1,7 +1,7 @@
 from traceback import print_exc
 
-from PySide2.QtCore import QObject, Signal, Slot
-from PySide2.QtWidgets import QMessageBox
+from PySide6.QtCore import QObject, Signal, Slot
+from PySide6.QtWidgets import QMessageBox
 
 from zero_play.game_state import GameState
 from zero_play.mcts_player import MctsPlayer

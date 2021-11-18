@@ -1,5 +1,5 @@
 import pytest
-from PySide2.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication
 
 from zero_play.pixmap_differ import PixmapDiffer
 

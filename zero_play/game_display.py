@@ -2,9 +2,9 @@ from abc import abstractmethod
 import typing
 
 import numpy as np
-from PySide2.QtCore import Signal, QThread, QSize, Slot
-from PySide2.QtGui import QResizeEvent
-from PySide2.QtWidgets import QGraphicsSimpleTextItem, QSizePolicy, QWidget
+from PySide6.QtCore import Signal, QThread, QSize, Slot
+from PySide6.QtGui import QResizeEvent
+from PySide6.QtWidgets import QGraphicsSimpleTextItem, QSizePolicy, QWidget
 
 from zero_play.game_state import GameState
 from zero_play.log_display import LogDisplay

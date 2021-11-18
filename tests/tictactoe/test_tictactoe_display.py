@@ -1,5 +1,5 @@
-from PySide2.QtGui import QFont, QPainter, QColor, QPen
-from PySide2.QtWidgets import QGraphicsScene
+from PySide6.QtGui import QFont, QPainter, QColor, QPen
+from PySide6.QtWidgets import QGraphicsScene
 
 from zero_play.game_display import center_text_item
 from zero_play.mcts_player import MctsPlayer
@@ -35,8 +35,8 @@ def test_start_square(pixmap_differ: PixmapDiffer):
         player_pixmap = display.ui.player_pixmap.pixmap()
         assert player_pixmap.toImage() == display.player1_icon.toImage()
         assert display.ui.move_text.text() == 'to move'
-        assert display.ui.black_count_pixmap.pixmap() is None
-        assert display.ui.white_count_pixmap.pixmap() is None
+        assert display.ui.black_count_pixmap.pixmap().isNull()
+        assert display.ui.white_count_pixmap.pixmap().isNull()
         assert display.ui.black_count_pixmap.text() == ''
         assert display.ui.white_count_pixmap.text() == ''
         assert display.ui.black_count.text() == ''
@@ -308,7 +308,7 @@ OXX
         display.update_board(board)
 
         render_display(display, actual)
-    assert display.ui.player_pixmap.pixmap() is None
+    assert display.ui.player_pixmap.pixmap().isNull()
     assert display.move_text.text() == 'draw'
 
 

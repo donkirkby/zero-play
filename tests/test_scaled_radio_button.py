@@ -1,6 +1,6 @@
-from PySide2.QtCore import QSize
-from PySide2.QtGui import QPainter
-from PySide2.QtWidgets import QWidget, QVBoxLayout, QRadioButton, QSizePolicy
+from PySide6.QtCore import QSize
+from PySide6.QtGui import QPainter
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QRadioButton, QSizePolicy
 
 from zero_play.pixmap_differ import PixmapDiffer
 from zero_play.scaled_radio_button import ScaledRadioButton

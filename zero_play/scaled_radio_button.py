@@ -1,6 +1,6 @@
-from PySide2.QtCore import QSize
-from PySide2.QtGui import QResizeEvent, QFontMetrics, Qt
-from PySide2.QtWidgets import QRadioButton
+from PySide6.QtCore import QSize
+from PySide6.QtGui import QResizeEvent, QFontMetrics, Qt
+from PySide6.QtWidgets import QRadioButton
 
 
 class ScaledRadioButton(QRadioButton):

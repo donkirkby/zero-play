@@ -1,5 +1,5 @@
-from PySide2.QtGui import QPainter, Qt
-from PySide2.QtWidgets import QWidget, QVBoxLayout, QSizePolicy, QLabel, QHBoxLayout
+from PySide6.QtGui import QPainter, Qt
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QSizePolicy, QLabel, QHBoxLayout
 
 from zero_play.grid_display import GridDisplay
 from zero_play.pixmap_differ import PixmapDiffer

@@ -1,12 +1,13 @@
 import typing
+from base64 import standard_b64encode
 from contextlib import contextmanager
 from pathlib import Path
 import turtle
 
-from PySide2.QtCore import (QByteArray, QBuffer, QIODevice, QTextCodec, QSize,
+from PySide6.QtCore import (QByteArray, QBuffer, QIODevice, QSize,
                             QRect)
-from PySide2.QtGui import QPixmap, QPainter, QColor, QImage, Qt
-from PySide2.QtWidgets import QGraphicsView
+from PySide6.QtGui import QPixmap, QPainter, QColor, QImage, Qt
+from PySide6.QtWidgets import QGraphicsView
 
 from zero_play.game_display import GameDisplay
 
@@ -212,10 +213,10 @@ def encode_image(image: QImage) -> str:
 
     # writes pixmap into bytes in PNG format
     image.save(buffer, "PNG")  # type: ignore
-    encoded_bytes = image_bytes.toBase64()
-    codec = QTextCodec.codecForName(b"UTF-8")
-    encoded_string = codec.toUnicode(encoded_bytes)
-    return encoded_string
+    raw_bytes = bytes(buffer.data())
+    b64_bytes = standard_b64encode(raw_bytes)
+    b64_string = b64_bytes.decode('UTF-8')
+    return b64_string
 
 
 def decode_image(text: str) -> QImage:

@@ -10,10 +10,10 @@ from pathlib import Path
 from random import shuffle
 
 import numpy as np
-from PySide2.QtCore import QSettings
+from PySide6.QtCore import QSettings
 
-from PySide2.QtGui import Qt, QIcon, QPixmap
-from PySide2.QtWidgets import (QApplication, QMainWindow, QFileDialog,
+from PySide6.QtGui import Qt, QIcon, QPixmap
+from PySide6.QtWidgets import (QApplication, QMainWindow, QFileDialog,
                                QTableWidgetItem, QGridLayout, QPushButton,
                                QSizePolicy, QDialog, QWidget, QLabel, QComboBox)
 from alembic import command

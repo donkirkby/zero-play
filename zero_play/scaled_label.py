@@ -1,6 +1,6 @@
-from PySide2.QtCore import QMargins
-from PySide2.QtGui import QResizeEvent, QFontMetrics, Qt
-from PySide2.QtWidgets import QLabel
+from PySide6.QtCore import QMargins
+from PySide6.QtGui import QResizeEvent, QFontMetrics, Qt
+from PySide6.QtWidgets import QLabel
 
 
 class ScaledLabel(QLabel):

@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from PySide2 import QtWidgets
+from PySide6 import QtWidgets
 
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas

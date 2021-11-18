@@ -3,8 +3,8 @@ from contextlib import contextmanager
 from pathlib import Path
 
 import typing
-from PySide2.QtGui import QPixmap, QColor, QPainter, QImage, QPen, Qt
-from PySide2.QtWidgets import QApplication
+from PySide6.QtGui import QPixmap, QColor, QPainter, QImage, QPen, Qt
+from PySide6.QtWidgets import QApplication
 
 from zero_play.connect4.display import Connect4Display
 from zero_play.connect4.game import Connect4State

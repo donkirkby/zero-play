@@ -1,5 +1,5 @@
-from PySide2.QtCore import QLine
-from PySide2.QtGui import QPainter, QColor, QPen
+from PySide6.QtCore import QLine
+from PySide6.QtGui import QPainter, QColor, QPen
 
 from zero_play.connect4.display import Connect4Display
 from zero_play.connect4.game import Connect4State
