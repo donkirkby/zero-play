@@ -42,6 +42,12 @@ def test_diff_found(pixmap_differ, monkeypatch):
 
     # actual, diff, and expected
     assert len(mock_turtle.display_image.call_args_list) == 3
+    expected_files = [pixmap_differ.work_dir / 'diff_found_actual.png',
+                      pixmap_differ.work_dir / 'diff_found_diff.png',
+                      pixmap_differ.work_dir / 'diff_found_expected.png']
+    for expected_file in expected_files:
+        assert expected_file.exists()
+        expected_file.unlink()
 
 
 def test_encode_image(pixmap_differ):
