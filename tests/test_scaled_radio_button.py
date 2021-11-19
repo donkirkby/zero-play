@@ -20,13 +20,13 @@ def test_text(pixmap_differ: PixmapDiffer):
         ex_radio2 = QRadioButton('Lorem ipsum')
         ex_font = ex_radio1.font()
         if ex_font.family() == 'Sans Serif':
-            # Fonts are different on Travis CI.
-            big_font_size = 26
-            small_font_size = 25
-            ex_radio1.setStyleSheet('QRadioButton::indicator {width: 26} '
+            # Fonts are different on GitHub actions.
+            big_font_size = 27
+            small_font_size = 27
+            ex_radio1.setStyleSheet('QRadioButton::indicator {width: 27} '
                                     'QRadioButton {spacing: 13}')
-            ex_radio2.setStyleSheet('QRadioButton::indicator {width: 25} '
-                                    'QRadioButton {spacing: 12}')
+            ex_radio2.setStyleSheet('QRadioButton::indicator {width: 27} '
+                                    'QRadioButton {spacing: 13}')
         else:
             big_font_size = 29
             small_font_size = 28
@@ -84,12 +84,12 @@ def test_icon(pixmap_differ: PixmapDiffer):
         ex_radio2.setIcon(icon)
         ex_font = ex_radio1.font()
         if ex_font.family() == 'Sans Serif':
-            # Fonts are different on Travis CI.
+            # Fonts are different on GitHub actions.
             big_font_size = 93
-            small_font_size = 22
+            small_font_size = 23
             ex_radio1.setStyleSheet('QRadioButton::indicator {width: 93} '
                                     'QRadioButton {spacing: 46}')
-            ex_radio2.setStyleSheet('QRadioButton::indicator {width: 22} '
+            ex_radio2.setStyleSheet('QRadioButton::indicator {width: 23} '
                                     'QRadioButton {spacing: 11}')
         else:
             big_font_size = 93

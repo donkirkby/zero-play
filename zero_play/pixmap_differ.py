@@ -163,15 +163,7 @@ class PixmapDiffer:
                                             diff_width, diff_height)
         finally:
             diff_section_painter.end()
-        # To see an image dumped in the Travis CI log, copy the text from the
-        # log, and paste it in test_pixmap_differ.test_decode_image.
-        print(f'Encoded image of differing section '
-              f'({self.diff_min_x}, {self.diff_min_y}) - '
-              f'({self.diff_max_x}, {self.diff_max_y}):')
-        print(encode_image(diff_section))
-        message = f'Found {self.different_pixels} different pixels, '
-        message += f'see' if is_saved else 'could not write'
-        message += f' {diff_path.relative_to(Path(__file__).parent.parent)}.'
+        message = f'Found {self.different_pixels} different pixels.'
         assert self.different_pixels == 0, message
 
     def diff_colour(self,

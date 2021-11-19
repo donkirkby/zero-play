@@ -19,9 +19,9 @@ def test_text(pixmap_differ: PixmapDiffer):
         ex_label2 = QLabel('Lorem ipsum')
         ex_font = ex_label1.font()
         if ex_font.family() == 'Sans Serif':
-            # Fonts are different on Travis CI.
-            big_font_size = 30
-            small_font_size = 25
+            # Fonts are different on GitHub actions.
+            big_font_size = 32
+            small_font_size = 27
         else:
             big_font_size = 35
             small_font_size = 28
