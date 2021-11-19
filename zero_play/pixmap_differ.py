@@ -35,18 +35,15 @@ def display_diff(actual_image: QImage,
     t.right(90)
     t.forward(text_height)
     t.write(f'Actual', font=font)
-    display_image(ox + t.xcor(), oy - t.ycor(),
-                  image=encode_image(actual_image))
+    display_image(encode_image(actual_image), t.pos())
     t.forward(actual_image.height())
     t.forward(text_height)
     t.write(f'Diff ({diff_count} pixels)', font=font)
-    display_image(ox + t.xcor(), oy - t.ycor(),
-                  image=encode_image(diff_image))
+    display_image(encode_image(diff_image), t.pos())
     t.forward(diff_image.height())
     t.forward(text_height)
     t.write('Expected', font=font)
-    display_image(ox + t.xcor(), oy - t.ycor(),
-                  image=encode_image(expected_image))
+    display_image(encode_image(expected_image), t.pos())
     t.forward(expected_image.height())
 
 
