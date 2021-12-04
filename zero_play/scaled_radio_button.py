@@ -28,7 +28,7 @@ class ScaledRadioButton(QRadioButton):
                                         Qt.AlignLeft,
                                         text,
                                         tabstops=0,
-                                        tabarray=None)
+                                        tabarray=None)  # type: ignore
             full_width = indicator_width + indicator_spacing + rect.width()
             height = rect.height()
             if icon:

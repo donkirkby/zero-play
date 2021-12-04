@@ -28,7 +28,7 @@ class ScaledLabel(QLabel):
                                         Qt.AlignLeft,
                                         text,
                                         tabstops=0,
-                                        tabarray=None)
+                                        tabarray=None)  # type: ignore
             if (target_rect.width() < rect.width() or
                     target_rect.height() < rect.height()):
                 max_size = new_size - 1

@@ -198,7 +198,7 @@ class PixmapDiffer:
 def encode_image(image: QImage) -> str:
     image_bytes = QByteArray()
     buffer = QBuffer(image_bytes)
-    buffer.open(QIODevice.WriteOnly)
+    buffer.open(QIODevice.WriteOnly)  # type: ignore
 
     # writes pixmap into bytes in PNG format
     image.save(buffer, "PNG")  # type: ignore
@@ -247,7 +247,7 @@ def render_display(display: GameDisplay,
                        f"{display_size.width()}x{display_size.height()}.")
             painter.drawText(QRect(0, 0,
                                    painter_size.width(), painter_size.height()),
-                             Qt.AlignCenter | Qt.TextWordWrap,
+                             Qt.AlignCenter | Qt.TextWordWrap,  # type: ignore
                              message)
             return
         assert scene_size == painter_size
