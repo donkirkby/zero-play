@@ -1,4 +1,5 @@
 import math
+import os
 import sys
 import typing
 from datetime import datetime
@@ -21,6 +22,7 @@ from alembic.config import Config
 from pkg_resources import iter_entry_points, EntryPoint
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session as BaseSession
+from sqlalchemy.util import immutabledict
 
 import zero_play
 from zero_play.about_dialog import Ui_Dialog
@@ -74,11 +76,11 @@ def get_settings(game_state: GameState = None):
     return settings
 
 
-def get_database_url(database_path: str = None) -> typing.Optional[str]:
+def get_database_url(database_path: Path = None) -> typing.Optional[str]:
     if database_path is None:
         settings = get_settings()
         database_path = settings.value('db_path')
-        if database_path is None:
+        if database_path is None or not os.path.exists(str(database_path)):
             return None
     database_url = f'sqlite:///{database_path}'
     return database_url
@@ -150,9 +152,11 @@ class ZeroPlayWindow(QMainWindow):
         yield from entries
 
     @property
-    def db_session(self) -> BaseSession:
+    def db_session(self) -> typing.Optional[BaseSession]:
         if self._db_session is None:
             db_url = get_database_url()
+            if db_url is None:
+                return None
             engine = create_engine(db_url)
             Session.configure(bind=engine)
             self._db_session = Session()
@@ -176,6 +180,7 @@ class ZeroPlayWindow(QMainWindow):
         for game_entry in filtered_entries:
             display_class = game_entry.load()
             display: GameDisplay = display_class()
+            # noinspection PyUnresolvedReferences
             self.destroyed.connect(display.close)
             display.game_ended.connect(self.on_game_ended)  # type: ignore
             games.append(display)
@@ -432,6 +437,8 @@ class ZeroPlayWindow(QMainWindow):
                 self.ui.searches_lock1.isChecked()):
             return
         db_session = self.db_session
+        if db_session is None:
+            return
         game_record = GameRecord.find_or_create(db_session, game_state)
         game_end_time = datetime.now()
         game_duration = game_end_time - self.game_start_time
@@ -535,9 +542,9 @@ class ZeroPlayWindow(QMainWindow):
         database_path = Path(file_name).absolute()
         settings.setValue('db_path', str(database_path))
         database_url = get_database_url(database_path)
-        alembic_config = Config(config_args={
+        alembic_config = Config(config_args=immutabledict({
             'script_location': script_path,
-            'sqlalchemy.url': database_url})
+            'sqlalchemy.url': database_url}))
         command.upgrade(alembic_config, 'head')
 
     def on_open_db(self):

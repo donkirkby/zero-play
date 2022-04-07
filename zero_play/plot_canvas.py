@@ -12,7 +12,7 @@ from zero_play.models.match import MatchRecord
 from zero_play.models.match_player import MatchPlayerRecord
 from zero_play.tictactoe.state import TicTacToeState
 
-plt.switch_backend('Qt5Agg')
+plt.switch_backend('Qt6Agg')
 
 
 class PlotCanvas(FigureCanvas):
@@ -29,6 +29,8 @@ class PlotCanvas(FigureCanvas):
         self.updateGeometry()
 
     def requery(self, db_session: SessionBase):
+        if db_session is None:
+            return
         game_record = GameRecord.find_or_create(db_session, self.game)
         strengths = []
         datetimes = []
