@@ -53,7 +53,9 @@ class DiagramWriter:
         print('Writing to', path)
         with self.create_painter() as painter:
             self.draw(painter)
-            image: QImage = painter.device().toImage()
+            device = painter.device()
+            assert isinstance(device, QPixmap), device
+            image: QImage = device.toImage()
             image.save(str(path))
 
 

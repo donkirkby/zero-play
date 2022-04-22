@@ -180,8 +180,7 @@ class ZeroPlayWindow(QMainWindow):
         for game_entry in filtered_entries:
             display_class = game_entry.load()
             display: GameDisplay = display_class()
-            # noinspection PyUnresolvedReferences
-            self.destroyed.connect(display.close)
+            self.destroyed.connect(display.close)  # type: ignore
             display.game_ended.connect(self.on_game_ended)  # type: ignore
             games.append(display)
         games.sort(key=attrgetter('start_state.game_name'))
@@ -193,8 +192,8 @@ class ZeroPlayWindow(QMainWindow):
             game_button = QPushButton(game_name)
             game_button.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
 
-            # noinspection PyUnresolvedReferences
-            game_button.clicked.connect(partial(self.show_game, display))
+            game_button.clicked.connect(partial(self.show_game,  # type: ignore
+                                                display))
             game_layout.addWidget(game_button, row, column)
 
             self.ui.history_game.addItem(game_name, userData=display)

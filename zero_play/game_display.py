@@ -70,7 +70,9 @@ class GameDisplay(QWidget):
 
     def get_player(self, player_number: int) -> typing.Optional[MctsPlayer]:
         worker = self.mcts_workers.get(player_number)
-        return worker and worker.player
+        if worker:
+            return worker.player
+        return None
 
     @abstractmethod
     def update_board(self, board: GameState):

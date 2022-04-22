@@ -73,7 +73,7 @@ class GridDisplay(GameDisplay):
         self.to_move.setVisible(False)
         self.move_text = ui.move_text
         for i in range(self.start_state.board_height):
-            row: typing.List[QGraphicsItem] = []
+            row: typing.List[GraphicsPieceItem] = []
             self.spaces.append(row)
             for j in range(self.start_state.board_width):
                 piece = GraphicsPieceItem(i, j, self)

@@ -202,7 +202,7 @@ def encode_image(image: QImage) -> str:
 
     # writes pixmap into bytes in PNG format
     image.save(buffer, "PNG")  # type: ignore
-    raw_bytes = bytes(buffer.data())
+    raw_bytes = buffer.data().data()
     b64_bytes = standard_b64encode(raw_bytes)
     b64_string = b64_bytes.decode('UTF-8')
     return b64_string
@@ -240,7 +240,9 @@ def render_display(display: GameDisplay,
 
         view.grab()  # Force layout to recalculate, if needed.
         scene_size = view.contentsRect().size()
-        painter_size = painter.device().size()
+        device = painter.device()
+        assert isinstance(device, QPixmap)
+        painter_size = device.size()
         if scene_size != painter_size:
             display_size = find_display_size(display, view, painter_size)
             message = (f"Try resizing display to "
