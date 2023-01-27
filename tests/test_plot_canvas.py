@@ -52,7 +52,7 @@ def test_single_plot(pixmap_differ: PixmapDiffer, monkeypatch):
     with pixmap_differ.create_painters(
             2*size,
             size,
-            'plot_canvas_plot') as (actual, expected):
+            'plot_canvas_single_plot') as (actual, expected):
         strengths = [100]
         future_strength = 150
 
