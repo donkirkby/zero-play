@@ -48,6 +48,8 @@ try:
 except ImportError:
     from zero_play.plot_canvas_dummy import PlotCanvasDummy as PlotCanvas  # type: ignore
 
+DEFAULT_SEARCHES = 600
+
 
 class AboutDialog(QDialog):
     def __init__(self,
@@ -289,7 +291,7 @@ class ZeroPlayWindow(QMainWindow):
         is_locked = settings.value('searches_locked', False, bool)
         self.ui.searches_lock1.setChecked(is_locked)
         self.ui.searches_lock2.setChecked(is_locked)
-        search_count = settings.value('searches', 600, int)
+        search_count = settings.value('searches', DEFAULT_SEARCHES, int)
         self.ui.searches1.setValue(search_count)
         self.ui.searches2.setValue(search_count)
         self.ui.shuffle_players.setChecked(settings.value('shuffle_players',
@@ -418,7 +420,9 @@ class ZeroPlayWindow(QMainWindow):
     def requery_plot(self):
         display: GameDisplay = self.ui.history_game.currentData()
         self.plot_canvas.game = display.start_state
-        self.plot_canvas.requery(self.db_session)
+        settings = get_settings(display.start_state)
+        future_strength = settings.value('searches', DEFAULT_SEARCHES, int)
+        self.plot_canvas.requery(self.db_session, future_strength)
 
     def on_searches_changed(self, search_count: int):
         if self.ui.stacked_widget.currentWidget() is not self.ui.players_page:
