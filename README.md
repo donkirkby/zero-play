@@ -1,8 +1,8 @@
 # Zero Play [![Build Badge]][build] [![Coverage Badge]][codecov] [![PyPI Badge]][pypi]
 ### Teach a computer to play any game
 
-[Build Badge]: https://travis-ci.org/donkirkby/zero-play.svg?branch=master
-[build]: https://travis-ci.org/donkirkby/zero-play
+[Build Badge]: https://github.com/donkirkby/zero-play/actions/workflows/py-build.yml/badge.svg?branch=master
+[build]: https://github.com/donkirkby/zero-play/actions
 [Coverage Badge]: https://codecov.io/github/donkirkby/zero-play/coverage.svg?branch=master
 [codecov]: https://codecov.io/github/donkirkby/zero-play?branch=master
 [PyPI Badge]: https://badge.fury.io/py/zero-play.svg
