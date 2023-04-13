@@ -35,10 +35,8 @@ jobs:
           pipenv run mypy zero_play
           # Add QT_DEBUG_PLUGINS=1 before xvfb-run to debug Qt library problems.
           xvfb-run -a pipenv run coverage run --source=zero_play -m pytest
-      - name: Upload code coverage
-        run: |
-          pipenv install codecov
-          pipenv run codecov
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
       - name: Upload image diffs
         uses: actions/upload-artifact@v3
         if: ${{ always() && steps.test.outcome == 'failure' }}
