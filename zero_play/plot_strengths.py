@@ -214,7 +214,9 @@ class Plotter:
         self.conn = sqlite3.connect(db_path)
         self.conn.row_factory = sqlite3.Row
         self.load_history()
-        self.game_name = game_name
+        self.game_name = game_name.split('.')[-1]
+        if self.game_name.endswith('State'):
+            self.game_name = self.game_name[:-5]
         if controller is not None:
             self.game_name = controller.start_state.game_name
             game_thread = Process(target=run_games,
@@ -267,11 +269,31 @@ class Plotter:
             plt.xlabel('Opponent MCTS simulation count')
             plt.xscale('log')
             plt.ylim(-0.01, 1.01)
+            group_num = 0
+            prev_iter_count = ''
             for name, rates in all_series:
-                line, = plt.plot(opponent_levels, rates, label=name)
+                fields = name.split()
+                iter_count = fields[-1]
+                if iter_count != prev_iter_count:
+                    group_num += 1
+                    prev_iter_count = iter_count
+                player = fields[2]
+                result = fields[0]
+                match (result, player):
+                    case 'ties', '1':
+                        style = ':'
+                    case 'ties', '2':
+                        style = '-.'
+                    case 'wins', '2':
+                        style = '--'
+                    case _:
+                        style = ''
+                style += f'C{group_num}'
+
+                line, = plt.plot(opponent_levels, rates, style, label=name)
                 self.plot_lines.append(
                     line)
-            plt.legend()
+            plt.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
         else:
             for line, (name, rates) in zip(self.plot_lines, all_series):
                 # noinspection PyTypeChecker
@@ -505,10 +527,14 @@ def main():
                       args.opponent_min,
                       args.opponent_max,
                       neural_net_path)
-    # noinspection PyUnusedLocal
-    animation = FuncAnimation(figure, plotter.update, interval=30000)
+    if controller is None:
+        animation = None
+    else:
+        animation = FuncAnimation(figure, plotter.update, interval=30000)
+
     plt.show()
+    assert controller is None or animation is not None
 
 
-if __name__ == '__main__':
+if __name__ in ('__main__', '__live_coding__'):
     main()
