@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from PySide6.QtGui import QPainter, QImage
 
 from zero_play.pixmap_differ import PixmapDiffer
-from zero_play.plot_canvas import PlotCanvas
+from zero_play.strength_history_plot import StrengthHistoryPlot
 
 
 # noinspection DuplicatedCode
@@ -20,7 +20,6 @@ def test_plot(pixmap_differ: PixmapDiffer, monkeypatch):
         strengths = [100, 200]
         future_strength = 150
 
-        plt.figure(figsize=(5, 4))
         plt.plot(strengths, label='past')
         plt.plot([2], [future_strength], 'o', label='next')
         expected_png = BytesIO()
@@ -33,7 +32,7 @@ def test_plot(pixmap_differ: PixmapDiffer, monkeypatch):
         plt.savefig(expected_png, dpi=60)
         expected.drawImage(0, 0, QImage.fromData(expected_png.getvalue()))
 
-        canvas = PlotCanvas()
+        canvas = StrengthHistoryPlot()
         monkeypatch.setattr(canvas, 'fetch_strengths', lambda _: strengths)
 
         session = None
@@ -56,7 +55,6 @@ def test_single_plot(pixmap_differ: PixmapDiffer, monkeypatch):
         strengths = [100]
         future_strength = 150
 
-        plt.figure(figsize=(5, 4))
         plt.plot(strengths, 'o', label='past')
         plt.plot([1], [future_strength], 'o', label='next')
         expected_png = BytesIO()
@@ -69,7 +67,7 @@ def test_single_plot(pixmap_differ: PixmapDiffer, monkeypatch):
         plt.savefig(expected_png, dpi=60)
         expected.drawImage(0, 0, QImage.fromData(expected_png.getvalue()))
 
-        canvas = PlotCanvas()
+        canvas = StrengthHistoryPlot()
         monkeypatch.setattr(canvas, 'fetch_strengths', lambda _: strengths)
 
         session = None

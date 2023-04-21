@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'main_window.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.2.1
+## Created by: Qt User Interface Compiler version 6.3.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -56,6 +56,8 @@ class Ui_MainWindow(object):
         self.action_new_db.setObjectName(u"action_new_db")
         self.action_open_db = QAction(MainWindow)
         self.action_open_db.setObjectName(u"action_open_db")
+        self.action_strength_test = QAction(MainWindow)
+        self.action_strength_test.setObjectName(u"action_strength_test")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout_2 = QVBoxLayout(self.centralwidget)
@@ -307,40 +309,42 @@ class Ui_MainWindow(object):
         self.plot_strength_page.setObjectName(u"plot_strength_page")
         self.gridLayout_5 = QGridLayout(self.plot_strength_page)
         self.gridLayout_5.setObjectName(u"gridLayout_5")
-        self.label = QLabel(self.plot_strength_page)
-        self.label.setObjectName(u"label")
+        self.strength_count_label = QLabel(self.plot_strength_page)
+        self.strength_count_label.setObjectName(u"strength_count_label")
 
-        self.gridLayout_5.addWidget(self.label, 0, 0, 1, 1)
-
-        self.plot_game = QComboBox(self.plot_strength_page)
-        self.plot_game.setObjectName(u"plot_game")
-
-        self.gridLayout_5.addWidget(self.plot_game, 0, 1, 1, 2)
-
-        self.lineEdit = QLineEdit(self.plot_strength_page)
-        self.lineEdit.setObjectName(u"lineEdit")
-
-        self.gridLayout_5.addWidget(self.lineEdit, 2, 1, 1, 2)
+        self.gridLayout_5.addWidget(self.strength_count_label, 6, 0, 1, 1)
 
         self.label_2 = QLabel(self.plot_strength_page)
         self.label_2.setObjectName(u"label_2")
 
         self.gridLayout_5.addWidget(self.label_2, 3, 0, 1, 1)
 
-        self.lineEdit_2 = QLineEdit(self.plot_strength_page)
-        self.lineEdit_2.setObjectName(u"lineEdit_2")
+        self.strength_test_game = QComboBox(self.plot_strength_page)
+        self.strength_test_game.setObjectName(u"strength_test_game")
 
-        self.gridLayout_5.addWidget(self.lineEdit_2, 3, 1, 1, 2)
+        self.gridLayout_5.addWidget(self.strength_test_game, 0, 1, 1, 2)
 
-        self.reset_plot = QPushButton(self.plot_strength_page)
-        self.reset_plot.setObjectName(u"reset_plot")
+        self.reset_strength_test = QPushButton(self.plot_strength_page)
+        self.reset_strength_test.setObjectName(u"reset_strength_test")
 
-        self.gridLayout_5.addWidget(self.reset_plot, 6, 2, 1, 1)
+        self.gridLayout_5.addWidget(self.reset_strength_test, 6, 2, 1, 1)
 
-        self.start_stop_plot = QPushButton(self.plot_strength_page)
-        self.start_stop_plot.setObjectName(u"start_stop_plot")
+        self.label = QLabel(self.plot_strength_page)
+        self.label.setObjectName(u"label")
 
-        self.gridLayout_5.addWidget(self.start_stop_plot, 6, 1, 1, 1)
+        self.gridLayout_5.addWidget(self.label, 0, 0, 1, 1)
+
+        self.strength_test_min = QSpinBox(self.plot_strength_page)
+        self.strength_test_min.setObjectName(u"strength_test_min")
+        self.strength_test_min.setMinimum(1)
+        self.strength_test_min.setMaximum(1000000)
+
+        self.gridLayout_5.addWidget(self.strength_test_min, 3, 1, 1, 2)
+
+        self.start_strength_test = QPushButton(self.plot_strength_page)
+        self.start_strength_test.setObjectName(u"start_strength_test")
+
+        self.gridLayout_5.addWidget(self.start_strength_test, 6, 1, 1, 1)
 
         self.strengths_label = QLabel(self.plot_strength_page)
         self.strengths_label.setObjectName(u"strengths_label")
@@ -352,12 +356,25 @@ class Ui_MainWindow(object):
 
         self.gridLayout_5.addWidget(self.label_3, 4, 0, 1, 1)
 
-        self.lineEdit_3 = QLineEdit(self.plot_strength_page)
-        self.lineEdit_3.setObjectName(u"lineEdit_3")
+        self.strength_test_strengths = QLineEdit(self.plot_strength_page)
+        self.strength_test_strengths.setObjectName(u"strength_test_strengths")
 
-        self.gridLayout_5.addWidget(self.lineEdit_3, 4, 1, 1, 2)
+        self.gridLayout_5.addWidget(self.strength_test_strengths, 2, 1, 1, 2)
+
+        self.strength_test_max = QSpinBox(self.plot_strength_page)
+        self.strength_test_max.setObjectName(u"strength_test_max")
+        self.strength_test_max.setMinimum(1)
+        self.strength_test_max.setMaximum(1000000)
+        self.strength_test_max.setValue(512)
+
+        self.gridLayout_5.addWidget(self.strength_test_max, 4, 1, 1, 2)
 
         self.stacked_widget.addWidget(self.plot_strength_page)
+        self.plot_strength_display_page = QWidget()
+        self.plot_strength_display_page.setObjectName(u"plot_strength_display_page")
+        self.gridLayout_7 = QGridLayout(self.plot_strength_display_page)
+        self.gridLayout_7.setObjectName(u"gridLayout_7")
+        self.stacked_widget.addWidget(self.plot_strength_display_page)
         self.plot_history_page = QWidget()
         self.plot_history_page.setObjectName(u"plot_history_page")
         self.gridLayout_6 = QGridLayout(self.plot_history_page)
@@ -410,13 +427,14 @@ class Ui_MainWindow(object):
         self.menu_new.addAction(self.action_comparison)
         self.menu_new.addAction(self.action_plot)
         self.menu_new.addAction(self.action_training_session)
+        self.menu_new.addAction(self.action_strength_test)
         self.menu_view.addAction(self.action_coordinates)
         self.menu_help.addAction(self.action_about)
         self.menu_help.addAction(self.menu_rules.menuAction())
 
         self.retranslateUi(MainWindow)
 
-        self.stacked_widget.setCurrentIndex(2)
+        self.stacked_widget.setCurrentIndex(5)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -435,6 +453,7 @@ class Ui_MainWindow(object):
         self.action_about.setText(QCoreApplication.translate("MainWindow", u"&About...", None))
         self.action_new_db.setText(QCoreApplication.translate("MainWindow", u"New Player &Database...", None))
         self.action_open_db.setText(QCoreApplication.translate("MainWindow", u"&Open Player Database...", None))
+        self.action_strength_test.setText(QCoreApplication.translate("MainWindow", u"&Strength Test", None))
         self.connect4.setText(QCoreApplication.translate("MainWindow", u"Connect 4", None))
         self.tic_tac_toe.setText(QCoreApplication.translate("MainWindow", u"Tic Tac Toe", None))
         self.othello.setText(QCoreApplication.translate("MainWindow", u"Othello", None))
@@ -456,15 +475,21 @@ class Ui_MainWindow(object):
         self.toggle_review.setText(QCoreApplication.translate("MainWindow", u"Review / Resume", None))
         self.resume_here.setText(QCoreApplication.translate("MainWindow", u"Resume Here", None))
         self.game_display.setText(QCoreApplication.translate("MainWindow", u"Game Display", None))
-        self.label.setText(QCoreApplication.translate("MainWindow", u"Game:", None))
-#if QT_CONFIG(whatsthis)
-        self.lineEdit.setWhatsThis("")
-#endif // QT_CONFIG(whatsthis)
+        self.strength_count_label.setText(QCoreApplication.translate("MainWindow", u"0 games recorded", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Opponent min:", None))
-        self.reset_plot.setText(QCoreApplication.translate("MainWindow", u"Reset", None))
-        self.start_stop_plot.setText(QCoreApplication.translate("MainWindow", u"Start / Stop", None))
-        self.strengths_label.setText(QCoreApplication.translate("MainWindow", u"Player Strengths:", None))
+        self.reset_strength_test.setText(QCoreApplication.translate("MainWindow", u"Reset", None))
+        self.label.setText(QCoreApplication.translate("MainWindow", u"Game:", None))
+        self.strength_test_min.setSuffix(QCoreApplication.translate("MainWindow", u" iteration(s)", None))
+        self.start_strength_test.setText(QCoreApplication.translate("MainWindow", u"Start", None))
+        self.strengths_label.setText(QCoreApplication.translate("MainWindow", u"Player strengths:", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Opponent max:", None))
+#if QT_CONFIG(tooltip)
+        self.strength_test_strengths.setToolTip("")
+#endif // QT_CONFIG(tooltip)
+#if QT_CONFIG(whatsthis)
+        self.strength_test_strengths.setWhatsThis("")
+#endif // QT_CONFIG(whatsthis)
+        self.strength_test_max.setSuffix(QCoreApplication.translate("MainWindow", u" iteration(s)", None))
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"Game:", None))
         self.menu_file.setTitle(QCoreApplication.translate("MainWindow", u"&File", None))
         self.menu_new.setTitle(QCoreApplication.translate("MainWindow", u"&New", None))

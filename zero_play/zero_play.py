@@ -35,10 +35,14 @@ from zero_play.models.game import GameRecord
 from zero_play.models.match import MatchRecord
 from zero_play.models.match_player import MatchPlayerRecord
 from zero_play.models.player import PlayerRecord
+from zero_play.play_controller import PlayController
 from zero_play.playout import Playout
+from zero_play.process_display import ProcessDisplay
 from zero_play.strength_adjuster import StrengthAdjuster
 from zero_play import zero_play_rules_rc
 from zero_play import zero_play_images_rc
+from zero_play.strength_history_plot import StrengthHistoryPlot
+from zero_play.strength_plot import StrengthPlot
 
 assert zero_play_rules_rc  # Need to import this module to load resources.
 assert zero_play_images_rc  # Need to import this module to load resources.
@@ -101,8 +105,10 @@ class ZeroPlayWindow(QMainWindow):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         ui = self.ui = Ui_MainWindow()
         ui.setupUi(self)
-        self.plot_canvas = PlotCanvas(ui.centralwidget)
+        self.plot_canvas = StrengthHistoryPlot(ui.centralwidget)
         ui.plot_history_page.layout().addWidget(self.plot_canvas, 1, 0, 1, 2)
+        self.strength_canvas = StrengthPlot(ui.centralwidget)
+        ui.plot_strength_display_page.layout().addWidget(self.strength_canvas)
         ui.cancel.clicked.connect(self.on_cancel)
         ui.start.clicked.connect(self.on_start)
         ui.action_game.triggered.connect(self.on_new_game)
@@ -111,6 +117,8 @@ class ZeroPlayWindow(QMainWindow):
         ui.action_plot.triggered.connect(self.on_plot)
         ui.action_coordinates.triggered.connect(self.on_view_coordinates)
         ui.action_about.triggered.connect(self.on_about)
+        ui.action_strength_test.triggered.connect(self.on_new_strength_test)
+        ui.start_strength_test.clicked.connect(self.on_start_strength_test)
         ui.toggle_review.clicked.connect(self.on_toggle_review)
         ui.resume_here.clicked.connect(self.on_resume_here)
         ui.rules_close.clicked.connect(self.on_close_rules)
@@ -130,14 +138,14 @@ class ZeroPlayWindow(QMainWindow):
         icon = QIcon(icon_pixmap)
         self.setWindowIcon(icon)
         self.start_state: typing.Optional[GameState] = None
-        self.display: typing.Optional[GameDisplay] = None
+        self.display: typing.Optional[ProcessDisplay] = None
+        self.game_display: typing.Optional[GameDisplay] = None
         self.on_new_game()
         self.board_to_resume: typing.Optional[np.ndarray] = None
         self.review_names = [name.strip()
                              for name in ui.toggle_review.text().split('/')]
         self.are_coordinates_always_visible = False
         self.game_start_time = datetime.now()
-        ui.start_stop_plot.clicked.connect(self.requery_plot)
         ui.history_game.currentIndexChanged.connect(self.requery_plot)
         self._db_session = None
         self.on_toggle_review()
@@ -199,6 +207,7 @@ class ZeroPlayWindow(QMainWindow):
             game_layout.addWidget(game_button, row, column)
 
             self.ui.history_game.addItem(game_name, userData=display)
+            self.ui.strength_test_game.addItem(game_name, userData=display)
 
             if display.rules_path is not None:
                 game_rules_action = self.ui.menu_rules.addAction(game_name)
@@ -212,14 +221,14 @@ class ZeroPlayWindow(QMainWindow):
         is_named_review = self.ui.toggle_review.text() == self.review_names[0]
         is_review_visible = is_game_displayed and is_named_review
         if not is_review_visible:
-            if self.display is not None and self.board_to_resume is not None:
-                self.display.update_board(self.board_to_resume)
+            if self.game_display is not None and self.board_to_resume is not None:
+                self.game_display.update_board(self.board_to_resume)
             self.board_to_resume = None
             self.ui.action_coordinates.setChecked(
                 self.are_coordinates_always_visible)
             self.on_view_coordinates(self.are_coordinates_always_visible)
         else:
-            self.board_to_resume = self.display.current_state
+            self.board_to_resume = self.game_display.current_state
             self.are_coordinates_always_visible = (
                 self.ui.action_coordinates.isChecked())
             self.ui.action_coordinates.setChecked(True)
@@ -234,29 +243,29 @@ class ZeroPlayWindow(QMainWindow):
                                      choices.horizontalScrollBar().height())
             self.ui.move_history.clear()
             self.ui.move_history.addItems(
-                [str(item) for item in self.display.log_display.items])
+                [str(item) for item in self.game_display.log_display.items])
             self.ui.move_history.setCurrentIndex(self.ui.move_history.count()-1)
 
         self.ui.resume_here.setVisible(is_review_visible)
         self.ui.move_history.setVisible(is_review_visible)
         self.ui.choices.setVisible(is_review_visible)
         self.ui.toggle_review.setText(self.review_names[is_review_visible])
-        if self.display is not None:
-            self.display.is_reviewing = is_review_visible
+        if self.game_display is not None:
+            self.game_display.is_reviewing = is_review_visible
         choices.setVisible(is_review_visible)
 
     def on_resume_here(self):
-        self.board_to_resume = self.display.current_state
+        self.board_to_resume = self.game_display.current_state
         self.is_history_dirty = True
         history_index = self.ui.move_history.currentIndex()
-        self.display.log_display.rewind_to(history_index)
+        self.game_display.log_display.rewind_to(history_index)
         self.on_toggle_review()
-        self.display.request_move()
+        self.game_display.request_move()
 
     def on_move_history(self, item_index: int):
-        assert self.display is not None
-        history_item = self.display.log_display.items[item_index]
-        self.display.update_board(history_item.game_state)
+        assert self.game_display is not None
+        history_item = self.game_display.log_display.items[item_index]
+        self.game_display.update_board(history_item.game_state)
         choices = self.ui.choices
         choices.clear()
         choices.setColumnCount(len(history_item.choices))
@@ -273,15 +282,18 @@ class ZeroPlayWindow(QMainWindow):
         choices.resizeColumnsToContents()
 
     def on_new_game(self):
-        if self.display is not None:
-            self.display.stop_workers()
-            self.display = None
+        self.stop_workers()
         self.ui.stacked_widget.setCurrentWidget(self.ui.game_page)
         self.setWindowTitle(self.get_collection_name())
 
+    def stop_workers(self):
+        if self.display is not None:
+            self.display.stop_workers()
+            self.display = self.game_display = None
+
     def show_game(self, display: GameDisplay):
         QApplication.setOverrideCursor(Qt.WaitCursor)
-        self.display = display
+        self.display = self.game_display = display
         start_state = display.start_state
         self.start_state = start_state
         collection_name = self.get_collection_name()
@@ -373,7 +385,7 @@ class ZeroPlayWindow(QMainWindow):
 
     def on_start(self):
         self.game_start_time = datetime.now()
-        self.display.update_board(self.display.start_state)
+        self.game_display.update_board(self.game_display.start_state)
         self.is_history_dirty = False
         ui = self.ui
         player_fields = [(ui.player1.currentData(), ui.searches1.value()),
@@ -385,7 +397,7 @@ class ZeroPlayWindow(QMainWindow):
             shuffle(player_fields)
         mcts_choices = {self.start_state.players[0]: player_fields[0],
                         self.start_state.players[1]: player_fields[1]}
-        self.display.mcts_players = [
+        self.game_display.mcts_players = [
             MctsPlayer(self.start_state,
                        player_number,
                        iteration_count=searches,
@@ -393,25 +405,44 @@ class ZeroPlayWindow(QMainWindow):
             for player_number, (heuristic, searches) in mcts_choices.items()
             if heuristic is not None]
         layout: QGridLayout = ui.display_page.layout()
-        layout.replaceWidget(ui.game_display, self.display)
+        layout.replaceWidget(ui.game_display, self.game_display)
         ui.game_display.setVisible(False)
-        ui.game_display = self.display
-        self.display.setVisible(True)
-        self.display.show_coordinates = ui.action_coordinates.isChecked()
+        ui.game_display = self.game_display
+        self.game_display.setVisible(True)
+        self.game_display.show_coordinates = ui.action_coordinates.isChecked()
 
         self.on_view_game()
 
     def on_view_game(self):
-        if self.display is None:
+        if self.game_display is None:
             self.on_new_game()
         else:
             self.ui.stacked_widget.setCurrentWidget(self.ui.display_page)
-            self.display.update_board(self.display.current_state)
-            self.display.request_move()
+            self.game_display.update_board(self.game_display.current_state)
+            self.game_display.request_move()
 
     def on_view_coordinates(self, is_checked: bool):
-        if self.display is not None:
-            self.display.show_coordinates = is_checked
+        if self.game_display is not None:
+            self.game_display.show_coordinates = is_checked
+
+    def on_new_strength_test(self):
+        self.stop_workers()
+        self.ui.stacked_widget.setCurrentWidget(
+            self.ui.plot_strength_page)
+
+    def on_start_strength_test(self):
+        game_display: GameDisplay = self.ui.strength_test_game.currentData()
+        start_state = game_display.start_state
+        players = [MctsPlayer(start_state, GameState.X_PLAYER),
+                   MctsPlayer(start_state, GameState.O_PLAYER)]
+        controller = PlayController(start_state, players)
+        player_definitions = self.ui.strength_test_strengths.text().split()
+        self.display = self.strength_canvas
+        self.strength_canvas.start(self.db_session,
+                                   controller,
+                                   player_definitions,
+                                   self.ui.strength_test_min.value(),
+                                   self.ui.strength_test_max.value())
 
     def on_plot(self):
         self.ui.stacked_widget.setCurrentWidget(self.ui.plot_history_page)
@@ -436,7 +467,7 @@ class ZeroPlayWindow(QMainWindow):
 
     def on_game_ended(self, game_state: GameState):
         if (self.is_history_dirty or
-                self.display is None or
+                self.game_display is None or
                 self.ui.searches_lock1.isChecked()):
             return
         db_session = self.db_session
@@ -453,7 +484,7 @@ class ZeroPlayWindow(QMainWindow):
         winner = game_state.get_winner()
         mcts_player: typing.Optional[MctsPlayer]
         for player_number in game_state.get_players():
-            mcts_player = self.display.get_player(player_number)
+            mcts_player = self.game_display.get_player(player_number)
             if mcts_player is None:
                 player_record = db_session.query(PlayerRecord).filter_by(
                     type=PlayerRecord.HUMAN_TYPE).one_or_none()
@@ -481,7 +512,7 @@ class ZeroPlayWindow(QMainWindow):
             db_session.add(match_player)
         db_session.commit()
         try:
-            mcts_player, = self.display.mcts_players
+            mcts_player, = self.game_display.mcts_players
         except ValueError:
             # Didn't have exactly one MCTS player
             return
@@ -522,9 +553,9 @@ class ZeroPlayWindow(QMainWindow):
             self.ui.rules_text.setSource('qrc' + rules_path)
 
     def on_close_rules(self):
-        if self.display is None:
+        if self.game_display is None:
             page = self.ui.game_page
-        elif self.display.current_state == self.display.start_state:
+        elif self.game_display.current_state == self.game_display.start_state:
             page = self.ui.players_page
         else:
             page = self.ui.display_page

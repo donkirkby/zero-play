@@ -4,16 +4,16 @@ import typing
 import numpy as np
 from PySide6.QtCore import Signal, QThread, QSize, Slot
 from PySide6.QtGui import QResizeEvent
-from PySide6.QtWidgets import QGraphicsSimpleTextItem, QSizePolicy, QWidget
+from PySide6.QtWidgets import QGraphicsSimpleTextItem
 
 from zero_play.game_state import GameState
 from zero_play.log_display import LogDisplay
 from zero_play.mcts_player import MctsPlayer
 from zero_play.mcts_worker import MctsWorker
+from zero_play.process_display import ProcessDisplay
 
 
-class GameDisplay(QWidget):
-    default_font = 'Sans Serif,9,-1,5,50,0,0,0,0,0'
+class GameDisplay(ProcessDisplay):
     rules_path: typing.Optional[str] = None
 
     move_needed = Signal(int, np.ndarray)  # active_player, board
@@ -24,12 +24,10 @@ class GameDisplay(QWidget):
         super().__init__()
         self.start_state = start_state
         self.mcts_workers: typing.Dict[int, MctsWorker] = {}
-        self.worker_thread: typing.Optional[QThread] = None
         self.current_state = self.start_state
         self.valid_moves = self.start_state.get_valid_moves()
         self._show_coordinates = False
         self.log_display = LogDisplay()
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.is_reviewing = False
 
     @property
@@ -144,13 +142,6 @@ class GameDisplay(QWidget):
         player = self.current_state.get_active_player()
         # noinspection PyUnresolvedReferences
         self.move_needed.emit(player, self.current_state)
-
-    def close(self):
-        self.stop_workers()
-
-    def stop_workers(self):
-        if self.worker_thread is not None:
-            self.worker_thread.quit()
 
     def can_move(self):
         if self.is_reviewing:

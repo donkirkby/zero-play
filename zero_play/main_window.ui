@@ -18,7 +18,7 @@
     <item>
      <widget class="QStackedWidget" name="stacked_widget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>5</number>
       </property>
       <widget class="QWidget" name="game_page">
        <layout class="QGridLayout" name="gridLayout_3">
@@ -344,20 +344,10 @@
       </widget>
       <widget class="QWidget" name="plot_strength_page">
        <layout class="QGridLayout" name="gridLayout_5">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label">
+        <item row="6" column="0">
+         <widget class="QLabel" name="strength_count_label">
           <property name="text">
-           <string>Game:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1" colspan="2">
-         <widget class="QComboBox" name="plot_game"/>
-        </item>
-        <item row="2" column="1" colspan="2">
-         <widget class="QLineEdit" name="lineEdit">
-          <property name="whatsThis">
-           <string extracomment="comma-separated list of search counts"/>
+           <string>0 games recorded</string>
           </property>
          </widget>
         </item>
@@ -368,27 +358,47 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="1" colspan="2">
-         <widget class="QLineEdit" name="lineEdit_2"/>
+        <item row="0" column="1" colspan="2">
+         <widget class="QComboBox" name="strength_test_game"/>
         </item>
         <item row="6" column="2">
-         <widget class="QPushButton" name="reset_plot">
+         <widget class="QPushButton" name="reset_strength_test">
           <property name="text">
            <string>Reset</string>
           </property>
          </widget>
         </item>
-        <item row="6" column="1">
-         <widget class="QPushButton" name="start_stop_plot">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
           <property name="text">
-           <string>Start / Stop</string>
+           <string>Game:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1" colspan="2">
+         <widget class="QSpinBox" name="strength_test_min">
+          <property name="suffix">
+           <string> iteration(s)</string>
+          </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>1000000</number>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
+         <widget class="QPushButton" name="start_strength_test">
+          <property name="text">
+           <string>Start</string>
           </property>
          </widget>
         </item>
         <item row="2" column="0">
          <widget class="QLabel" name="strengths_label">
           <property name="text">
-           <string>Player Strengths:</string>
+           <string>Player strengths:</string>
           </property>
          </widget>
         </item>
@@ -399,10 +409,36 @@
           </property>
          </widget>
         </item>
+        <item row="2" column="1" colspan="2">
+         <widget class="QLineEdit" name="strength_test_strengths">
+          <property name="toolTip">
+           <string extracomment="List of iteration counts, separated by spaces."/>
+          </property>
+          <property name="whatsThis">
+           <string extracomment="comma-separated list of search counts"/>
+          </property>
+         </widget>
+        </item>
         <item row="4" column="1" colspan="2">
-         <widget class="QLineEdit" name="lineEdit_3"/>
+         <widget class="QSpinBox" name="strength_test_max">
+          <property name="suffix">
+           <string> iteration(s)</string>
+          </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>1000000</number>
+          </property>
+          <property name="value">
+           <number>512</number>
+          </property>
+         </widget>
         </item>
        </layout>
+      </widget>
+      <widget class="QWidget" name="plot_strength_display_page">
+       <layout class="QGridLayout" name="gridLayout_7"/>
       </widget>
       <widget class="QWidget" name="plot_history_page">
        <layout class="QGridLayout" name="gridLayout_6" columnstretch="1,8">
@@ -443,6 +479,7 @@
      <addaction name="action_comparison"/>
      <addaction name="action_plot"/>
      <addaction name="action_training_session"/>
+     <addaction name="action_strength_test"/>
     </widget>
     <addaction name="menu_new"/>
     <addaction name="action_open"/>
@@ -545,6 +582,11 @@
   <action name="action_open_db">
    <property name="text">
     <string>&amp;Open Player Database...</string>
+   </property>
+  </action>
+  <action name="action_strength_test">
+   <property name="text">
+    <string>&amp;Strength Test</string>
    </property>
   </action>
  </widget>
