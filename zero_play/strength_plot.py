@@ -1,17 +1,11 @@
-from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
-from importlib import import_module
 from io import StringIO
 from multiprocessing import Process, Queue
 import logging
-import os
 from queue import Empty
 import re
-import sqlite3
-from sqlite3 import OperationalError
 import typing
 
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 import numpy as np
 import seaborn as sn
 from sqlalchemy.orm import Session as BaseSession
@@ -23,6 +17,7 @@ from zero_play.models import SessionBase
 from zero_play.models.game import GameRecord
 from zero_play.models.match import MatchRecord
 from zero_play.models.match_player import MatchPlayerRecord
+from zero_play.models.player import PlayerRecord
 from zero_play.play_controller import PlayController
 from zero_play.playout import Playout
 from zero_play.plot_canvas import PlotCanvas
@@ -154,24 +149,25 @@ class WinCounter(dict):
     def build_series(self):
         all_series = []
         for player_definition in self.player_definitions:
+            parsed_player = MatchUp.parse_definition(player_definition)
             series = (f'wins as 1 with {player_definition}',
-                      [self[MatchUp.parse_definition(player_definition) +
+                      [self[parsed_player +
                             MatchUp.parse_definition(opponent_level)].p1_win_rate
                        for opponent_level in self.opponent_levels])
             all_series.append(series)
             series = (f'ties as 1 with {player_definition}',
-                      [self[MatchUp.parse_definition(player_definition) +
+                      [self[parsed_player +
                             MatchUp.parse_definition(opponent_level)].tie_rate
                        for opponent_level in self.opponent_levels])
             all_series.append(series)
             series = (f'wins as 2 with {player_definition}',
                       [self[MatchUp.parse_definition(opponent_level) +
-                            MatchUp.parse_definition(player_definition)].p2_win_rate
+                            parsed_player].p2_win_rate
                        for opponent_level in self.opponent_levels])
             all_series.append(series)
             series = (f'ties as 2 with {player_definition}',
                       [self[MatchUp.parse_definition(opponent_level) +
-                            MatchUp.parse_definition(player_definition)].tie_rate
+                            parsed_player].tie_rate
                        for opponent_level in self.opponent_levels])
             all_series.append(series)
         return all_series
@@ -215,6 +211,7 @@ class StrengthPlot(PlotCanvas, ProcessDisplay):
         self.win_counter: WinCounter | None = None
         self.result_queue: Queue = Queue()
         self.db_session: BaseSession | None = None
+        self.process: Process | None = None
 
     def start(self,
               db_session: BaseSession,
@@ -226,24 +223,23 @@ class StrengthPlot(PlotCanvas, ProcessDisplay):
         self.win_counter = WinCounter(player_definitions=player_definitions,
                                       opponent_min=opponent_min,
                                       opponent_max=opponent_max)
-        self.load_history(db_session, controller)
-        return
+        self.load_history(db_session)
         # self.game_name = controller.start_state.game_name
-        self.worker_thread = Process(target=run_games,
-                                     args=(controller,
-                                           self.result_queue,
-                                           WinCounter(source=self.win_counter),
-                                           # neural_net_path),
-                                           ),
-                                     daemon=True)
-        self.worker_thread.start()
+        self.process = Process(target=run_games,
+                               args=(controller,
+                                     self.result_queue,
+                                     WinCounter(source=self.win_counter),
+                                     # neural_net_path),
+                                     ),
+                               daemon=True)
+        # self.worker_thread.start()
         sn.set()
         self.create_plot()
         plt.tight_layout()
 
     def fetch_strengths(self, db_session):
         if db_session is None:
-            return []
+            return
         game_record = GameRecord.find_or_create(db_session, self.game)
         strengths = []
         datetimes = []
@@ -343,52 +339,33 @@ class StrengthPlot(PlotCanvas, ProcessDisplay):
                 line.set_ydata(rates)
         self.artists.extend(self.plot_lines)
 
-    def load_history(self, db_session: BaseSession, controller: PlayController):
-        start_state = controller.start_state
-        game_record = GameRecord.find_or_create(db_session, start_state)
-        for match in game_record.matches:  # type: ignore
-            print(match.game.name)
-            self.win_counter
-        return
-        try:
-            self.conn.execute("""\
-CREATE
-TABLE   games
-        (
-        iters1,
-        iters2,
-        nn1,
-        nn2,
-        wins1,
-        ties,
-        wins2
-        );
-""")
-        except OperationalError:
-            # Table already exists.
-            pass
-        cursor = self.conn.execute("""\
-SELECT  iters1,
-        iters2,
-        nn1,
-        nn2,
-        wins1,
-        ties,
-        wins2
-FROM    games;""")
-        while True:
-            rows = cursor.fetchmany()
-            if not rows:
-                break
-            for iters1, iters2, nn1, nn2, wins1, ties, wins2 in rows:
-                match_up: MatchUp = self.win_counter.get((iters1,
-                                                          nn1,
-                                                          iters2,
-                                                          nn2))
-                if match_up is not None:
-                    match_up.p1_wins = wins1
-                    match_up.ties = ties
-                    match_up.p2_wins = wins2
+    def load_history(self, db_session: BaseSession):
+        assert self.win_counter is not None
+        player1_number = self.game.get_active_player()
+        game_record = GameRecord.find_or_create(db_session, self.game)
+        match_record: MatchRecord
+        for match_record in game_record.matches:  # type: ignore
+            player1_iterations = player2_iterations = result = None
+            has_human = False
+            match_player: MatchPlayerRecord
+            for match_player in match_record.match_players:  # type: ignore
+                player: PlayerRecord = match_player.player
+                if player.type == PlayerRecord.HUMAN_TYPE:
+                    has_human = True
+                player_number = match_player.player_number
+                if player_number == player1_number:
+                    player1_iterations = player.iterations
+                    result = match_player.result
+                else:
+                    player2_iterations = player.iterations
+            if has_human:
+                continue
+            match_up = self.win_counter.get((player1_iterations,
+                                             False,
+                                             player2_iterations,
+                                             False))
+            if match_up is not None:
+                match_up.record_result(result)
         print(self.win_counter.build_summary(), end='')
 
     def write_history(self):

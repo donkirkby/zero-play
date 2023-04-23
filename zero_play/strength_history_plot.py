@@ -18,17 +18,21 @@ class StrengthHistoryPlot(PlotCanvas):
             return []
         game_record = GameRecord.find_or_create(db_session, self.game)
         strengths = []
-        datetimes = []
         match: MatchRecord
         # noinspection PyTypeChecker
         for match in game_record.matches:  # type: ignore
             match_player: MatchPlayerRecord
+            has_human = False
+            ai_player = None
             # noinspection PyTypeChecker
             for match_player in match.match_players:  # type: ignore
                 player = match_player.player
-                if player.type != player.HUMAN_TYPE:
-                    strengths.append(player.iterations)
-                    datetimes.append(match.start_time)
+                if player.type == player.HUMAN_TYPE:
+                    has_human = True
+                else:
+                    ai_player = player
+            if has_human and ai_player is not None:
+                strengths.append(ai_player.iterations)
         return strengths
 
     def requery(self, db_session: SessionBase | None, future_strength: int):

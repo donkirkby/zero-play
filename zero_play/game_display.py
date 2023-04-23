@@ -56,12 +56,12 @@ class GameDisplay(ProcessDisplay):
             self.worker_thread = None
         else:
             self.worker_thread = QThread()
+            self.worker_thread.finished.connect(  # type: ignore
+                self.worker_thread.deleteLater)
             for worker in self.mcts_workers.values():
                 worker.move_chosen.connect(self.make_move)  # type: ignore
                 worker.move_analysed.connect(self.analyse_move)  # type: ignore
-                # noinspection PyUnresolvedReferences
                 self.move_needed.connect(worker.choose_move)  # type: ignore
-                # noinspection PyUnresolvedReferences
                 self.move_made.connect(worker.analyse_move)  # type: ignore
                 worker.moveToThread(self.worker_thread)
             self.worker_thread.start()

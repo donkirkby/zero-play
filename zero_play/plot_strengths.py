@@ -1,14 +1,14 @@
 
 
-class Plotter:
-    def __init__(self,
-                 db_path,
-                 game_name: str,
-                 controller: typing.Optional[PlayController],
-                 player_definitions: typing.List[typing.Union[str, int]],
-                 opponent_min: int,
-                 opponent_max: int,
-                 neural_net_path: str):
+# class Plotter:
+#     def __init__(self,
+#                  db_path,
+#                  game_name: str,
+#                  controller: typing.Optional[PlayController],
+#                  player_definitions: typing.List[typing.Union[str, int]],
+#                  opponent_min: int,
+#                  opponent_max: int,
+#                  neural_net_path: str):
 
 
 def parse_args():
