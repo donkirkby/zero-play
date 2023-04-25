@@ -10,7 +10,7 @@ from zero_play.scaled_label import ScaledLabel
 def test_text(pixmap_differ: PixmapDiffer):
     actual: QPainter
     expected: QPainter
-    with pixmap_differ.create_painters(300, 240, 'scaled_label_text') as (
+    with pixmap_differ.create_qpainters((300, 240)) as (
             actual,
             expected):
         ex_widget = QWidget()
@@ -67,7 +67,7 @@ def test_text(pixmap_differ: PixmapDiffer):
 def test_pixmap(pixmap_differ: PixmapDiffer):
     actual: QPainter
     expected: QPainter
-    with pixmap_differ.create_painters(300, 240, 'scaled_label_pixmap') as (
+    with pixmap_differ.create_qpainters((300, 240)) as (
             actual,
             expected):
         ex_widget = QWidget()
@@ -121,7 +121,7 @@ def test_pixmap(pixmap_differ: PixmapDiffer):
 def test_pixmap_vertical(pixmap_differ: PixmapDiffer):
     actual: QPainter
     expected: QPainter
-    with pixmap_differ.create_painters(300, 240, 'scaled_label_pixmap_vertical') as (
+    with pixmap_differ.create_qpainters((300, 240)) as (
             actual,
             expected):
         ex_widget = QWidget()

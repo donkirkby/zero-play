@@ -135,9 +135,9 @@ class GridGameState(GameState):
     def __init__(self,
                  board_height: int,
                  board_width: int,
-                 text: str = None,
-                 lines: typing.Sequence[str] = None,
-                 spaces: np.ndarray = None,
+                 text: str | None = None,
+                 lines: typing.Sequence[str] | None = None,
+                 spaces: np.ndarray | None = None,
                  extra_count: int = 0):
         self.board_height = board_height
         self.board_width = board_width

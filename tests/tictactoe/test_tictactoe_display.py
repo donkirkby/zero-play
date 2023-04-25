@@ -21,10 +21,7 @@ def test_start_square(pixmap_differ: PixmapDiffer):
     size = 240
     actual: QPainter
     expected: QPainter
-    with pixmap_differ.create_painters(
-            size,
-            size,
-            'tictactoe_start_square') as (actual, expected):
+    with pixmap_differ.create_qpainters((size, size)) as (actual, expected):
         draw_square_grid(expected)
         expected.setBrush(TicTacToeDisplay.player1_colour)
 
@@ -47,10 +44,7 @@ def test_start_wide(pixmap_differ: PixmapDiffer):
     size = 240
     actual: QPainter
     expected: QPainter
-    with pixmap_differ.create_painters(
-            size*2,
-            size,
-            'tictactoe_start_wide') as (actual, expected):
+    with pixmap_differ.create_qpainters((size*2, size)) as (actual, expected):
         expected.fillRect(0, 0, size * 2 + 80, size, TicTacToeDisplay.background_colour)
         expected.drawLine(120, 80, 360, 80)
         expected.drawLine(120, 160, 360, 160)
@@ -64,10 +58,7 @@ def test_start_wide(pixmap_differ: PixmapDiffer):
 
 def test_start_tall(pixmap_differ: PixmapDiffer):
     size = 120
-    with pixmap_differ.create_painters(
-            size,
-            size*2,
-            'tictactoe_start_tall') as (actual, expected):
+    with pixmap_differ.create_qpainters((size, size*2)) as (actual, expected):
         expected.fillRect(0, 0, size + 40, size * 2, TicTacToeDisplay.background_colour)
         expected.drawLine(0, 100, 120, 100)
         expected.drawLine(0, 140, 120, 140)
@@ -97,10 +88,7 @@ def draw_text(expected: QPainter, x: int, y: int, text: str):
 
 def test_pieces(pixmap_differ: PixmapDiffer):
     size = 240
-    with pixmap_differ.create_painters(
-            size,
-            size,
-            'tictactoe_pieces') as (actual, expected):
+    with pixmap_differ.create_qpainters((size, size)) as (actual, expected):
         draw_square_grid(expected)
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(10, 10, 60, 60)
@@ -126,10 +114,7 @@ XO.
 # noinspection DuplicatedCode
 def test_piece_hover_enter(pixmap_differ: PixmapDiffer):
     size = 240
-    with pixmap_differ.create_painters(
-            size,
-            size,
-            'tictactoe_piece_hover_enter') as (actual, expected):
+    with pixmap_differ.create_qpainters((size, size)) as (actual, expected):
         draw_square_grid(expected)
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(10, 10, 60, 60)
@@ -160,10 +145,7 @@ X..
 def test_piece_hover_enter_mcts(pixmap_differ: PixmapDiffer):
     """ Don't display move options while MCTS player is thinking. """
     size = 240
-    with pixmap_differ.create_painters(
-            size,
-            size,
-            'tictactoe_piece_hover_enter_mcts') as (actual, expected):
+    with pixmap_differ.create_qpainters((size, size)) as (actual, expected):
         draw_square_grid(expected)
 
         display = TicTacToeDisplay()
@@ -184,10 +166,7 @@ def test_piece_hover_enter_mcts(pixmap_differ: PixmapDiffer):
 # noinspection DuplicatedCode
 def test_piece_hover_leave(pixmap_differ: PixmapDiffer):
     size = 240
-    with pixmap_differ.create_painters(
-            size,
-            size,
-            'tictactoe_piece_hover_leave') as (actual, expected):
+    with pixmap_differ.create_qpainters((size, size)) as (actual, expected):
         draw_square_grid(expected)
 
         display = TicTacToeDisplay()
@@ -202,10 +181,7 @@ def test_piece_hover_leave(pixmap_differ: PixmapDiffer):
 # noinspection DuplicatedCode
 def test_piece_hover_existing(pixmap_differ: PixmapDiffer):
     size = 240
-    with pixmap_differ.create_painters(
-            size,
-            size,
-            'tictactoe_piece_hover_existing') as (actual, expected):
+    with pixmap_differ.create_qpainters((size, size)) as (actual, expected):
         draw_square_grid(expected)
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(10, 10, 60, 60)
@@ -227,10 +203,7 @@ X..
 
 def test_piece_click(pixmap_differ: PixmapDiffer):
     size = 240
-    with pixmap_differ.create_painters(
-            size,
-            size,
-            'tictactoe_piece_click') as (actual, expected):
+    with pixmap_differ.create_qpainters((size, size)) as (actual, expected):
         draw_square_grid(expected)
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(10, 10, 60, 60)
@@ -247,10 +220,7 @@ def test_piece_click(pixmap_differ: PixmapDiffer):
 def test_winner(pixmap_differ: PixmapDiffer):
     assert 1 == 1
     size = 240
-    with pixmap_differ.create_painters(
-            size,
-            size,
-            'tictactoe_winner') as (actual, expected):
+    with pixmap_differ.create_qpainters((size, size)) as (actual, expected):
         draw_square_grid(expected)
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(10, 10, 60, 60)
@@ -279,10 +249,7 @@ XO.
 
 def test_draw(pixmap_differ: PixmapDiffer):
     size = 240
-    with pixmap_differ.create_painters(
-            size,
-            size,
-            'tictactoe_draw') as (actual, expected):
+    with pixmap_differ.create_qpainters((size, size)) as (actual, expected):
         draw_square_grid(expected)
         expected.setBrush(TicTacToeDisplay.player1_colour)
         expected.drawEllipse(10, 10, 60, 60)
@@ -316,10 +283,7 @@ def test_coordinates(pixmap_differ: PixmapDiffer):
     assert 1 == 1
     actual: QPainter
     expected: QPainter
-    with pixmap_differ.create_painters(
-            200,
-            200,
-            'tictactoe_coordinates') as (actual, expected):
+    with pixmap_differ.create_qpainters((200, 200)) as (actual, expected):
         expected.fillRect(0, 0, 250, 200, TicTacToeDisplay.background_colour)
         expected.drawLine(50, 100, 200, 100)
         expected.drawLine(50, 150, 200, 150)

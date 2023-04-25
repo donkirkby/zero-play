@@ -11,7 +11,7 @@ from zero_play.tictactoe.display import TicTacToeDisplay
 def test_text(pixmap_differ: PixmapDiffer):
     actual: QPainter
     expected: QPainter
-    with pixmap_differ.create_painters(300, 240, 'scaled_radio_button_text') as (
+    with pixmap_differ.create_qpainters((300, 240)) as (
             actual,
             expected):
         ex_widget = QWidget()
@@ -70,7 +70,7 @@ def test_text(pixmap_differ: PixmapDiffer):
 def test_icon(pixmap_differ: PixmapDiffer):
     actual: QPainter
     expected: QPainter
-    with pixmap_differ.create_painters(300, 240, 'scaled_radio_button_icon') as (
+    with pixmap_differ.create_qpainters((300, 240)) as (
             actual,
             expected):
         display = TicTacToeDisplay()

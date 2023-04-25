@@ -35,7 +35,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def main():
+def main() -> None:
     args = parse_args()
     folder: Path = args.folder
     output_name = args.name or folder.name

@@ -21,7 +21,7 @@ class PlayerResults:
 
 
 class PlayController:
-    def __init__(self, start_state: GameState, players: typing.List[Player]):
+    def __init__(self, start_state: GameState, players: typing.Sequence[Player]):
         self.board = self.start_state = start_state
         x_player: Player
         o_player: Player

@@ -138,7 +138,7 @@ class GridDisplay(GameDisplay):
     def create_icon(player_colour: QColor) -> QPixmap:
         size = 200
         icon = QPixmap(size, size)
-        icon.fill(Qt.transparent)
+        icon.fill(Qt.GlobalColor.transparent)
         painter = QPainter(icon)
         try:
             painter.setBrush(player_colour)
@@ -200,7 +200,7 @@ class GridDisplay(GameDisplay):
                 if player == self.start_state.X_PLAYER
                 else self.player2_icon)
 
-    def update_move_text(self, text: str = None):
+    def update_move_text(self, text: str | None = None):
         if self.debug_message:
             self.move_text.setText(self.debug_message)
         elif text is not None:

@@ -4,9 +4,6 @@ updates:
   directory: "/"
   schedule:
     interval: daily
-  ignore:
-    - dependency-name: pyside2
-      versions: ["5.15.x"]  # Waiting for a fix: https://bugreports.qt.io/browse/PYSIDE-1404
 - package-ecosystem: bundler
   directory: "/docs"
   schedule:

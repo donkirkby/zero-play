@@ -12,7 +12,7 @@ class MctsWorker(QObject):
     # board, analysing_player, [(move_text, probability, count)] for top 10 choices
     move_analysed = Signal(GameState, int, list)
 
-    def __init__(self, player: MctsPlayer, parent: QObject = None):
+    def __init__(self, player: MctsPlayer, parent: QObject | None = None):
         super().__init__(parent)
         self.player = player
 

@@ -21,8 +21,8 @@ class SearchNode:
 
     def __init__(self,
                  game_state: GameState,
-                 parent: 'SearchNode' = None,
-                 move: int = None):
+                 parent: typing.Optional['SearchNode'] = None,
+                 move: int | None = None):
         """ Initialize an instance.
 
         :param game_state: the board state that this node represents
@@ -80,7 +80,9 @@ class SearchNode:
         self.children = children
         return children
 
-    def record_value(self, value: float, child_predictions: np.ndarray = None):
+    def record_value(self,
+                     value: float,
+                     child_predictions: np.ndarray | None = None):
         if child_predictions is not None:
             self.child_predictions = child_predictions
         if (not self.parent or
@@ -306,7 +308,7 @@ class MctsPlayer(Player):
                  start_state: GameState,
                  player_number: int = GameState.X_PLAYER,
                  iteration_count: int = DEFAULT_ITERATIONS,
-                 heuristic: Heuristic = None,
+                 heuristic: Heuristic | None = None,
                  process_count: int = 1):
         super().__init__(player_number, heuristic)
         self.iteration_count = iteration_count

@@ -74,10 +74,7 @@ OOO...
 
 def test_invalid_hover_enter(pixmap_differ: PixmapDiffer):
     size = 240
-    with pixmap_differ.create_painters(
-            size,
-            size,
-            'othello_invalid_hover_enter') as (actual, expected):
+    with pixmap_differ.create_qpainters((size, size)) as (actual, expected):
 
         display = OthelloDisplay()
         display.resize(324, 264)

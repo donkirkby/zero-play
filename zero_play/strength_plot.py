@@ -29,9 +29,9 @@ logger = logging.getLogger(__name__)
 
 class MatchUp:
     def __init__(self,
-                 p1_definition: typing.Union[int, str] = None,
-                 p2_definition: typing.Union[int, str] = None,
-                 source: 'MatchUp' = None):
+                 p1_definition: int | str | None = None,
+                 p2_definition: int | str | None = None,
+                 source: typing.Optional['MatchUp'] = None):
         if source is None:
             self.p1_iterations, self.p1_neural_net = MatchUp.parse_definition(
                 p1_definition)
@@ -101,11 +101,11 @@ class MatchUp:
 
 class WinCounter(dict):
     def __init__(self,
-                 player_levels: typing.List[int] = None,
-                 opponent_min: int = None,
-                 opponent_max: int = None,
-                 source: 'WinCounter' = None,
-                 player_definitions: typing.List[typing.Union[str, int]] = None):
+                 player_levels: typing.List[int] | None = None,
+                 opponent_min: int | None = None,
+                 opponent_max: int | None = None,
+                 source: typing.Optional['WinCounter'] = None,
+                 player_definitions: typing.List[str | int] | None = None):
         super().__init__()
         if source is not None:
             self.player_definitions: typing.List[
@@ -202,7 +202,7 @@ class WinCounter(dict):
 
 
 class StrengthPlot(PlotCanvas, ProcessDisplay):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.game: GameState = TicTacToeState()
         self.artists: typing.List[plt.Artist] = []
@@ -237,9 +237,9 @@ class StrengthPlot(PlotCanvas, ProcessDisplay):
         self.create_plot()
         plt.tight_layout()
 
-    def fetch_strengths(self, db_session):
+    def fetch_strengths(self, db_session) -> typing.List[int]:
         if db_session is None:
-            return
+            return []
         game_record = GameRecord.find_or_create(db_session, self.game)
         strengths = []
         datetimes = []
@@ -251,6 +251,7 @@ class StrengthPlot(PlotCanvas, ProcessDisplay):
             for match_player in match.match_players:  # type: ignore
                 player = match_player.player
                 if player.type != player.HUMAN_TYPE:
+                    assert player.iterations is not None
                     strengths.append(player.iterations)
                     datetimes.append(match.start_time)
         return strengths
@@ -271,7 +272,8 @@ class StrengthPlot(PlotCanvas, ProcessDisplay):
         self.axes.legend(loc='lower right')
         self.axes.figure.canvas.draw()
 
-    def update(self, _frame):
+    # noinspection PyMethodOverriding
+    def update(self, _frame) -> None:  # type: ignore
         messages = []
         try:
             for _ in range(1000):
@@ -281,6 +283,7 @@ class StrengthPlot(PlotCanvas, ProcessDisplay):
         # logger.debug('Plotter.update() found %d messages.', len(messages))
         if not messages:
             return
+        assert self.win_counter is not None
         for p1_iterations, p1_nn, p2_iterations, p2_nn, result in messages:
             match_up: MatchUp = self.win_counter[(p1_iterations,
                                                   p1_nn,
@@ -294,7 +297,7 @@ class StrengthPlot(PlotCanvas, ProcessDisplay):
 
         self.create_plot()
         # logger.debug('Plotter.update() done.')
-        return self.artists
+        # return self.artists
 
     def create_plot(self):
         opponent_levels = self.win_counter.opponent_levels
@@ -427,7 +430,7 @@ def run_games(controller: PlayController,
               result_queue: Queue,
               win_counter: WinCounter,
               # checkpoint_path: str = None,
-              game_count: int = None):
+              game_count: int | None = None):
     player1 = controller.players[Game.X_PLAYER]
     player2 = controller.players[Game.O_PLAYER]
     assert isinstance(player1, MctsPlayer)

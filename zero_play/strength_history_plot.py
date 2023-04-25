@@ -1,3 +1,5 @@
+import typing
+
 from zero_play.game_state import GameState
 from zero_play.models import SessionBase
 from zero_play.models.game import GameRecord
@@ -8,12 +10,12 @@ from zero_play.tictactoe.state import TicTacToeState
 
 
 class StrengthHistoryPlot(PlotCanvas):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         self.game: GameState = TicTacToeState()
 
         super().__init__(parent)
 
-    def fetch_strengths(self, db_session):
+    def fetch_strengths(self, db_session) -> typing.List[int]:
         if db_session is None:
             return []
         game_record = GameRecord.find_or_create(db_session, self.game)
@@ -24,7 +26,6 @@ class StrengthHistoryPlot(PlotCanvas):
             match_player: MatchPlayerRecord
             has_human = False
             ai_player = None
-            # noinspection PyTypeChecker
             for match_player in match.match_players:  # type: ignore
                 player = match_player.player
                 if player.type == player.HUMAN_TYPE:
@@ -32,6 +33,7 @@ class StrengthHistoryPlot(PlotCanvas):
                 else:
                     ai_player = player
             if has_human and ai_player is not None:
+                assert ai_player.iterations is not None
                 strengths.append(ai_player.iterations)
         return strengths
 

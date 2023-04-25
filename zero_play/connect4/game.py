@@ -7,10 +7,10 @@ class Connect4State(GridGameState):
     game_name = 'Connect 4'
 
     def __init__(self,
-                 text: str = None,
+                 text: str | None = None,
                  board_height: int = 6,
                  board_width: int = 7,
-                 spaces: np.ndarray = None):
+                 spaces: np.ndarray | None = None):
         if text is None:
             lines = None
         else:

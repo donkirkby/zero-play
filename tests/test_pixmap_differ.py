@@ -23,31 +23,15 @@ def create_blue_green_rect():
 
 
 def test_diff_found(pixmap_differ, monkeypatch):
-    mock_turtle = Mock('MockTurtle')
-    mock_turtle.display_image = Mock('MockTurtle.display_image')
-    mock_turtle.return_value.screen.cv.cget.return_value = 100
-    mock_turtle.return_value.xcor.return_value = 0
-    mock_turtle.return_value.ycor.return_value = 0
-    monkeypatch.setattr(turtle, 'Turtle', mock_turtle)
     expected_pixmap = create_blue_green_rect()
 
-    with pytest.raises(AssertionError, match='Found 8 different pixels'):
+    with pytest.raises(AssertionError, match='Images differ by 8 pixels'):
         actual: QPainter
         expected: QPainter
-        with pixmap_differ.create_painters(4, 2, 'diff_found') as (actual,
-                                                                   expected):
+        with pixmap_differ.create_qpainters((4, 2)) as (actual, expected):
             expected.drawPixmap(0, 0, expected_pixmap)
 
             # Do nothing to actual, so error should be raised.
-
-    # actual, diff, and expected
-    assert len(mock_turtle.display_image.call_args_list) == 3
-    expected_files = [pixmap_differ.work_dir / 'diff_found_actual.png',
-                      pixmap_differ.work_dir / 'diff_found_diff.png',
-                      pixmap_differ.work_dir / 'diff_found_expected.png']
-    for expected_file in expected_files:
-        assert expected_file.exists()
-        expected_file.unlink()
 
 
 def test_encode_image(pixmap_differ):
@@ -56,7 +40,7 @@ def test_encode_image(pixmap_differ):
     text = encode_image(expected_pixmap.toImage())
     actual: QPainter
     expected: QPainter
-    with pixmap_differ.create_painters(4, 2, 'encode_image') as (
+    with pixmap_differ.create_qpainters((4, 2)) as (
             actual,
             expected):
         image = decode_image(text)
@@ -77,7 +61,7 @@ def test_decode_image(pixmap_differ):
 
     actual: QPainter
     expected: QPainter
-    with pixmap_differ.create_painters(width, height, 'decode_image') as (
+    with pixmap_differ.create_qpainters((width, height)) as (
             actual,
             expected):
         actual.drawPixmap(0, 0, QPixmap(image))

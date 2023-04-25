@@ -32,7 +32,7 @@ class LogItem:
 
 
 class LogDisplay:
-    def __init__(self):
+    def __init__(self) -> None:
         self.step = 0
         self.items: typing.List[LogItem] = []
         self.offsets: typing.List[int] = []

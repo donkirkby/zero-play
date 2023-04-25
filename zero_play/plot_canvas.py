@@ -8,13 +8,13 @@ plt.switch_backend('QtAgg')
 
 
 class PlotCanvas(FigureCanvas):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         fig = Figure()
         self.axes: Axes = fig.add_subplot(111)
 
         super().__init__(fig)
         self.setParent(parent)
 
-        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
-                           QtWidgets.QSizePolicy.Expanding)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding,
+                           QtWidgets.QSizePolicy.Policy.Expanding)
         self.updateGeometry()

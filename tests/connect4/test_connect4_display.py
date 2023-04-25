@@ -19,10 +19,7 @@ def draw_grid(expected):
 def test_pieces(pixmap_differ: PixmapDiffer):
     actual: QPainter
     expected: QPainter
-    with pixmap_differ.create_painters(
-            280,
-            240,
-            'connect4_pieces') as (actual, expected):
+    with pixmap_differ.create_qpainters((280, 240)) as (actual, expected):
         draw_grid(expected)
         expected.setBrush(Connect4Display.player1_colour)
         expected.drawEllipse(125, 205, 30, 30)
@@ -48,10 +45,7 @@ def test_pieces(pixmap_differ: PixmapDiffer):
 def test_clicked(pixmap_differ: PixmapDiffer):
     actual: QPainter
     expected: QPainter
-    with pixmap_differ.create_painters(
-            280,
-            240,
-            'connect4_clicked') as (actual, expected):
+    with pixmap_differ.create_qpainters((280, 240)) as (actual, expected):
         draw_grid(expected)
         expected.setBrush(Connect4Display.player1_colour)
         expected.drawEllipse(5, 205, 30, 30)

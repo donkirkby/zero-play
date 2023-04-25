@@ -21,7 +21,7 @@ def get_player_argument(values: typing.Sequence, player_number: int):
 class Player(metaclass=ABCMeta):
     def __init__(self,
                  player_number: int = GameState.X_PLAYER,
-                 heuristic: Heuristic = None):
+                 heuristic: Heuristic | None = None):
         if heuristic is None:
             heuristic = Playout()
         self.player_number = player_number

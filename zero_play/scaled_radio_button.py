@@ -25,7 +25,7 @@ class ScaledRadioButton(QRadioButton):
 
             # Be careful which overload of boundingRect() you call.
             rect = metrics.boundingRect(target_rect,
-                                        Qt.AlignLeft,
+                                        Qt.AlignmentFlag.AlignLeft,
                                         text,
                                         tabstops=0,
                                         tabarray=None)  # type: ignore

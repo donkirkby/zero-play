@@ -1,4 +1,3 @@
-import turtle
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -9,7 +8,8 @@ from PySide6.QtWidgets import QApplication
 from zero_play.connect4.display import Connect4Display
 from zero_play.connect4.game import Connect4State
 from zero_play.game_display import GameDisplay
-from zero_play.pixmap_differ import render_display, encode_image
+from zero_play.live_qpainter import LiveQPainter
+from zero_play.pixmap_differ import render_display
 from zero_play.tictactoe.display import TicTacToeDisplay
 from zero_play.tictactoe.state import TicTacToeState
 
@@ -40,14 +40,14 @@ class DiagramWriter:
         finally:
             painter.end()
 
-    def demo(self):
-        display_image = getattr(turtle.Turtle, 'display_image', None)
-        if display_image is None:
-            return
+    def demo(self) -> None:
+        painter: QPainter
         with self.create_painter() as painter:
             self.draw(painter)
-            actual_image: QImage = painter.device().toImage()
-            display_image(0, 0, image=encode_image(actual_image))
+            pixmap = painter.device()
+            assert isinstance(pixmap, QPixmap)
+            live_painter = LiveQPainter(pixmap, fill=None)
+            live_painter.display()
 
     def write(self, path: Path):
         print('Writing to', path)

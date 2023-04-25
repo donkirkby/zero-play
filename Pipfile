@@ -18,7 +18,8 @@ tensorflow = "*"
 markdown = "*"
 alembic = "*"
 sqlalchemy = "*"
-pyside6 = "*"
+pyside6 = "<6.5"  # 6.5.0 causes fatal Python error. Try 6.5.1 when released.
+space-tracer = "*"
 
 [requires]
 # Sync with .github/workflows/py-build.yml

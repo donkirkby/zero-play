@@ -10,10 +10,10 @@ class OthelloState(GridGameState):
     game_name = 'Othello'
 
     def __init__(self,
-                 text: str = None,
+                 text: str | None = None,
                  board_height: int = 6,
                  board_width: int = 6,
-                 spaces: np.ndarray = None):
+                 spaces: np.ndarray | None = None):
         if spaces is not None:
             size = spaces.size
             board_width = board_height = int(math.sqrt(size-1))

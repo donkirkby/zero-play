@@ -7,8 +7,8 @@ class TicTacToeState(GridGameState):
     game_name = 'Tic Tac Toe'
 
     def __init__(self,
-                 text: str = None,
-                 spaces: np.ndarray = None,
+                 text: str | None = None,
+                 spaces: np.ndarray | None = None,
                  board_height: int = 3,
                  board_width: int = 3):
         super().__init__(board_height=board_height,

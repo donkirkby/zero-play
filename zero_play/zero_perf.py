@@ -45,7 +45,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def main():
+def main() -> None:
     args = parse_args()
     class_path = args.game
     class_parts = class_path.split('.')

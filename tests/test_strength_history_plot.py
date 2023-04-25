@@ -13,10 +13,7 @@ def test_plot(pixmap_differ: PixmapDiffer, monkeypatch):
     size = 260
     actual: QPainter
     expected: QPainter
-    with pixmap_differ.create_painters(
-            2*size,
-            size,
-            'plot_canvas_plot') as (actual, expected):
+    with pixmap_differ.create_qpainters((2*size, size)) as (actual, expected):
         strengths = [100, 200]
         future_strength = 150
 
@@ -48,10 +45,7 @@ def test_single_plot(pixmap_differ: PixmapDiffer, monkeypatch):
     size = 260
     actual: QPainter
     expected: QPainter
-    with pixmap_differ.create_painters(
-            2*size,
-            size,
-            'plot_canvas_single_plot') as (actual, expected):
+    with pixmap_differ.create_qpainters((2*size, size)) as (actual, expected):
         strengths = [100]
         future_strength = 150
 

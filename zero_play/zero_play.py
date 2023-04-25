@@ -58,7 +58,7 @@ DEFAULT_SEARCHES = 600
 class AboutDialog(QDialog):
     def __init__(self,
                  credit_pairs: typing.Iterable[typing.Tuple[str, str]],
-                 parent: QWidget = None):
+                 parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
@@ -66,14 +66,17 @@ class AboutDialog(QDialog):
         credits_layout = self.ui.credits_layout
         row = 0
         for row, (title, text) in enumerate(credit_pairs):
-            credits_layout.addWidget(QLabel(title), row, 0, Qt.AlignRight)
+            credits_layout.addWidget(QLabel(title),
+                                     row,
+                                     0,
+                                     Qt.AlignmentFlag.AlignRight)
             credits_layout.addWidget(QLabel(text), row, 1)
         row += 1
         credits_layout.addWidget(self.ui.version_label, row, 0)
         credits_layout.addWidget(self.ui.version, row, 1)
 
 
-def get_settings(game_state: GameState = None):
+def get_settings(game_state: GameState | None = None):
     settings = QSettings("Don Kirkby", "Zero Play")
     if game_state is not None:
         settings.beginGroup('games')
@@ -82,7 +85,7 @@ def get_settings(game_state: GameState = None):
     return settings
 
 
-def get_database_url(database_path: Path = None) -> typing.Optional[str]:
+def get_database_url(database_path: Path | None = None) -> typing.Optional[str]:
     if database_path is None:
         settings = get_settings()
         database_path = settings.value('db_path')
@@ -100,9 +103,9 @@ class ZeroPlayWindow(QMainWindow):
     """
     icon_path = ":/zero_play_images/main_icon.png"
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.setAttribute(Qt.WA_DeleteOnClose, True)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
         ui = self.ui = Ui_MainWindow()
         ui.setupUi(self)
         self.plot_canvas = StrengthHistoryPlot(ui.centralwidget)
@@ -130,9 +133,9 @@ class ZeroPlayWindow(QMainWindow):
         ui.searches1.valueChanged.connect(self.on_searches_changed)
         ui.searches_lock1.stateChanged.connect(self.on_lock_changed)
         ui.searches_lock2.stateChanged.connect(self.on_lock_changed)
-        self.cpu_count = cpu_count()
+        self.cpu_count = cpu_count() or 1
         self.is_history_dirty = False  # Has current game been rewound?
-        self.all_displays = []
+        self.all_displays: typing.List[GameDisplay] = []
         self.load_game_list(ui.game_page.layout())
         icon_pixmap = QPixmap(self.icon_path)  # After displays load resources!
         icon = QIcon(icon_pixmap)
@@ -200,7 +203,8 @@ class ZeroPlayWindow(QMainWindow):
             column = i % column_count
             game_name = display.start_state.game_name
             game_button = QPushButton(game_name)
-            game_button.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+            game_button.setSizePolicy(QSizePolicy.Policy.Minimum,
+                                      QSizePolicy.Policy.Minimum)
 
             game_button.clicked.connect(partial(self.show_game,  # type: ignore
                                                 display))
@@ -292,7 +296,7 @@ class ZeroPlayWindow(QMainWindow):
             self.display = self.game_display = None
 
     def show_game(self, display: GameDisplay):
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         self.display = self.game_display = display
         start_state = display.start_state
         self.start_state = start_state
@@ -331,6 +335,7 @@ class ZeroPlayWindow(QMainWindow):
         if new_index < 0:
             # Combo box was cleared.
             return
+        assert self.start_state is not None
         settings = get_settings(self.start_state)
         if player is self.ui.player1:
             searches = self.ui.searches1
@@ -383,8 +388,10 @@ class ZeroPlayWindow(QMainWindow):
             filter='Checkpoint (*.h5)',
             options=QFileDialog.DontUseNativeDialog)
 
-    def on_start(self):
+    def on_start(self) -> None:
         self.game_start_time = datetime.now()
+        assert self.game_display is not None
+        assert self.start_state is not None
         self.game_display.update_board(self.game_display.start_state)
         self.is_history_dirty = False
         ui = self.ui
@@ -430,7 +437,7 @@ class ZeroPlayWindow(QMainWindow):
         self.ui.stacked_widget.setCurrentWidget(
             self.ui.plot_strength_page)
 
-    def on_start_strength_test(self):
+    def on_start_strength_test(self) -> None:
         game_display: GameDisplay = self.ui.strength_test_game.currentData()
         start_state = game_display.start_state
         players = [MctsPlayer(start_state, GameState.X_PLAYER),
@@ -438,6 +445,7 @@ class ZeroPlayWindow(QMainWindow):
         controller = PlayController(start_state, players)
         player_definitions = self.ui.strength_test_strengths.text().split()
         self.display = self.strength_canvas
+        assert self.db_session is not None
         self.strength_canvas.start(self.db_session,
                                    controller,
                                    player_definitions,
@@ -448,7 +456,7 @@ class ZeroPlayWindow(QMainWindow):
         self.ui.stacked_widget.setCurrentWidget(self.ui.plot_history_page)
         self.requery_plot()
 
-    def requery_plot(self):
+    def requery_plot(self) -> None:
         display: GameDisplay = self.ui.history_game.currentData()
         self.plot_canvas.game = display.start_state
         settings = get_settings(display.start_state)
