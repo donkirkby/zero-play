@@ -35,7 +35,7 @@ def test_plot(pixmap_differ: PixmapDiffer, monkeypatch):
         session = None
         canvas.requery(session, future_strength)
         png_file = BytesIO()
-        canvas.figure.savefig(png_file, dpi=60)
+        canvas.axes.figure.savefig(png_file, dpi=60)
         image = QImage.fromData(png_file.getvalue())
         actual.drawImage(0, 0, image)
 
@@ -67,6 +67,6 @@ def test_single_plot(pixmap_differ: PixmapDiffer, monkeypatch):
         session = None
         canvas.requery(session, future_strength)
         png_file = BytesIO()
-        canvas.figure.savefig(png_file, dpi=60)
+        canvas.axes.figure.savefig(png_file, dpi=60)
         image = QImage.fromData(png_file.getvalue())
         actual.drawImage(0, 0, image)

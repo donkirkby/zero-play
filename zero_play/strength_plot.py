@@ -8,6 +8,7 @@ import typing
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sn
+from matplotlib.animation import FuncAnimation
 from sqlalchemy.orm import Session as BaseSession
 
 # from zero_play.connect4.neural_net import NeuralNet
@@ -21,7 +22,6 @@ from zero_play.models.player import PlayerRecord
 from zero_play.play_controller import PlayController
 from zero_play.playout import Playout
 from zero_play.plot_canvas import PlotCanvas
-from zero_play.process_display import ProcessDisplay
 from zero_play.tictactoe.state import TicTacToeState
 
 logger = logging.getLogger(__name__)
@@ -201,7 +201,7 @@ class WinCounter(dict):
         return summary.getvalue()
 
 
-class StrengthPlot(PlotCanvas, ProcessDisplay):
+class StrengthPlot(PlotCanvas):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.game: GameState = TicTacToeState()
@@ -209,9 +209,16 @@ class StrengthPlot(PlotCanvas, ProcessDisplay):
         self.plot_lines: typing.List[plt.Line2D] = []
 
         self.win_counter: WinCounter | None = None
-        self.result_queue: Queue = Queue()
+        self.request_queue: Queue[str] = Queue()
+        self.result_queue: Queue[
+            typing.Tuple[int, bool, int, bool, int]] = Queue()
         self.db_session: BaseSession | None = None
         self.process: Process | None = None
+        self.animation = FuncAnimation(self.axes.figure,
+                                       self.update,
+                                       interval=30_000,
+                                       cache_frame_data=False)
+        self.animation.pause()
 
     def start(self,
               db_session: BaseSession,
@@ -220,6 +227,7 @@ class StrengthPlot(PlotCanvas, ProcessDisplay):
               opponent_min: int,
               opponent_max: int):
         self.db_session = db_session
+        self.game = controller.start_state
         self.win_counter = WinCounter(player_definitions=player_definitions,
                                       opponent_min=opponent_min,
                                       opponent_max=opponent_max)
@@ -227,15 +235,22 @@ class StrengthPlot(PlotCanvas, ProcessDisplay):
         # self.game_name = controller.start_state.game_name
         self.process = Process(target=run_games,
                                args=(controller,
+                                     self.request_queue,
                                      self.result_queue,
                                      WinCounter(source=self.win_counter),
                                      # neural_net_path),
                                      ),
                                daemon=True)
+        self.process.start()
         # self.worker_thread.start()
         sn.set()
         self.create_plot()
         plt.tight_layout()
+        self.animation.resume()
+
+    def stop_workers(self):
+        self.request_queue.put('Stop')
+        self.animation.pause()
 
     def fetch_strengths(self, db_session) -> typing.List[int]:
         if db_session is None:
@@ -273,7 +288,7 @@ class StrengthPlot(PlotCanvas, ProcessDisplay):
         self.axes.figure.canvas.draw()
 
     # noinspection PyMethodOverriding
-    def update(self, _frame) -> None:  # type: ignore
+    def update(self, _frame=None) -> None:  # type: ignore
         messages = []
         try:
             for _ in range(1000):
@@ -290,12 +305,12 @@ class StrengthPlot(PlotCanvas, ProcessDisplay):
                                                   p2_iterations,
                                                   p2_nn)]
             match_up.record_result(result)
-            # match = MatchRecord.
-        self.write_history()
+            self.write_history(match_up, result)
 
         self.artists.clear()
 
         self.create_plot()
+        self.axes.figure.canvas.draw()
         # logger.debug('Plotter.update() done.')
         # return self.artists
 
@@ -303,9 +318,9 @@ class StrengthPlot(PlotCanvas, ProcessDisplay):
         opponent_levels = self.win_counter.opponent_levels
         all_series = self.win_counter.build_series()
         total_games = sum(match_up.count for match_up in self.win_counter.values())
-        self.artists.append(plt.title(
+        self.artists.append(self.axes.set_title(
             f'Win Rates After {total_games} '
-            f'Games of {self.game_name}'))
+            f'Games of {self.game.game_name}'))
         if not self.plot_lines:
             self.axes.set_ylabel(f'Win and tie rates')
             self.axes.set_xlabel('Opponent MCTS simulation count')
@@ -341,6 +356,9 @@ class StrengthPlot(PlotCanvas, ProcessDisplay):
                 # noinspection PyTypeChecker
                 line.set_ydata(rates)
         self.artists.extend(self.plot_lines)
+        self.axes.redraw_in_frame()
+
+        return self.artists
 
     def load_history(self, db_session: BaseSession):
         assert self.win_counter is not None
@@ -371,66 +389,48 @@ class StrengthPlot(PlotCanvas, ProcessDisplay):
                 match_up.record_result(result)
         print(self.win_counter.build_summary(), end='')
 
-    def write_history(self):
-        for match_up in self.win_counter.values():
-            update_count = self.conn.execute(
-                """\
-UPDATE  games
-SET     wins1 = ?,
-        ties = ?,
-        wins2 = ?
-WHERE   iters1 = ?
-AND     nn1 = ?
-AND     iters2 = ?
-AND     nn2 = ?;
-""",
-                [match_up.p1_wins,
-                 match_up.ties,
-                 match_up.p2_wins,
-                 match_up.p1_iterations,
-                 match_up.p1_neural_net,
-                 match_up.p2_iterations,
-                 match_up.p2_neural_net]).rowcount
-            if update_count == 0:
-                self.conn.execute(
-                    """\
-INSERT
-INTO    games
-        (
-        iters1,
-        nn1,
-        iters2,
-        nn2,
-        wins1,
-        ties,
-        wins2
-        )
-        VALUES
-        (
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?
-        )
-""",
-                    [match_up.p1_iterations,
-                     match_up.p1_neural_net,
-                     match_up.p2_iterations,
-                     match_up.p2_neural_net,
-                     match_up.p1_wins,
-                     match_up.ties,
-                     match_up.p2_wins])
-            self.conn.commit()
+    def write_history(self, match_up: MatchUp, result: int):
+        db_session = self.db_session
+        assert db_session is not None
+        game_record = GameRecord.find_or_create(db_session, self.game)
+        match_record = MatchRecord(game=game_record)
+        db_session.add(match_record)
+        mcts_player: typing.Optional[MctsPlayer]
+        iteration_entries = (match_up.p1_iterations, match_up.p2_iterations)
+        for i, player_number in enumerate(self.game.get_players()):
+            iterations = iteration_entries[i]
+            player_record = db_session.query(PlayerRecord).filter_by(
+                type=PlayerRecord.PLAYOUT_TYPE,
+                iterations=iterations).one_or_none()
+            if player_record is None:
+                player_record = PlayerRecord(type=PlayerRecord.PLAYOUT_TYPE,
+                                             iterations=iterations)
+                db_session.add(player_record)
+            player_result = result if i == 0 else -result
+            match_player = MatchPlayerRecord(match=match_record,
+                                             player=player_record,
+                                             player_number=player_number,
+                                             result=player_result)
+            db_session.add(match_player)
+        db_session.commit()
 
 
 def run_games(controller: PlayController,
+              request_queue: Queue,
               result_queue: Queue,
               win_counter: WinCounter,
               # checkpoint_path: str = None,
               game_count: int | None = None):
+    """ Run a series of games, and send the results through a queue.
+
+    :param controller: tracks game progress
+    :param request_queue: source of control requests. For now, any message will
+        tell this process to shut down.
+    :param result_queue: destination for game results. Each message is a tuple
+        with the match-up key and the game result: 1, 0, or -1 for player 1.
+    :param win_counter: defines all the strength combinations to test.
+    :param game_count: number of games to run, or None to run until stopped.
+    """
     player1 = controller.players[Game.X_PLAYER]
     player2 = controller.players[Game.O_PLAYER]
     assert isinstance(player1, MctsPlayer)
@@ -456,7 +456,11 @@ def run_games(controller: PlayController,
         # logger.debug(f'checking params {i}, {j} ({x}, {y}) with {counts[i, j]} counts')
         controller.start_game()
         while not controller.take_turn():
-            pass
+            try:
+                request_queue.get_nowait()
+                return  # Received the quit message.
+            except Empty:
+                pass
 
         if controller.board.is_win(Game.X_PLAYER):
             result = Game.X_PLAYER

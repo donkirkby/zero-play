@@ -141,7 +141,7 @@ class ZeroPlayWindow(QMainWindow):
         icon = QIcon(icon_pixmap)
         self.setWindowIcon(icon)
         self.start_state: typing.Optional[GameState] = None
-        self.display: typing.Optional[ProcessDisplay] = None
+        self.display: ProcessDisplay | StrengthPlot | None = None
         self.game_display: typing.Optional[GameDisplay] = None
         self.on_new_game()
         self.board_to_resume: typing.Optional[np.ndarray] = None
@@ -451,6 +451,8 @@ class ZeroPlayWindow(QMainWindow):
                                    player_definitions,
                                    self.ui.strength_test_min.value(),
                                    self.ui.strength_test_max.value())
+        self.ui.stacked_widget.setCurrentWidget(
+            self.ui.plot_strength_display_page)
 
     def on_plot(self):
         self.ui.stacked_widget.setCurrentWidget(self.ui.plot_history_page)
