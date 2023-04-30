@@ -151,6 +151,21 @@ class ZeroPlayWindow(QMainWindow):
         self.game_start_time = datetime.now()
         ui.history_game.currentIndexChanged.connect(self.requery_plot)
         self._db_session = None
+        settings = get_settings()
+        ui.strength_test_game.setCurrentText(settings.value(
+            'strength_test_game',
+            ui.strength_test_game.currentText()))
+        ui.strength_test_strengths.setText(settings.value(
+            'strength_test_strengths',
+            ui.strength_test_strengths.text()))
+        ui.strength_test_min.setValue(settings.value(
+            'strength_test_min',
+            ui.strength_test_min.value(),
+            type=int))
+        ui.strength_test_max.setValue(settings.value(
+            'strength_test_max',
+            ui.strength_test_max.value(),
+            type=int))
         self.on_toggle_review()
 
     @staticmethod
@@ -438,21 +453,29 @@ class ZeroPlayWindow(QMainWindow):
             self.ui.plot_strength_page)
 
     def on_start_strength_test(self) -> None:
-        game_display: GameDisplay = self.ui.strength_test_game.currentData()
+        settings = get_settings()
+        ui = self.ui
+        settings.setValue('strength_test_game',
+                          ui.strength_test_game.currentText())
+        settings.setValue('strength_test_strengths',
+                          ui.strength_test_strengths.text())
+        settings.setValue('strength_test_min', ui.strength_test_min.value())
+        settings.setValue('strength_test_max', ui.strength_test_max.value())
+        game_display: GameDisplay = ui.strength_test_game.currentData()
         start_state = game_display.start_state
         players = [MctsPlayer(start_state, GameState.X_PLAYER),
                    MctsPlayer(start_state, GameState.O_PLAYER)]
         controller = PlayController(start_state, players)
-        player_definitions = self.ui.strength_test_strengths.text().split()
+        player_definitions = ui.strength_test_strengths.text().split()
         self.display = self.strength_canvas
         assert self.db_session is not None
         self.strength_canvas.start(self.db_session,
                                    controller,
                                    player_definitions,
-                                   self.ui.strength_test_min.value(),
-                                   self.ui.strength_test_max.value())
-        self.ui.stacked_widget.setCurrentWidget(
-            self.ui.plot_strength_display_page)
+                                   ui.strength_test_min.value(),
+                                   ui.strength_test_max.value())
+        ui.stacked_widget.setCurrentWidget(
+            ui.plot_strength_display_page)
 
     def on_plot(self):
         self.ui.stacked_widget.setCurrentWidget(self.ui.plot_history_page)

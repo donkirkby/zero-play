@@ -1,8 +1,6 @@
 import typing
 from base64 import standard_b64encode
 from contextlib import contextmanager
-from pathlib import Path
-import turtle
 
 from PySide6.QtCore import (QByteArray, QBuffer, QIODevice, QSize,
                             QRect)
@@ -14,45 +12,10 @@ from zero_play.game_display import GameDisplay
 from zero_play.live_qpainter import LiveQPainter
 
 
-def display_diff(actual_image: QImage,
-                 diff_image: QImage,
-                 expected_image: QImage,
-                 diff_count: int):
-    # Display image when in live turtle mode.
-    display_image = getattr(turtle.Turtle, 'display_image', None)
-    if display_image is None:
-        return
-    t = turtle.Turtle()
-    # noinspection PyUnresolvedReferences
-    screen = t.screen  # type: ignore
-    w = screen.cv.cget('width')
-    h = screen.cv.cget('height')
-    ox, oy = w / 2, h / 2
-    text_space = (h - actual_image.height() - diff_image.height() -
-                  expected_image.height())
-    text_height = max(20, text_space // 3)
-    font = ('Arial', text_height // 2, 'Normal')
-    t.penup()
-    t.goto(-ox, oy)
-    t.right(90)
-    t.forward(text_height)
-    t.write(f'Actual', font=font)
-    display_image(encode_image(actual_image), t.pos())
-    t.forward(actual_image.height())
-    t.forward(text_height)
-    t.write(f'Diff ({diff_count} pixels)', font=font)
-    display_image(encode_image(diff_image), t.pos())
-    t.forward(diff_image.height())
-    t.forward(text_height)
-    t.write('Expected', font=font)
-    display_image(encode_image(expected_image), t.pos())
-    t.forward(expected_image.height())
-
-
 class PixmapDiffer(LiveImageDiffer):
     @staticmethod
     def start_painter(size: LiveImage.Size,
-                      fill: LiveImage.FlexibleFill = 0) -> LivePainter:
+                      fill: LiveImage.FlexibleFill = 'white') -> LivePainter:
         width, height = size
         pixmap = QPixmap(width, height)
         return LiveQPainter(pixmap, QColor(fill))
@@ -63,9 +26,10 @@ class PixmapDiffer(LiveImageDiffer):
             painter.end()
 
     @contextmanager
-    def create_qpainters(self,
-                         size: LiveImage.Size,
-                         fill: LiveImage.FlexibleFill = 0) -> typing.Iterator[
+    def create_qpainters(
+            self,
+            size: LiveImage.Size,
+            fill: LiveImage.FlexibleFill = 'ivory') -> typing.Iterator[
             typing.Tuple[QPainter, QPainter]]:
         with self.create_painters(size, fill) as (actual, expected):
             assert isinstance(actual, LiveQPainter)

@@ -1,13 +1,18 @@
 from textwrap import dedent
 
 import pytest
+from PySide6.QtGui import QPainter
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 from sqlalchemy import create_engine
 
+from tests.conftest import paint_figure
 from zero_play.models import SessionBase, Session, Base
 from zero_play.models.game import GameRecord
 from zero_play.models.match import MatchRecord
 from zero_play.models.match_player import MatchPlayerRecord
 from zero_play.models.player import PlayerRecord
+from zero_play.pixmap_differ import PixmapDiffer
 from zero_play.strength_plot import StrengthPlot, WinCounter, MatchUp
 from zero_play.tictactoe.state import TicTacToeState
 
@@ -122,7 +127,7 @@ def test_humans_excluded(memory_db):
 
 
 # noinspection DuplicatedCode
-def test(memory_db):
+def test_player_iterations_filtered(memory_db):
     tic_tac_toe = memory_db.query(GameRecord).filter(
         GameRecord.name == 'Tic Tac Toe').one()
     player1 = memory_db.query(PlayerRecord).filter(
@@ -167,3 +172,35 @@ def test(memory_db):
     match_up: MatchUp = plot.win_counter[(16, False, 1, False)]
     assert match_up.p1_wins == 1
     assert plot.win_counter.build_summary() == expected_summary
+
+
+def test_plot_layout(pixmap_differ: PixmapDiffer, memory_db):
+    actual: QPainter
+    expected: QPainter
+    with pixmap_differ.create_qpainters((500, 275)) as (actual, expected):
+        fig = Figure()
+        ax: Axes = fig.add_subplot(111)
+        ax.set_title('Win Rates After 2 Games of Tic Tac Toe')
+        ax.set_xlabel('Opponent MCTS simulation count')
+        ax.set_ylabel('Win and tie rates')
+        ax.set_ylim(-0.01, 1.01)
+        ax.set_xscale('log')
+        ax.plot([1, 2, 4, 8], [1, 0, 0, 0], 'C1', label='wins as 1 with 16')
+        ax.plot([1, 2, 4, 8], [0, 0, 0, 0], 'C1:', label='ties as 1 with 16')
+        ax.plot([1, 2, 4, 8], [0, 0, 0, 0], 'C1--', label='wins as 2 with 16')
+        ax.plot([1, 2, 4, 8], [0, 0, 0, 0], 'C1-.', label='ties as 2 with 16')
+        ax.plot([1, 2, 4, 8], [0, 0, 0, 0], 'C2', label='wins as 1 with 256')
+        ax.plot([1, 2, 4, 8], [0, 0, 0, 0], 'C2:', label='ties as 1 with 256')
+        ax.plot([1, 2, 4, 8], [0, 0, 0, 0], 'C2--', label='wins as 2 with 256')
+        ax.plot([1, 2, 4, 8], [0, 0, 0, 0], 'C2-.', label='ties as 2 with 256')
+        ax.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
+        fig.tight_layout()
+        paint_figure(fig, expected)
+
+        plot = StrengthPlot()
+        plot.win_counter = WinCounter(player_levels=[16, 256],
+                                      opponent_min=1,
+                                      opponent_max=8)
+        plot.load_history(memory_db)
+        plot.create_plot()
+        paint_figure(plot.axes.figure, actual)

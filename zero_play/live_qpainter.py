@@ -34,7 +34,8 @@ class LiveQPainter(LivePainter):
         buffer = QBuffer(image_bytes)
         buffer.open(QIODevice.OpenModeFlag.WriteOnly)
         try:
-            self.pixmap.toImage().save(buffer, b"PNG")
+            image = self.pixmap.toImage()
+            image.save(buffer, "PNG")  # type: ignore
             return bytes(buffer.data())  # type: ignore
         finally:
             buffer.close()

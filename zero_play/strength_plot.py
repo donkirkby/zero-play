@@ -8,7 +8,7 @@ import typing
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sn
-from matplotlib.animation import FuncAnimation
+from PySide6.QtCore import QTimer
 from sqlalchemy.orm import Session as BaseSession
 
 # from zero_play.connect4.neural_net import NeuralNet
@@ -214,11 +214,10 @@ class StrengthPlot(PlotCanvas):
             typing.Tuple[int, bool, int, bool, int]] = Queue()
         self.db_session: BaseSession | None = None
         self.process: Process | None = None
-        self.animation = FuncAnimation(self.axes.figure,
-                                       self.update,
-                                       interval=30_000,
-                                       cache_frame_data=False)
-        self.animation.pause()
+        self.timer = QTimer()
+
+        # noinspection PyUnresolvedReferences
+        self.timer.timeout.connect(self.update)
 
     def start(self,
               db_session: BaseSession,
@@ -246,11 +245,12 @@ class StrengthPlot(PlotCanvas):
         sn.set()
         self.create_plot()
         plt.tight_layout()
-        self.animation.resume()
+        self.timer.start(30_000)
+        self.update()
 
     def stop_workers(self):
         self.request_queue.put('Stop')
-        self.animation.pause()
+        self.timer.stop()
 
     def fetch_strengths(self, db_session) -> typing.List[int]:
         if db_session is None:
@@ -356,6 +356,7 @@ class StrengthPlot(PlotCanvas):
                 # noinspection PyTypeChecker
                 line.set_ydata(rates)
         self.artists.extend(self.plot_lines)
+        self.axes.figure.tight_layout()
         self.axes.redraw_in_frame()
 
         return self.artists

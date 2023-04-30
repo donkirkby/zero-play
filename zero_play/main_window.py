@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'main_window.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.3.2
+## Created by: Qt User Interface Compiler version 6.4.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -489,6 +489,7 @@ class Ui_MainWindow(object):
 #if QT_CONFIG(whatsthis)
         self.strength_test_strengths.setWhatsThis("")
 #endif // QT_CONFIG(whatsthis)
+        self.strength_test_strengths.setText(QCoreApplication.translate("MainWindow", u"1 8 64", None))
         self.strength_test_max.setSuffix(QCoreApplication.translate("MainWindow", u" iteration(s)", None))
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"Game:", None))
         self.menu_file.setTitle(QCoreApplication.translate("MainWindow", u"&File", None))

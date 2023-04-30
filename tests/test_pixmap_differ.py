@@ -1,6 +1,3 @@
-import turtle
-from unittest.mock import Mock
-
 import pytest
 from PySide6.QtGui import QPixmap, QPainter, QColor
 
