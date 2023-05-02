@@ -18,4 +18,8 @@ class ProcessDisplay(QWidget):
 
     def stop_workers(self):
         if self.worker_thread is not None:
-            self.worker_thread.quit()
+            try:
+                self.worker_thread.quit()
+            except RuntimeError:
+                # already quit.
+                pass

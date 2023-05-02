@@ -57,7 +57,7 @@ def main() -> None:
         print(f':/{output_name}/{rel_path}')
 
     output = args.output or Path(output_name + '_rc.py')
-    project_result = run(['pyside2-rcc', '--project'],
+    project_result = run(['pyside6-rcc', '--project'],
                          check=True,
                          capture_output=True,
                          encoding='utf8',
@@ -69,7 +69,7 @@ def main() -> None:
     project_path = folder / (output_name + '.qrc')
     project_path.write_text(project_text)
     files_to_tidy.append(project_path)
-    run(['pyside2-rcc',
+    run(['pyside6-rcc',
          '-o', output,
          '--root', '/'+output_name,
          project_path],

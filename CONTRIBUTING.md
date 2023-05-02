@@ -17,7 +17,7 @@ transcript if that helps explain the problem.
 [issues]: https://github.com/donkirkby/zero-play/issues?state=open
 
 ## Building a Release
-The nice thing about using the [PySide2 GUI] is that users can install Zero Play
+The nice thing about using the [PySide GUI] is that users can install Zero Play
 with pip. Releasing a new version means publishing it on the
 [Python package index] where pip can find it. The details are at
 [packaging.python.org], but the main steps are:
@@ -58,10 +58,10 @@ with pip. Releasing a new version means publishing it on the
 [package page]: https://pypi.org/project/zero-play/
 
 
-[PySide2 GUI]: https://wiki.qt.io/Qt_for_Python
+[PySide GUI]: https://wiki.qt.io/Qt_for_Python
 [Python package index]: https://pypi.org/
 
-## PySide2 Tools
+## PySide Tools
 To edit the GUI, do the following:
 
 1. Download and install [Qt Creator].
@@ -69,7 +69,7 @@ To edit the GUI, do the following:
 3. Read the [Qt Designer documentation], and make the changes you want.
 4. Compile the `.ui` file into a Python source file with a command like this:
 
-        pyside2-uic -o main_window.py main_window.ui
+        pyside6-uic -o main_window.py main_window.ui
 
 To add a new screen to the project:
 
@@ -82,10 +82,25 @@ packages up the rules files into `zero_play_rules_rc.py`. It's launched with
 the `zero_play_rcc` command.
 
     cd zero_play
-    zero_play_rcc --name zero_play_rules ../docs/rules
+    zero_play_rcc --markdown --name zero_play_rules ../docs/rules
 
 [Qt Creator]: https://www.qt.io/download-qt-installer
 [Qt Designer documentation]: https://doc.qt.io/qt-5/designer-quick-start.html
+
+## Adding a Game
+Look at the `zero_play.tictactoe` package for an example, then follow these
+steps:
+1. Add a rules file in `docs/rules`. If you need diagrams, add them to
+   `diagram_writer.py`.
+2. Run `zero_play_rcc` to package the rules, as described above.
+3. Add a state class, subclassing `GameState`. Write some tests, and override
+   all the abstract methods.
+4. Add a display class, subclassing `GameDisplay`. Write some tests, and
+   override all the abstract methods.
+5. Add an entry point in `setup.py`. To register the new entry point, you'll
+   need to use `pip uninstall` and `pip install` for the project.
+6. Run the project, and check that the new game shows up in the main list. Also
+   check that the rules display properly.
 
 ## Testing GitHub Pages locally
 The web site uses the [Bulma Clean theme], which is based on [Bulma]. The

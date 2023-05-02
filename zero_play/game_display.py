@@ -37,6 +37,7 @@ class GameDisplay(ProcessDisplay):
     @show_coordinates.setter
     def show_coordinates(self, value):
         self._show_coordinates = value
+        # noinspection PyUnresolvedReferences
         scene = self.scene()
         size = QSize(scene.width(), scene.height())
         self.resizeEvent(QResizeEvent(size, size))

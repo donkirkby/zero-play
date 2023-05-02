@@ -2,7 +2,7 @@ import itertools
 import typing
 
 from PySide6.QtGui import QColor, QBrush, QFont, QResizeEvent, QPixmap, Qt, QPainter, QPen
-from PySide6.QtWidgets import QGraphicsItem, QGraphicsEllipseItem, \
+from PySide6.QtWidgets import QGraphicsEllipseItem, \
     QGraphicsSceneHoverEvent, QGraphicsSceneMouseEvent, QGraphicsScene
 
 from zero_play.game_state import GridGameState, GameState
