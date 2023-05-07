@@ -45,13 +45,13 @@ Known bug on Ubuntu 20.04:
 > qt.qpa.plugin: Could not load the Qt platform plugin "xcb" in "" even though
 > it was found.
 
-This is a [PySide2 bug] that is missing some dependencies. You can work around
+This is a [PySide bug] that is missing some dependencies. You can work around
 it by installing those dependencies like this:
 
     sudo apt install libxcb-xinerama0
 
 [quick-and-dirty guide]: https://snarky.ca/a-quick-and-dirty-guide-on-how-to-install-packages-for-python/
-[PySide2 bug]: https://bugreports.qt.io/browse/QTBUG-84749
+[PySide bug]: https://bugreports.qt.io/browse/QTBUG-84749
 
 ## More Information
 If you'd like to help out with the project, or add your own games, see the

@@ -1,5 +1,5 @@
 from io import StringIO
-from multiprocessing import Process, Queue
+from multiprocessing import Queue
 import logging
 from queue import Empty
 import re
@@ -8,13 +8,12 @@ import typing
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sn
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, QObject, Slot, Signal, QThread
 from sqlalchemy.orm import Session as BaseSession
 
 # from zero_play.connect4.neural_net import NeuralNet
 from zero_play.game_state import GameState as Game, GameState
 from zero_play.mcts_player import MctsPlayer
-from zero_play.models import SessionBase
 from zero_play.models.game import GameRecord
 from zero_play.models.match import MatchRecord
 from zero_play.models.match_player import MatchPlayerRecord
@@ -202,6 +201,10 @@ class WinCounter(dict):
 
 
 class StrengthPlot(PlotCanvas):
+    run_needed = Signal(PlayController,
+                        WinCounter,
+                        int)
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.game: GameState = TicTacToeState()
@@ -213,7 +216,8 @@ class StrengthPlot(PlotCanvas):
         self.result_queue: Queue[
             typing.Tuple[int, bool, int, bool, int]] = Queue()
         self.db_session: BaseSession | None = None
-        self.process: Process | None = None
+        self.worker_thread: QThread | None = None
+        self.runner: GameRunner | None = None
         self.timer = QTimer()
 
         # noinspection PyUnresolvedReferences
@@ -225,6 +229,13 @@ class StrengthPlot(PlotCanvas):
               player_definitions: typing.List[typing.Union[str, int]],
               opponent_min: int,
               opponent_max: int):
+        self.worker_thread = QThread(parent=self)
+        self.worker_thread.finished.connect(  # type: ignore
+            self.worker_thread.deleteLater)
+        self.runner = GameRunner(self.request_queue, self.result_queue)
+        self.run_needed.connect(self.runner.run_games)  # type: ignore
+        self.runner.moveToThread(self.worker_thread)
+        self.worker_thread.start()
         self.db_session = db_session
         self.game = controller.start_state
         self.win_counter = WinCounter(player_definitions=player_definitions,
@@ -232,16 +243,10 @@ class StrengthPlot(PlotCanvas):
                                       opponent_max=opponent_max)
         self.load_history(db_session)
         # self.game_name = controller.start_state.game_name
-        self.process = Process(target=run_games,
-                               args=(controller,
-                                     self.request_queue,
-                                     self.result_queue,
-                                     WinCounter(source=self.win_counter),
-                                     # neural_net_path),
-                                     ),
-                               daemon=True)
-        self.process.start()
-        # self.worker_thread.start()
+        self.run_needed.emit(controller,  # type: ignore
+                             WinCounter(source=self.win_counter),
+                             # neural_net_path),
+                             0)
         sn.set()
         self.create_plot()
         plt.tight_layout()
@@ -249,43 +254,11 @@ class StrengthPlot(PlotCanvas):
         self.update()
 
     def stop_workers(self):
-        self.request_queue.put('Stop')
-        self.timer.stop()
-
-    def fetch_strengths(self, db_session) -> typing.List[int]:
-        if db_session is None:
-            return []
-        game_record = GameRecord.find_or_create(db_session, self.game)
-        strengths = []
-        datetimes = []
-        match: MatchRecord
-        # noinspection PyTypeChecker
-        for match in game_record.matches:  # type: ignore
-            match_player: MatchPlayerRecord
-            # noinspection PyTypeChecker
-            for match_player in match.match_players:  # type: ignore
-                player = match_player.player
-                if player.type != player.HUMAN_TYPE:
-                    assert player.iterations is not None
-                    strengths.append(player.iterations)
-                    datetimes.append(match.start_time)
-        return strengths
-
-    def requery(self, db_session: SessionBase | None, future_strength: int):
-        strengths = self.fetch_strengths(db_session)
-
-        self.axes.clear()
-        marker = 'o' if len(strengths) == 1 else ''
-        self.axes.plot(strengths, marker, label='past')
-        self.axes.plot([len(strengths)], [future_strength], 'o', label='next')
-        self.axes.set_ylim(0)
-        if len(strengths) + 1 < len(self.axes.get_xticks()):
-            self.axes.set_xticks(list(range(len(strengths) + 1)))
-        self.axes.set_title('Search iterations over time')
-        self.axes.set_ylabel('Search iterations')
-        self.axes.set_xlabel('Number of games played')
-        self.axes.legend(loc='lower right')
-        self.axes.figure.canvas.draw()
+        if self.worker_thread is not None:
+            self.request_queue.put('Stop')
+            self.timer.stop()
+            self.worker_thread.quit()
+            self.worker_thread.wait(5_000)
 
     # noinspection PyMethodOverriding
     def update(self, _frame=None) -> None:  # type: ignore
@@ -416,70 +389,83 @@ class StrengthPlot(PlotCanvas):
         db_session.commit()
 
 
-def run_games(controller: PlayController,
-              request_queue: Queue,
-              result_queue: Queue,
-              win_counter: WinCounter,
-              # checkpoint_path: str = None,
-              game_count: int | None = None):
-    """ Run a series of games, and send the results through a queue.
+class GameRunner(QObject):
+    def __init__(self,
+                 request_queue: Queue,
+                 result_queue: Queue):
+        """ Initialize object.
+        :param request_queue: source of control requests. For now, any message will
+            tell this process to shut down.
+        :param result_queue: destination for game results. Each message is a tuple
+            with the match-up key and the game result: 1, 0, or -1 for player 1.
+        """
+        super().__init__()
+        self.request_queue = request_queue
+        self.result_queue = result_queue
 
-    :param controller: tracks game progress
-    :param request_queue: source of control requests. For now, any message will
-        tell this process to shut down.
-    :param result_queue: destination for game results. Each message is a tuple
-        with the match-up key and the game result: 1, 0, or -1 for player 1.
-    :param win_counter: defines all the strength combinations to test.
-    :param game_count: number of games to run, or None to run until stopped.
-    """
-    player1 = controller.players[Game.X_PLAYER]
-    player2 = controller.players[Game.O_PLAYER]
-    assert isinstance(player1, MctsPlayer)
-    assert isinstance(player2, MctsPlayer)
+    @Slot(PlayController,
+          WinCounter,
+          int)  # type: ignore
+    def run_games(self,
+                  controller: PlayController,
+                  win_counter: WinCounter,
+                  # checkpoint_path: str = None,
+                  game_count: int = 0):
+        """ Run a series of games, and send the results through a queue.
 
-    # nn = None
-    playout = Playout()
+        :param controller: tracks game progress
+        :param win_counter: defines all the strength combinations to test.
+        :param game_count: number of games to run, or 0 to run until stopped.
+        """
+        player1 = controller.players[Game.X_PLAYER]
+        player2 = controller.players[Game.O_PLAYER]
+        assert isinstance(player1, MctsPlayer)
+        assert isinstance(player2, MctsPlayer)
+        is_unlimited = game_count == 0
 
-    while game_count is None or game_count > 0:
-        match_up = win_counter.find_next_matchup()
-        player1.iteration_count = match_up.p1_iterations
-        # if match_up.p1_neural_net:
-        #     nn = nn or load_neural_net(controller.game, checkpoint_path)
-        #     player1.heuristic = nn
-        # else:
-        player1.heuristic = playout
-        player2.iteration_count = match_up.p2_iterations
-        # if match_up.p2_neural_net:
-        #     nn = nn or load_neural_net(controller.game, checkpoint_path)
-        #     player2.heuristic = nn
-        # else:
-        player2.heuristic = playout
-        # logger.debug(f'checking params {i}, {j} ({x}, {y}) with {counts[i, j]} counts')
-        controller.start_game()
-        while not controller.take_turn():
-            try:
-                request_queue.get_nowait()
-                return  # Received the quit message.
-            except Empty:
-                pass
+        # nn = None
+        playout = Playout()
 
-        if controller.board.is_win(Game.X_PLAYER):
-            result = Game.X_PLAYER
-        elif controller.board.is_win(Game.O_PLAYER):
-            result = Game.O_PLAYER
-        else:
-            result = 0
+        while is_unlimited or game_count > 0:
+            match_up = win_counter.find_next_matchup()
+            player1.iteration_count = match_up.p1_iterations
+            # if match_up.p1_neural_net:
+            #     nn = nn or load_neural_net(controller.game, checkpoint_path)
+            #     player1.heuristic = nn
+            # else:
+            player1.heuristic = playout
+            player2.iteration_count = match_up.p2_iterations
+            # if match_up.p2_neural_net:
+            #     nn = nn or load_neural_net(controller.game, checkpoint_path)
+            #     player2.heuristic = nn
+            # else:
+            player2.heuristic = playout
+            # logger.debug(f'checking params {i}, {j} ({x}, {y}) with {counts[i, j]} counts')
+            controller.start_game()
+            while not controller.take_turn():
+                try:
+                    self.request_queue.get_nowait()
+                    return  # Received the quit message.
+                except Empty:
+                    pass
 
-        logger.debug('Result of pitting %s vs %s: %s.',
-                     match_up.format_definition(match_up.p1_iterations,
-                                                match_up.p1_neural_net),
-                     match_up.format_definition(match_up.p2_iterations,
-                                                match_up.p2_neural_net),
-                     result)
-        result_queue.put(match_up.key + (result,))
-        match_up.record_result(result)
-        if game_count:
-            game_count -= 1
+            if controller.board.is_win(Game.X_PLAYER):
+                result = Game.X_PLAYER
+            elif controller.board.is_win(Game.O_PLAYER):
+                result = Game.O_PLAYER
+            else:
+                result = 0
+
+            logger.debug('Result of pitting %s vs %s: %s.',
+                         match_up.format_definition(match_up.p1_iterations,
+                                                    match_up.p1_neural_net),
+                         match_up.format_definition(match_up.p2_iterations,
+                                                    match_up.p2_neural_net),
+                         result)
+            self.result_queue.put(match_up.key + (result,))
+            match_up.record_result(result)
+            if game_count:
+                game_count -= 1
 
 
 # def load_neural_net(game, checkpoint_path):

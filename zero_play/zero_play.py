@@ -13,7 +13,7 @@ from random import shuffle
 import numpy as np
 from PySide6.QtCore import QSettings
 
-from PySide6.QtGui import Qt, QIcon, QPixmap
+from PySide6.QtGui import Qt, QIcon, QPixmap, QCloseEvent
 from PySide6.QtWidgets import (QApplication, QMainWindow, QFileDialog,
                                QTableWidgetItem, QGridLayout, QPushButton,
                                QSizePolicy, QDialog, QWidget, QLabel, QComboBox)
@@ -196,6 +196,9 @@ class ZeroPlayWindow(QMainWindow):
         dialog = AboutDialog(credit_pairs, self)
         dialog.setWindowTitle(f'About {self.get_collection_name()}')
         dialog.exec_()
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        self.stop_workers()
 
     def load_game_list(self, game_layout: QGridLayout):
         while game_layout.count():
@@ -463,8 +466,12 @@ class ZeroPlayWindow(QMainWindow):
         settings.setValue('strength_test_max', ui.strength_test_max.value())
         game_display: GameDisplay = ui.strength_test_game.currentData()
         start_state = game_display.start_state
-        players = [MctsPlayer(start_state, GameState.X_PLAYER),
-                   MctsPlayer(start_state, GameState.O_PLAYER)]
+        players = [MctsPlayer(start_state,
+                              GameState.X_PLAYER,
+                              process_count=self.cpu_count),
+                   MctsPlayer(start_state,
+                              GameState.O_PLAYER,
+                              process_count=self.cpu_count)]
         controller = PlayController(start_state, players)
         player_definitions = ui.strength_test_strengths.text().split()
         self.display = self.strength_canvas

@@ -298,7 +298,7 @@ class MctsPlayer(Player):
     This is based on the general discussion of MCTS in Wikipedia:
     https://en.wikipedia.org/wiki/Monte_Carlo_tree_search
     Also based on the specific adaptations of AlphaZero:
-    http://web.stanford.edu/~surag/posts/alphazero.html
+    https://web.stanford.edu/~surag/posts/alphazero.html
     The original AlphaZero paper:
     https://deepmind.com/blog/alphago-zero-learning-scratch/
     """
