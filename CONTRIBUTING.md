@@ -102,6 +102,16 @@ steps:
 6. Run the project, and check that the new game shows up in the main list. Also
    check that the rules display properly.
 
+## Making Database Changes
+The database schema is managed with [Alembic], and you can make changes by
+adding attributes to the model classes in the `zero_play/models` folder or
+adding new classes. Once your classes are ready, create a new migration by
+running:
+
+   PYTHONPATH=. alembic revision --autogenerate -m "migration name"
+
+[Alembic]: https://alembic.sqlalchemy.org/
+
 ## Testing GitHub Pages locally
 The web site uses the [Bulma Clean theme], which is based on [Bulma]. The
 [Bulma colours] can be particularly helpful to learn about.

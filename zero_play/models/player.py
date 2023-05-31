@@ -15,7 +15,7 @@ class PlayerRecord(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     type = Column(String)
-    iterations = Column(Integer)
+    milliseconds = Column(Integer)
     match_players = relationship(MatchPlayerRecord, back_populates='player')
 
     def __repr__(self):

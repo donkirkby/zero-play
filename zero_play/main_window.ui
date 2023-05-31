@@ -100,7 +100,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>searches</string>
+             <string>seconds</string>
             </property>
            </widget>
           </item>
@@ -144,7 +144,7 @@
           <item row="2" column="3">
            <widget class="QLabel" name="searches_label2">
             <property name="text">
-             <string>searches</string>
+             <string>seconds</string>
             </property>
            </widget>
           </item>
@@ -158,19 +158,6 @@
             </property>
             <property name="text">
              <string>Player 1:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QSpinBox" name="searches1">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximum">
-             <number>1000000</number>
             </property>
            </widget>
           </item>
@@ -188,23 +175,36 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="2">
-           <widget class="QSpinBox" name="searches2">
+          <item row="4" column="1" colspan="4">
+           <widget class="QPushButton" name="start">
+            <property name="text">
+             <string>Start</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QDoubleSpinBox" name="search_seconds1">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="maximum">
-             <number>1000000</number>
+            <property name="decimals">
+             <number>1</number>
             </property>
            </widget>
           </item>
-          <item row="4" column="1" colspan="4">
-           <widget class="QPushButton" name="start">
-            <property name="text">
-             <string>Start</string>
+          <item row="2" column="2">
+           <widget class="QDoubleSpinBox" name="search_seconds2">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="decimals">
+             <number>1</number>
             </property>
            </widget>
           </item>
@@ -375,19 +375,6 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="1" colspan="2">
-         <widget class="QSpinBox" name="strength_test_min">
-          <property name="suffix">
-           <string> iteration(s)</string>
-          </property>
-          <property name="minimum">
-           <number>1</number>
-          </property>
-          <property name="maximum">
-           <number>1000000</number>
-          </property>
-         </widget>
-        </item>
         <item row="6" column="1">
          <widget class="QPushButton" name="start_strength_test">
           <property name="text">
@@ -422,19 +409,32 @@
           </property>
          </widget>
         </item>
-        <item row="4" column="1" colspan="2">
-         <widget class="QSpinBox" name="strength_test_max">
+        <item row="3" column="1" colspan="2">
+         <widget class="QDoubleSpinBox" name="strength_test_min">
           <property name="suffix">
-           <string> iteration(s)</string>
+           <string> seconds</string>
           </property>
-          <property name="minimum">
+          <property name="decimals">
+           <number>1</number>
+          </property>
+          <property name="value">
+           <double>0.100000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1" colspan="2">
+         <widget class="QDoubleSpinBox" name="strength_test_max">
+          <property name="suffix">
+           <string> seconds</string>
+          </property>
+          <property name="decimals">
            <number>1</number>
           </property>
           <property name="maximum">
-           <number>1000000</number>
+           <double>9999.899999999999636</double>
           </property>
           <property name="value">
-           <number>512</number>
+           <double>51.200000000000003</double>
           </property>
          </widget>
         </item>

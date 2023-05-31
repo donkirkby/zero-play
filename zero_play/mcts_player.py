@@ -4,6 +4,8 @@ import math
 import typing
 from concurrent.futures import (Future, wait, FIRST_COMPLETED, ALL_COMPLETED,
                                 ProcessPoolExecutor)
+from datetime import datetime
+from itertools import count
 from operator import itemgetter
 
 import numpy as np
@@ -169,10 +171,14 @@ class SearchManager:
                 else:
                     self.current_node = SearchNode(game_state)
 
-    def search(self, board: GameState, iterations: int):
+    def search(self,
+               board: GameState,
+               iterations: int | None = 1,
+               milliseconds: int | None = None):
+        start_time = datetime.now()
         self.find_node(board)
         max_tasks = self.process_count * 2
-        for _ in range(iterations):
+        for iteration in count(1):
             leaf = self.current_node.select_leaf()
             if self.executor is None:
                 leaf.evaluate(self.heuristic)
@@ -185,6 +191,14 @@ class SearchManager:
                 else:
                     timeout = 0
                 self.check_tasks(timeout, return_when=FIRST_COMPLETED)
+            if iterations is not None:
+                if iteration >= iterations:
+                    break
+            else:
+                assert milliseconds is not None
+                spent_seconds = (datetime.now() - start_time).total_seconds()
+                if spent_seconds*1000 > milliseconds:
+                    break
         if self.tasks:
             self.check_tasks(timeout=None, return_when=ALL_COMPLETED)
 
@@ -247,7 +261,7 @@ class SearchManager:
 
     def create_training_data(self, iterations: int, data_size: int):
         game_states: typing.List[typing.Tuple[GameState, np.ndarray]] = []
-        self.search(self.current_node.game_state, iterations=1)  # One extra to start.
+        self.search(self.current_node.game_state, milliseconds=1)  # One extra to start.
         report_size = 0
         board_shape = self.current_node.game_state.get_spaces().shape
         boards = np.zeros((data_size,) + board_shape, int)
@@ -307,11 +321,16 @@ class MctsPlayer(Player):
     def __init__(self,
                  start_state: GameState,
                  player_number: int = GameState.X_PLAYER,
-                 iteration_count: int = DEFAULT_ITERATIONS,
+                 iteration_count: int | None = None,
+                 milliseconds: int | None = None,
                  heuristic: Heuristic | None = None,
                  process_count: int = 1):
         super().__init__(player_number, heuristic)
-        self.iteration_count = iteration_count
+        self.milliseconds = milliseconds
+        if milliseconds is None and iteration_count is None:
+            self.iteration_count: int | None = self.DEFAULT_ITERATIONS
+        else:
+            self.iteration_count = iteration_count
         self.search_manager = SearchManager(start_state,
                                             self.heuristic,
                                             process_count)
@@ -336,7 +355,9 @@ class MctsPlayer(Player):
         :param game_state: the current state of the game.
         :return: the chosen move's index in the list of valid moves.
         """
-        self.search_manager.search(game_state, self.iteration_count)
+        self.search_manager.search(game_state,
+                                   self.iteration_count,
+                                   self.milliseconds)
         if game_state.get_move_count() < 15:
             return self.search_manager.choose_weighted_move()
         return self.search_manager.get_best_move()
@@ -353,5 +374,8 @@ class MctsPlayer(Player):
         return self.search_manager.get_move_probabilities(game_state)
 
     def get_summary(self) -> typing.Sequence[str]:
+        if self.milliseconds is not None:
+            return (('mcts',) + tuple(self.heuristic.get_summary()) +
+                    (f'{self.milliseconds}ms search',))
         return (('mcts',) + tuple(self.heuristic.get_summary()) +
                 (f'{self.iteration_count} iterations',))

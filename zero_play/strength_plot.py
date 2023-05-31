@@ -428,13 +428,13 @@ class GameRunner(QObject):
 
         while is_unlimited or game_count > 0:
             match_up = win_counter.find_next_matchup()
-            player1.iteration_count = match_up.p1_iterations
+            player1.milliseconds = match_up.p1_iterations
             # if match_up.p1_neural_net:
             #     nn = nn or load_neural_net(controller.game, checkpoint_path)
             #     player1.heuristic = nn
             # else:
             player1.heuristic = playout
-            player2.iteration_count = match_up.p2_iterations
+            player2.milliseconds = match_up.p2_iterations
             # if match_up.p2_neural_net:
             #     nn = nn or load_neural_net(controller.game, checkpoint_path)
             #     player2.heuristic = nn

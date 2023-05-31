@@ -52,7 +52,7 @@ try:
 except ImportError:
     from zero_play.plot_canvas_dummy import PlotCanvasDummy as PlotCanvas  # type: ignore
 
-DEFAULT_SEARCHES = 600
+DEFAULT_SEARCH_MILLISECONDS = 500
 
 
 class AboutDialog(QDialog):
@@ -130,7 +130,8 @@ class ZeroPlayWindow(QMainWindow):
             lambda new_index: self.on_player_changed(ui.player1, new_index))
         ui.player2.currentIndexChanged.connect(
             lambda new_index: self.on_player_changed(ui.player2, new_index))
-        ui.searches1.valueChanged.connect(self.on_searches_changed)
+        ui.search_seconds1.valueChanged.connect(self.on_searches_changed)
+        ui.search_seconds2.valueChanged.connect(self.on_searches_changed)
         ui.searches_lock1.stateChanged.connect(self.on_lock_changed)
         ui.searches_lock2.stateChanged.connect(self.on_lock_changed)
         self.cpu_count = cpu_count() or 1
@@ -185,10 +186,20 @@ class ZeroPlayWindow(QMainWindow):
             db_url = get_database_url()
             if db_url is None:
                 return None
+            self.upgrade_db(db_url)
+
             engine = create_engine(db_url)
             Session.configure(bind=engine)
             self._db_session = Session()
         return self._db_session
+
+    @staticmethod
+    def upgrade_db(db_url):
+        script_path = str(Path(__file__).parent / 'db')
+        alembic_config = Config(config_args=immutabledict({
+            'script_location': script_path,
+            'sqlalchemy.url': db_url}))
+        command.upgrade(alembic_config, 'head')
 
     def on_about(self):
         credit_pairs = chain(*(display.credit_pairs
@@ -325,9 +336,11 @@ class ZeroPlayWindow(QMainWindow):
         is_locked = settings.value('searches_locked', False, bool)
         self.ui.searches_lock1.setChecked(is_locked)
         self.ui.searches_lock2.setChecked(is_locked)
-        search_count = settings.value('searches', DEFAULT_SEARCHES, int)
-        self.ui.searches1.setValue(search_count)
-        self.ui.searches2.setValue(search_count)
+        search_seconds = settings.value('search_milliseconds',
+                                        DEFAULT_SEARCH_MILLISECONDS,
+                                        int) / 1000
+        self.ui.search_seconds1.setValue(search_seconds)
+        self.ui.search_seconds2.setValue(search_seconds)
         self.ui.shuffle_players.setChecked(settings.value('shuffle_players',
                                                           False,
                                                           bool))
@@ -356,13 +369,13 @@ class ZeroPlayWindow(QMainWindow):
         assert self.start_state is not None
         settings = get_settings(self.start_state)
         if player is self.ui.player1:
-            searches = self.ui.searches1
+            searches = self.ui.search_seconds1
             searches_label = self.ui.searches_label1
             searches_lock = self.ui.searches_lock1
             setting_name = 'player_1'
             row = 1
         else:
-            searches = self.ui.searches2
+            searches = self.ui.search_seconds2
             searches_label = self.ui.searches_label2
             searches_lock = self.ui.searches_lock2
             setting_name = 'player_2'
@@ -413,8 +426,9 @@ class ZeroPlayWindow(QMainWindow):
         self.game_display.update_board(self.game_display.start_state)
         self.is_history_dirty = False
         ui = self.ui
-        player_fields = [(ui.player1.currentData(), ui.searches1.value()),
-                         (ui.player2.currentData(), ui.searches2.value())]
+        player_fields = [
+            (ui.player1.currentData(), round(1000*ui.search_seconds1.value())),
+            (ui.player2.currentData(), round(1000*ui.search_seconds2.value()))]
         is_shuffled = ui.shuffle_players.isChecked()
         settings = get_settings(self.start_state)
         settings.setValue('shuffle_players', is_shuffled)
@@ -425,9 +439,9 @@ class ZeroPlayWindow(QMainWindow):
         self.game_display.mcts_players = [
             MctsPlayer(self.start_state,
                        player_number,
-                       iteration_count=searches,
+                       milliseconds=search_time,
                        process_count=self.cpu_count)
-            for player_number, (heuristic, searches) in mcts_choices.items()
+            for player_number, (heuristic, search_time) in mcts_choices.items()
             if heuristic is not None]
         layout: QGridLayout = ui.display_page.layout()
         layout.replaceWidget(ui.game_display, self.game_display)
@@ -466,12 +480,8 @@ class ZeroPlayWindow(QMainWindow):
         settings.setValue('strength_test_max', ui.strength_test_max.value())
         game_display: GameDisplay = ui.strength_test_game.currentData()
         start_state = game_display.start_state
-        players = [MctsPlayer(start_state,
-                              GameState.X_PLAYER,
-                              process_count=self.cpu_count),
-                   MctsPlayer(start_state,
-                              GameState.O_PLAYER,
-                              process_count=self.cpu_count)]
+        players = [MctsPlayer(start_state, GameState.X_PLAYER, process_count=self.cpu_count),
+                   MctsPlayer(start_state, GameState.O_PLAYER, process_count=self.cpu_count)]
         controller = PlayController(start_state, players)
         player_definitions = ui.strength_test_strengths.text().split()
         self.display = self.strength_canvas
@@ -492,15 +502,18 @@ class ZeroPlayWindow(QMainWindow):
         display: GameDisplay = self.ui.history_game.currentData()
         self.plot_canvas.game = display.start_state
         settings = get_settings(display.start_state)
-        future_strength = settings.value('searches', DEFAULT_SEARCHES, int)
+        future_strength = settings.value('search_milliseconds',
+                                         DEFAULT_SEARCH_MILLISECONDS,
+                                         int)
         self.plot_canvas.requery(self.db_session, future_strength)
 
-    def on_searches_changed(self, search_count: int):
+    def on_searches_changed(self, search_seconds: float):
         if self.ui.stacked_widget.currentWidget() is not self.ui.players_page:
             return
         if self.start_state is not None:
             settings = get_settings(self.start_state)
-            settings.setValue('searches', search_count)
+            settings.setValue('search_milliseconds',
+                              round(search_seconds * 10) * 100)
             settings.remove('game_count')
             settings.remove('last_score')
             settings.remove('streak_length')
@@ -534,10 +547,10 @@ class ZeroPlayWindow(QMainWindow):
             else:
                 player_record = db_session.query(PlayerRecord).filter_by(
                     type=PlayerRecord.PLAYOUT_TYPE,
-                    iterations=mcts_player.iteration_count).one_or_none()
+                    milliseconds=mcts_player.milliseconds).one_or_none()
                 if player_record is None:
                     player_record = PlayerRecord(type=PlayerRecord.PLAYOUT_TYPE,
-                                                 iterations=mcts_player.iteration_count)
+                                                 milliseconds=mcts_player.milliseconds)
                     db_session.add(player_record)
             if player_number == winner:
                 result = 1
@@ -565,13 +578,15 @@ class ZeroPlayWindow(QMainWindow):
         else:
             score = 1
         settings = get_settings(self.start_state)
+        assert mcts_player.milliseconds is not None
         strength_adjuster = StrengthAdjuster(
-            strength=mcts_player.iteration_count,
+            strength=mcts_player.milliseconds,
             game_count=settings.value('game_count', 0, int),
             last_score=settings.value('last_score', 0, int),
             streak_length=settings.value('streak_length', 1, int))
         strength_adjuster.record_score(score)
-        settings.setValue('searches', strength_adjuster.strength)
+        settings.setValue('search_milliseconds',
+                          round(strength_adjuster.strength / 100) * 100)
         settings.setValue('game_count', strength_adjuster.game_count)
         settings.setValue('last_score', strength_adjuster.last_score)
         settings.setValue('streak_length', strength_adjuster.streak_length)
@@ -604,25 +619,45 @@ class ZeroPlayWindow(QMainWindow):
     def on_new_db(self):
         settings = get_settings()
         db_path = settings.value('db_path')
+        kwargs = get_file_dialog_options()
         file_name, _ = QFileDialog.getSaveFileName(
             self,
             "Create a new database",
             dir=db_path,
             filter='Player databases (*.zpl)',
-            options=QFileDialog.DontUseNativeDialog)
+            **kwargs)
         if not file_name:
             return
-        script_path = str(Path(__file__).parent / 'db')
         database_path = Path(file_name).absolute()
+        self.upgrade_db(get_database_url(database_path))
         settings.setValue('db_path', str(database_path))
-        database_url = get_database_url(database_path)
-        alembic_config = Config(config_args=immutabledict({
-            'script_location': script_path,
-            'sqlalchemy.url': database_url}))
-        command.upgrade(alembic_config, 'head')
+        self._db_session = None
+        _ = self.db_session  # Force the database to open and upgrade
 
     def on_open_db(self):
-        pass
+        settings = get_settings()
+        db_path = settings.value('db_path')
+        kwargs = get_file_dialog_options()
+        file_name, _ = QFileDialog.getOpenFileName(
+            self,
+            "Open database",
+            dir=db_path,
+            filter='Player databases (*.zpl)',
+            **kwargs)
+        if not file_name:
+            return
+        database_path = Path(file_name).absolute()
+        settings.setValue('db_path', str(database_path))
+        self._db_session = None
+        _ = self.db_session  # Force the database to open and upgrade
+
+
+def get_file_dialog_options():
+    kwargs = {}
+    if 'SNAP' in os.environ:
+        # Native dialog restricts paths for snap processes to /run/user.
+        kwargs['options'] = QFileDialog.DontUseNativeDialog
+    return kwargs
 
 
 def main():

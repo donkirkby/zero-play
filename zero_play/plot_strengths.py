@@ -59,7 +59,7 @@ def parse_args():
 #     #     help="the player to use",
 #     #     action='entry_point')
 #     # args.player = ['mcts']
-#     # args.mcts_iterations = MctsPlayer.DEFAULT_ITERATIONS
+#     # args.mcts_iterations = MctsPlayer.DEFAULT_MILLISECONDS
 #
 #     if '__live_coding_context__' in locals():
 #         controller = None

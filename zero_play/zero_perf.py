@@ -55,12 +55,8 @@ def main() -> None:
     game_state_class = getattr(module, class_name)
     start_state: GameState = game_state_class()
 
-    player1 = MctsPlayer(start_state,
-                         iteration_count=args.iter1,
-                         process_count=args.processes1)
-    player2 = MctsPlayer(start_state,
-                         iteration_count=args.iter2,
-                         process_count=args.processes2)
+    player1 = MctsPlayer(start_state, milliseconds=args.iter1, process_count=args.processes1)
+    player2 = MctsPlayer(start_state, milliseconds=args.iter2, process_count=args.processes2)
     controller = PlayController(start_state, [player1, player2])
     controller.play(args.game_count, args.flip, args.display)
 

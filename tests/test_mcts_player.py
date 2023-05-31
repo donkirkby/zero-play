@@ -234,7 +234,7 @@ def test_choose_move_in_pool():
 OXOXO..
 XOXOXOO
 """)
-    player = MctsPlayer(start_state, iteration_count=200, process_count=2)
+    player = MctsPlayer(start_state, milliseconds=200, process_count=2)
     valid_moves = start_state.get_valid_moves()
 
     move = player.choose_move(state1)
@@ -282,7 +282,7 @@ XOXOXOO
     expected_high = expected_count * 1.1
     move_counts = Counter()
     for _ in range(test_count):
-        player = MctsPlayer(start_state, iteration_count=0)
+        player = MctsPlayer(start_state, milliseconds=0)
 
         move = player.choose_move(state1)
         move_counts[move] += 1
@@ -407,7 +407,7 @@ XX.
 OO.
 """)
 
-    player = MctsPlayer(TicTacToeState(), state1.X_PLAYER, iteration_count=100)
+    player = MctsPlayer(TicTacToeState(), state1.X_PLAYER, milliseconds=100)
 
     move = player.choose_move(state1)
 
@@ -429,7 +429,7 @@ def test_choose_move_sets_current_node():
 OXOXOXO
 XOXOXOX
 """)
-    player = MctsPlayer(start_state, iteration_count=20)
+    player = MctsPlayer(start_state, milliseconds=20)
 
     move1 = player.choose_move(state1)
     current_node1 = player.search_manager.current_node

@@ -33,8 +33,8 @@ class StrengthHistoryPlot(PlotCanvas):
                 else:
                     ai_player = player
             if has_human and ai_player is not None:
-                assert ai_player.iterations is not None
-                strengths.append(ai_player.iterations)
+                assert ai_player.milliseconds is not None
+                strengths.append(ai_player.milliseconds / 1000)
         return strengths
 
     def requery(self, db_session: SessionBase | None, future_strength: int):
@@ -43,12 +43,15 @@ class StrengthHistoryPlot(PlotCanvas):
         self.axes.clear()
         marker = 'o' if len(strengths) == 1 else ''
         self.axes.plot(strengths, marker, label='past')
-        self.axes.plot([len(strengths)], [future_strength], 'o', label='next')
+        self.axes.plot([len(strengths)],
+                       [future_strength / 1000],
+                       'o',
+                       label='next')
         self.axes.set_ylim(0)
         if len(strengths) + 1 < len(self.axes.get_xticks()):
             self.axes.set_xticks(list(range(len(strengths) + 1)))
-        self.axes.set_title('Search iterations over time')
-        self.axes.set_ylabel('Search iterations')
+        self.axes.set_title('Search seconds over time')
+        self.axes.set_ylabel('Search seconds')
         self.axes.set_xlabel('Number of games played')
         self.axes.legend(loc='lower right')
         self.axes.figure.canvas.draw()

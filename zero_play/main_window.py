@@ -16,10 +16,10 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QGridLayout,
-    QHeaderView, QLabel, QLineEdit, QMainWindow,
-    QMenu, QMenuBar, QPushButton, QSizePolicy,
-    QSpacerItem, QSpinBox, QStackedWidget, QStatusBar,
+from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDoubleSpinBox,
+    QGridLayout, QHeaderView, QLabel, QLineEdit,
+    QMainWindow, QMenu, QMenuBar, QPushButton,
+    QSizePolicy, QSpacerItem, QStackedWidget, QStatusBar,
     QTableWidget, QTableWidgetItem, QTextBrowser, QVBoxLayout,
     QWidget)
 
@@ -171,17 +171,6 @@ class Ui_MainWindow(object):
 
         self.player_layout.addWidget(self.player_label1, 1, 0, 1, 1)
 
-        self.searches1 = QSpinBox(self.players_page)
-        self.searches1.setObjectName(u"searches1")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
-        sizePolicy5.setHorizontalStretch(0)
-        sizePolicy5.setVerticalStretch(0)
-        sizePolicy5.setHeightForWidth(self.searches1.sizePolicy().hasHeightForWidth())
-        self.searches1.setSizePolicy(sizePolicy5)
-        self.searches1.setMaximum(1000000)
-
-        self.player_layout.addWidget(self.searches1, 1, 2, 1, 1)
-
         self.player_label2 = QLabel(self.players_page)
         self.player_label2.setObjectName(u"player_label2")
 
@@ -192,18 +181,29 @@ class Ui_MainWindow(object):
 
         self.player_layout.addWidget(self.shuffle_players, 3, 1, 1, 4)
 
-        self.searches2 = QSpinBox(self.players_page)
-        self.searches2.setObjectName(u"searches2")
-        sizePolicy5.setHeightForWidth(self.searches2.sizePolicy().hasHeightForWidth())
-        self.searches2.setSizePolicy(sizePolicy5)
-        self.searches2.setMaximum(1000000)
-
-        self.player_layout.addWidget(self.searches2, 2, 2, 1, 1)
-
         self.start = QPushButton(self.players_page)
         self.start.setObjectName(u"start")
 
         self.player_layout.addWidget(self.start, 4, 1, 1, 4)
+
+        self.search_seconds1 = QDoubleSpinBox(self.players_page)
+        self.search_seconds1.setObjectName(u"search_seconds1")
+        sizePolicy5 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.search_seconds1.sizePolicy().hasHeightForWidth())
+        self.search_seconds1.setSizePolicy(sizePolicy5)
+        self.search_seconds1.setDecimals(1)
+
+        self.player_layout.addWidget(self.search_seconds1, 1, 2, 1, 1)
+
+        self.search_seconds2 = QDoubleSpinBox(self.players_page)
+        self.search_seconds2.setObjectName(u"search_seconds2")
+        sizePolicy5.setHeightForWidth(self.search_seconds2.sizePolicy().hasHeightForWidth())
+        self.search_seconds2.setSizePolicy(sizePolicy5)
+        self.search_seconds2.setDecimals(1)
+
+        self.player_layout.addWidget(self.search_seconds2, 2, 2, 1, 1)
 
         self.player_layout.setColumnStretch(1, 10)
         self.player_layout.setColumnStretch(2, 1)
@@ -334,13 +334,6 @@ class Ui_MainWindow(object):
 
         self.gridLayout_5.addWidget(self.label, 0, 0, 1, 1)
 
-        self.strength_test_min = QSpinBox(self.plot_strength_page)
-        self.strength_test_min.setObjectName(u"strength_test_min")
-        self.strength_test_min.setMinimum(1)
-        self.strength_test_min.setMaximum(1000000)
-
-        self.gridLayout_5.addWidget(self.strength_test_min, 3, 1, 1, 2)
-
         self.start_strength_test = QPushButton(self.plot_strength_page)
         self.start_strength_test.setObjectName(u"start_strength_test")
 
@@ -361,11 +354,18 @@ class Ui_MainWindow(object):
 
         self.gridLayout_5.addWidget(self.strength_test_strengths, 2, 1, 1, 2)
 
-        self.strength_test_max = QSpinBox(self.plot_strength_page)
+        self.strength_test_min = QDoubleSpinBox(self.plot_strength_page)
+        self.strength_test_min.setObjectName(u"strength_test_min")
+        self.strength_test_min.setDecimals(1)
+        self.strength_test_min.setValue(0.100000000000000)
+
+        self.gridLayout_5.addWidget(self.strength_test_min, 3, 1, 1, 2)
+
+        self.strength_test_max = QDoubleSpinBox(self.plot_strength_page)
         self.strength_test_max.setObjectName(u"strength_test_max")
-        self.strength_test_max.setMinimum(1)
-        self.strength_test_max.setMaximum(1000000)
-        self.strength_test_max.setValue(512)
+        self.strength_test_max.setDecimals(1)
+        self.strength_test_max.setMaximum(9999.899999999999636)
+        self.strength_test_max.setValue(51.200000000000003)
 
         self.gridLayout_5.addWidget(self.strength_test_max, 4, 1, 1, 2)
 
@@ -459,11 +459,11 @@ class Ui_MainWindow(object):
         self.othello.setText(QCoreApplication.translate("MainWindow", u"Othello", None))
         self.searches_lock2.setText(QCoreApplication.translate("MainWindow", u"Lock", None))
         self.cancel.setText(QCoreApplication.translate("MainWindow", u"Cancel", None))
-        self.searches_label1.setText(QCoreApplication.translate("MainWindow", u"searches", None))
+        self.searches_label1.setText(QCoreApplication.translate("MainWindow", u"seconds", None))
         self.searches_lock1.setText(QCoreApplication.translate("MainWindow", u"Lock", None))
         self.game_label.setText(QCoreApplication.translate("MainWindow", u"Game:", None))
         self.game_name.setText(QCoreApplication.translate("MainWindow", u"Chosen Game's Name", None))
-        self.searches_label2.setText(QCoreApplication.translate("MainWindow", u"searches", None))
+        self.searches_label2.setText(QCoreApplication.translate("MainWindow", u"seconds", None))
         self.player_label1.setText(QCoreApplication.translate("MainWindow", u"Player 1:", None))
         self.player_label2.setText(QCoreApplication.translate("MainWindow", u"Player 2:", None))
         self.shuffle_players.setText(QCoreApplication.translate("MainWindow", u"Shuffle Player Order", None))
@@ -479,7 +479,6 @@ class Ui_MainWindow(object):
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Opponent min:", None))
         self.reset_strength_test.setText(QCoreApplication.translate("MainWindow", u"Reset", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Game:", None))
-        self.strength_test_min.setSuffix(QCoreApplication.translate("MainWindow", u" iteration(s)", None))
         self.start_strength_test.setText(QCoreApplication.translate("MainWindow", u"Start", None))
         self.strengths_label.setText(QCoreApplication.translate("MainWindow", u"Player strengths:", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Opponent max:", None))
@@ -490,7 +489,8 @@ class Ui_MainWindow(object):
         self.strength_test_strengths.setWhatsThis("")
 #endif // QT_CONFIG(whatsthis)
         self.strength_test_strengths.setText(QCoreApplication.translate("MainWindow", u"1 8 64", None))
-        self.strength_test_max.setSuffix(QCoreApplication.translate("MainWindow", u" iteration(s)", None))
+        self.strength_test_min.setSuffix(QCoreApplication.translate("MainWindow", u" seconds", None))
+        self.strength_test_max.setSuffix(QCoreApplication.translate("MainWindow", u" seconds", None))
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"Game:", None))
         self.menu_file.setTitle(QCoreApplication.translate("MainWindow", u"&File", None))
         self.menu_new.setTitle(QCoreApplication.translate("MainWindow", u"&New", None))
