@@ -32,17 +32,17 @@ class MatchUp:
                  p2_definition: int | str | None = None,
                  source: typing.Optional['MatchUp'] = None):
         if source is None:
-            self.p1_iterations, self.p1_neural_net = MatchUp.parse_definition(
+            self.p1_milliseconds, self.p1_neural_net = MatchUp.parse_definition(
                 p1_definition)
-            self.p2_iterations, self.p2_neural_net = MatchUp.parse_definition(
+            self.p2_milliseconds, self.p2_neural_net = MatchUp.parse_definition(
                 p2_definition)
             self.p1_wins = 0
             self.ties = 0
             self.p2_wins = 0
         else:
-            self.p1_iterations = source.p1_iterations
+            self.p1_milliseconds = source.p1_milliseconds
             self.p1_neural_net = source.p1_neural_net
-            self.p2_iterations = source.p2_iterations
+            self.p2_milliseconds = source.p2_milliseconds
             self.p2_neural_net = source.p2_neural_net
             self.p1_wins = source.p1_wins
             self.ties = source.ties
@@ -50,27 +50,27 @@ class MatchUp:
 
     @staticmethod
     def parse_definition(definition):
-        match = re.fullmatch(r'(\d+)(nn)?', str(definition))
-        return int(match.group(1)), bool(match.group(2))
+        match = re.fullmatch(r'([\d.]+)(nn)?', str(definition))
+        return round(float(match.group(1))*1000), bool(match.group(2))
 
     @staticmethod
-    def format_definition(iterations, neural_net):
+    def format_definition(milliseconds, neural_net) -> str:
         if neural_net:
-            return f'{iterations}nn'
-        return iterations
+            return f'{milliseconds}nn'
+        return str(milliseconds)
 
     def __repr__(self):
-        p1_definition = self.format_definition(self.p1_iterations,
+        p1_definition = self.format_definition(self.p1_milliseconds,
                                                self.p1_neural_net)
-        p2_definition = self.format_definition(self.p2_iterations,
+        p2_definition = self.format_definition(self.p2_milliseconds,
                                                self.p2_neural_net)
         return f'MatchUp({p1_definition!r}, {p2_definition!r})'
 
     @property
     def key(self):
-        return (self.p1_iterations,
+        return (self.p1_milliseconds,
                 self.p1_neural_net,
-                self.p2_iterations,
+                self.p2_milliseconds,
                 self.p2_neural_net)
 
     @property
@@ -125,7 +125,7 @@ class WinCounter(dict):
             opponent_level = opponent_min
             while opponent_level <= opponent_max:
                 self.opponent_levels.append(opponent_level)
-                opponent_level <<= 1
+                opponent_level *= 2
 
             for player_definition in player_definitions:
                 for opponent_level in self.opponent_levels:
@@ -340,7 +340,7 @@ class StrengthPlot(PlotCanvas):
         game_record = GameRecord.find_or_create(db_session, self.game)
         match_record: MatchRecord
         for match_record in game_record.matches:  # type: ignore
-            player1_iterations = player2_iterations = result = None
+            player1_milliseconds = player2_milliseconds = result = None
             has_human = False
             match_player: MatchPlayerRecord
             for match_player in match_record.match_players:  # type: ignore
@@ -349,15 +349,15 @@ class StrengthPlot(PlotCanvas):
                     has_human = True
                 player_number = match_player.player_number
                 if player_number == player1_number:
-                    player1_iterations = player.iterations
+                    player1_milliseconds = player.milliseconds
                     result = match_player.result
                 else:
-                    player2_iterations = player.iterations
+                    player2_milliseconds = player.milliseconds
             if has_human:
                 continue
-            match_up = self.win_counter.get((player1_iterations,
+            match_up = self.win_counter.get((player1_milliseconds,
                                              False,
-                                             player2_iterations,
+                                             player2_milliseconds,
                                              False))
             if match_up is not None:
                 match_up.record_result(result)
@@ -370,15 +370,15 @@ class StrengthPlot(PlotCanvas):
         match_record = MatchRecord(game=game_record)
         db_session.add(match_record)
         mcts_player: typing.Optional[MctsPlayer]
-        iteration_entries = (match_up.p1_iterations, match_up.p2_iterations)
+        millisecond_entries = (match_up.p1_milliseconds, match_up.p2_milliseconds)
         for i, player_number in enumerate(self.game.get_players()):
-            iterations = iteration_entries[i]
+            milliseconds = millisecond_entries[i]
             player_record = db_session.query(PlayerRecord).filter_by(
                 type=PlayerRecord.PLAYOUT_TYPE,
-                iterations=iterations).one_or_none()
+                milliseconds=milliseconds).one_or_none()
             if player_record is None:
                 player_record = PlayerRecord(type=PlayerRecord.PLAYOUT_TYPE,
-                                             iterations=iterations)
+                                             milliseconds=milliseconds)
                 db_session.add(player_record)
             player_result = result if i == 0 else -result
             match_player = MatchPlayerRecord(match=match_record,
@@ -428,18 +428,22 @@ class GameRunner(QObject):
 
         while is_unlimited or game_count > 0:
             match_up = win_counter.find_next_matchup()
-            player1.milliseconds = match_up.p1_iterations
+            player1.iteration_count = None
+            player1.milliseconds = match_up.p1_milliseconds
             # if match_up.p1_neural_net:
             #     nn = nn or load_neural_net(controller.game, checkpoint_path)
             #     player1.heuristic = nn
             # else:
             player1.heuristic = playout
-            player2.milliseconds = match_up.p2_iterations
+            player1.reset_counts()
+            player2.iteration_count = None
+            player2.milliseconds = match_up.p2_milliseconds
             # if match_up.p2_neural_net:
             #     nn = nn or load_neural_net(controller.game, checkpoint_path)
             #     player2.heuristic = nn
             # else:
             player2.heuristic = playout
+            player2.reset_counts()
             # logger.debug(f'checking params {i}, {j} ({x}, {y}) with {counts[i, j]} counts')
             controller.start_game()
             while not controller.take_turn():
@@ -449,6 +453,12 @@ class GameRunner(QObject):
                 except Empty:
                     pass
 
+            print(f'Player 1 averaged {player1.average_iterations:0.0f} '
+                  f'iterations in {player1.average_milliseconds/1000:0.1f}s '
+                  f'(target {player1.milliseconds/1000:0.1f}s), '
+                  f'and player 2 averaged {player2.average_iterations:0.0f} '
+                  f'iterations in {player2.average_milliseconds/1000:0.1f}s '
+                  f'(target {player2.milliseconds/1000:0.1f}s).')
             if controller.board.is_win(Game.X_PLAYER):
                 result = Game.X_PLAYER
             elif controller.board.is_win(Game.O_PLAYER):
@@ -457,9 +467,9 @@ class GameRunner(QObject):
                 result = 0
 
             logger.debug('Result of pitting %s vs %s: %s.',
-                         match_up.format_definition(match_up.p1_iterations,
+                         match_up.format_definition(match_up.p1_milliseconds,
                                                     match_up.p1_neural_net),
-                         match_up.format_definition(match_up.p2_iterations,
+                         match_up.format_definition(match_up.p2_milliseconds,
                                                     match_up.p2_neural_net),
                          result)
             self.result_queue.put(match_up.key + (result,))

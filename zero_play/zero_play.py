@@ -162,11 +162,11 @@ class ZeroPlayWindow(QMainWindow):
         ui.strength_test_min.setValue(settings.value(
             'strength_test_min',
             ui.strength_test_min.value(),
-            type=int))
+            type=float))
         ui.strength_test_max.setValue(settings.value(
             'strength_test_max',
             ui.strength_test_max.value(),
-            type=int))
+            type=float))
         self.on_toggle_review()
 
     @staticmethod

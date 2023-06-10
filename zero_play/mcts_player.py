@@ -153,6 +153,24 @@ class SearchManager:
         else:
             self.executor = ProcessPoolExecutor(process_count)
         self.tasks: typing.Dict[Future, SearchNode] = {}
+        self.search_count = 0
+        self.total_iterations = 0
+        self.total_milliseconds = 0
+
+    @property
+    def average_iterations(self) -> float:
+        if self.search_count == 0:
+            return math.nan
+        return self.total_iterations / self.search_count
+
+    @property
+    def average_milliseconds(self) -> float:
+        if self.search_count == 0:
+            return math.nan
+        return self.total_milliseconds / self.search_count
+
+    def reset_counts(self) -> None:
+        self.search_count = self.total_milliseconds = self.total_iterations = 0
 
     def reset(self) -> SearchNode:
         self.current_node = SearchNode(self.start_state)
@@ -178,6 +196,7 @@ class SearchManager:
         start_time = datetime.now()
         self.find_node(board)
         max_tasks = self.process_count * 2
+        iteration = 0
         for iteration in count(1):
             leaf = self.current_node.select_leaf()
             if self.executor is None:
@@ -204,6 +223,10 @@ class SearchManager:
 
         if self.current_node.children is None:
             self.current_node.select_leaf()
+        self.search_count += 1
+        self.total_iterations += iteration
+        spent_ms = (datetime.now() - start_time).total_seconds() * 1000
+        self.total_milliseconds += spent_ms
 
     def check_tasks(self, timeout, return_when):
         done, not_done = wait(self.tasks.keys(),
@@ -345,6 +368,17 @@ class MctsPlayer(Player):
         search_manager = getattr(self, 'search_manager', None)
         if search_manager is not None:
             search_manager.heuristic = value
+
+    def reset_counts(self) -> None:
+        self.search_manager.reset_counts()
+
+    @property
+    def average_iterations(self) -> float:
+        return self.search_manager.average_iterations
+
+    @property
+    def average_milliseconds(self) -> float:
+        return self.search_manager.average_milliseconds
 
     def end_game(self, game_state: GameState, opponent: Player):
         self.search_manager.reset()
