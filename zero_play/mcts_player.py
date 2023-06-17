@@ -226,7 +226,7 @@ class SearchManager:
         self.search_count += 1
         self.total_iterations += iteration
         spent_ms = (datetime.now() - start_time).total_seconds() * 1000
-        self.total_milliseconds += spent_ms
+        self.total_milliseconds += round(spent_ms)
 
     def check_tasks(self, timeout, return_when):
         done, not_done = wait(self.tasks.keys(),

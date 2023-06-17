@@ -1,4 +1,5 @@
 from io import BytesIO
+from pathlib import Path
 
 import pytest
 from PySide6.QtGui import QImage, QPainter
@@ -10,17 +11,26 @@ from zero_play.pixmap_differ import PixmapDiffer
 
 
 @pytest.fixture(scope='session')
-def pixmap_differ_session():
-    app = QApplication()
+def qapp():
+    yield QApplication()
 
-    yield PixmapDiffer()
 
-    assert app
+@pytest.fixture(scope='session')
+def pixmap_differ_session(qapp):
+    diffs_path = Path(__file__).parent / 'pixmap_diffs'
+
+    differ = PixmapDiffer(diffs_path)
+    yield differ
+    differ.remove_common_prefix()
+
+    assert qapp
 
 
 @pytest.fixture()
-def pixmap_differ(pixmap_differ_session):
+def pixmap_differ(request, pixmap_differ_session):
+    """ Pass the current request to the session pixmap differ. """
     plt.close('all')  # In case pixmap differ is comparing plots.
+    pixmap_differ_session.request = request
 
     yield pixmap_differ_session
 

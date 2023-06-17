@@ -453,12 +453,17 @@ class GameRunner(QObject):
                 except Empty:
                     pass
 
-            print(f'Player 1 averaged {player1.average_iterations:0.0f} '
-                  f'iterations in {player1.average_milliseconds/1000:0.1f}s '
-                  f'(target {player1.milliseconds/1000:0.1f}s), '
-                  f'and player 2 averaged {player2.average_iterations:0.0f} '
-                  f'iterations in {player2.average_milliseconds/1000:0.1f}s '
-                  f'(target {player2.milliseconds/1000:0.1f}s).')
+            debug_messages = []
+            for i, player in enumerate((player1, player2), 1):
+                average_milliseconds = player.average_milliseconds
+                milliseconds = player.milliseconds
+                assert average_milliseconds is not None
+                assert milliseconds is not None
+                debug_messages.append(
+                    f'Player {i} averaged {player.average_iterations:0.0f} '
+                    f'iterations in {average_milliseconds/1000:0.1f}s '
+                    f'(target {milliseconds/1000:0.1f}s).')
+            print(*debug_messages, sep=' ')
             if controller.board.is_win(Game.X_PLAYER):
                 result = Game.X_PLAYER
             elif controller.board.is_win(Game.O_PLAYER):

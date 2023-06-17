@@ -15,14 +15,14 @@ def test_plot(pixmap_differ: PixmapDiffer, monkeypatch):
     expected: QPainter
     with pixmap_differ.create_qpainters((2*size, size)) as (actual, expected):
         strengths = [100, 200]
-        future_strength = 150
+        future_strength = 150_000
 
         plt.plot(strengths, label='past')
-        plt.plot([2], [future_strength], 'o', label='next')
+        plt.plot([2], [future_strength/1000], 'o', label='next')
         expected_png = BytesIO()
         plt.ylim(0)
-        plt.title('Search iterations over time')
-        plt.ylabel('Search iterations')
+        plt.title('Search seconds over time')
+        plt.ylabel('Search seconds')
         plt.xlabel('Number of games played')
         plt.legend(loc='lower right')
         plt.xticks([0, 1, 2])
@@ -47,14 +47,14 @@ def test_single_plot(pixmap_differ: PixmapDiffer, monkeypatch):
     expected: QPainter
     with pixmap_differ.create_qpainters((2*size, size)) as (actual, expected):
         strengths = [100]
-        future_strength = 150
+        future_strength = 150_000
 
         plt.plot(strengths, 'o', label='past')
-        plt.plot([1], [future_strength], 'o', label='next')
+        plt.plot([1], [future_strength/1000], 'o', label='next')
         expected_png = BytesIO()
         plt.ylim(0)
-        plt.title('Search iterations over time')
-        plt.ylabel('Search iterations')
+        plt.title('Search seconds over time')
+        plt.ylabel('Search seconds')
         plt.xlabel('Number of games played')
         plt.legend(loc='lower right')
         plt.xticks([0, 1])

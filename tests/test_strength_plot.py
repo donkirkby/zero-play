@@ -19,7 +19,7 @@ from zero_play.tictactoe.state import TicTacToeState
 
 # noinspection DuplicatedCode
 @pytest.fixture
-def memory_db() -> SessionBase:
+def memory_db(qapp) -> SessionBase:
     # Open DB and create tables.
     engine = create_engine('sqlite://')
     Session.configure(bind=engine)
@@ -28,10 +28,10 @@ def memory_db() -> SessionBase:
 
     # Create some test data.
     tic_tac_toe = GameRecord.find_or_create(db_session, TicTacToeState())
-    player1 = PlayerRecord(iterations=16,
+    player1 = PlayerRecord(milliseconds=16_000,
                            name='Mr. Strong',
                            type=PlayerRecord.PLAYOUT_TYPE)
-    player2 = PlayerRecord(iterations=1,
+    player2 = PlayerRecord(milliseconds=1_000,
                            name='Mr. Weak',
                            type=PlayerRecord.PLAYOUT_TYPE)
     db_session.add(player1)
@@ -75,7 +75,7 @@ def test_load_history(memory_db):
 
     plot.load_history(memory_db)
 
-    match_up: MatchUp = plot.win_counter[(16, False, 1, False)]
+    match_up: MatchUp = plot.win_counter[(16_000, False, 1_000, False)]
     assert match_up.p1_wins == 1
     assert plot.win_counter.build_summary() == expected_summary
 
@@ -85,7 +85,7 @@ def test_humans_excluded(memory_db):
     tic_tac_toe = memory_db.query(GameRecord).filter(
         GameRecord.name == 'Tic Tac Toe').one()
     player1 = memory_db.query(PlayerRecord).filter(
-        PlayerRecord.iterations == 16).one()
+        PlayerRecord.milliseconds == 16_000).one()
     player2 = PlayerRecord(name='Mr. Human', type=PlayerRecord.HUMAN_TYPE)
     memory_db.add(player2)
     match = MatchRecord(game=tic_tac_toe)
@@ -121,7 +121,7 @@ def test_humans_excluded(memory_db):
 
     plot.load_history(memory_db)
 
-    match_up: MatchUp = plot.win_counter[(16, False, 1, False)]
+    match_up: MatchUp = plot.win_counter[(16_000, False, 1_000, False)]
     assert match_up.p1_wins == 1
     assert plot.win_counter.build_summary() == expected_summary
 
@@ -131,10 +131,10 @@ def test_player_iterations_filtered(memory_db):
     tic_tac_toe = memory_db.query(GameRecord).filter(
         GameRecord.name == 'Tic Tac Toe').one()
     player1 = memory_db.query(PlayerRecord).filter(
-        PlayerRecord.iterations == 16).one()
+        PlayerRecord.milliseconds == 16_000).one()
     player2 = PlayerRecord(name='Mr. Invincible',
                            type=PlayerRecord.PLAYOUT_TYPE,
-                           iterations=10_000)
+                           milliseconds=100_000)
     memory_db.add(player2)
     match = MatchRecord(game=tic_tac_toe)
     memory_db.add(match)
@@ -169,7 +169,7 @@ def test_player_iterations_filtered(memory_db):
 
     plot.load_history(memory_db)
 
-    match_up: MatchUp = plot.win_counter[(16, False, 1, False)]
+    match_up: MatchUp = plot.win_counter[(16_000, False, 1_000, False)]
     assert match_up.p1_wins == 1
     assert plot.win_counter.build_summary() == expected_summary
 

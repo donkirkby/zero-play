@@ -15,7 +15,7 @@ class StrengthHistoryPlot(PlotCanvas):
 
         super().__init__(parent)
 
-    def fetch_strengths(self, db_session) -> typing.List[int]:
+    def fetch_strengths(self, db_session) -> typing.List[float]:
         if db_session is None:
             return []
         game_record = GameRecord.find_or_create(db_session, self.game)
