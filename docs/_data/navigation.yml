@@ -10,6 +10,8 @@
   dropdown:
   - name: Latest
     link: /journal/
+  - name: 2020
+    link: /journal/2020.html
   - name: 2019
     link: /journal/2019.html
   - name: 2018

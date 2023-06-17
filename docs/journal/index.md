@@ -19,47 +19,19 @@ understand the tools better.
 [Shibumi Games]: https://github.com/donkirkby/shibumi-games
 
 ## 2020
-### 19 Jul 2020
-I took some of the ideas from my other projects around writing unit tests for
-GUI code, and applied them to PySide2's `QGraphicsScene`. Most of it worked
-pretty well, but the fonts were different between my workstation and TravisCI.
-I also spent a long time tracking down PySide2's [installation bug]. Both of
-those were easier to deal with once I set up the `travis-local.sh` script. One
-idea: use `QGraphicsScene` for both the expected image and the actual image.
+In [2020], I switched to a GUI using PySide, and supported multiprocessing.
+I published the first release on PyPI.
 
-[installation bug]: https://bugreports.qt.io/browse/QTBUG-84749
+[2020]: 2020.md
 
-### 3 Aug 2020
-Actually got a GUI working with a playable Tic Tac Toe, then added Connect 4.
-Connected an MCTS player to the GUI, and then added Othello.
+## 2021
+### Mar 2021
+Plot opponent strength over time as it adjusts to wins and losses.
 
-After adding a review feature, I think the basic version is done. Before I go
-back to fighting with machine learning, I'm going to try converting the Shibumi
-project to use the new GUI.
+## 2023
+### Apr 2023
+Restore the tool to plot win rates between different numbers of MCTS iterations.
 
-### Sep 2020
-Spargo has a superko rule that forbids any game state from being repeated. That
-means that you have to track the current board state, as well as the history, so
-I switched from board classes to game state classes.
-
-Released the first usable release of this and Shibumi Games. One nice feature
-is the adjustment of AI strength after wins and losses.
-
-### Oct 2020
-As the Shibumi games are gaining more controls, I decided to move most of the
-controls out of the `QGraphicsScene`, so developers can use Qt's layout classes.
-
-### Nov 2020
-Spargo was quite slow, so I added support for multiprocessing in issue #33. It
-definitely improved performance, but not as much as I'd hoped.
-
-![Multiprocessing times]
-
-I see definite improvement up to three CPUs, and maybe to four, but nothing
-beyond that. I guess hyperthreading doesn't help my workload, because my laptop
-has four physical cores and eight logical processors. That makes sense for
-mostly numerical calculations, I guess, but it's strange that the fourth
-processor improves so little. I wonder if I've got inefficient communication
-somewhere slowing things down.
-
-[Multiprocessing times]: 2020/multiprocessing_times.png
+### May 2023
+Switch MCTS search to limit by time instead of iterations, since that will make
+more sense when comparing neural network with random playouts.
