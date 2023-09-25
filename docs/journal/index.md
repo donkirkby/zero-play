@@ -35,3 +35,11 @@ Restore the tool to plot win rates between different numbers of MCTS iterations.
 ### May 2023
 Switch MCTS search to limit by time instead of iterations, since that will make
 more sense when comparing neural network with random playouts.
+
+### July 2023
+Resurrect the old neural network training code, but start by going through the
+painful Tensorflow installation of [GPU support]. After that worked, the old
+training code was broken, so try basing it on a [regression tutorial].
+
+[GPU support]: https://stackoverflow.com/a/54567428/4794
+[regression tutorial]: https://www.tensorflow.org/tutorials/keras/regression

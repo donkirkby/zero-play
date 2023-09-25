@@ -282,7 +282,24 @@ class SearchManager:
                      if child_node.move is not None]
         return top_moves
 
-    def create_training_data(self, iterations: int, data_size: int):
+    def create_training_data(
+            self,
+            iterations: int | None = None,
+            milliseconds: int | None = None,
+            data_size: int = 1) -> typing.Tuple[np.array, np.array]:
+        """ Play several games, then return game states and analysis.
+
+        Specify iterations or milliseconds to control the amount of search.
+
+        :param iterations: number of search iterations to run on each game state
+        :param milliseconds: time to search on each game state
+        :param data_size: number of game states to return
+        :return: (game_states, outputs) - both are numpy arrays. Each item in
+        game_states is a single game state, corresponding to an item at the same
+        index in outputs. Each item in outputs is a list of moves, with the
+        normalized weights for choosing each move, plus an extra entry that is
+        the final value of this position for the active player.
+        """
         game_states: typing.List[typing.Tuple[GameState, np.ndarray]] = []
         self.search(self.current_node.game_state, milliseconds=1)  # One extra to start.
         report_size = 0
@@ -292,7 +309,9 @@ class SearchManager:
         outputs = np.zeros((data_size, move_count + 1))
         data_count = 0
         while True:
-            self.search(self.current_node.game_state, iterations)
+            self.search(self.current_node.game_state,
+                        iterations=iterations,
+                        milliseconds=milliseconds)
             assert self.current_node.children is not None
             assert self.current_node.child_predictions is not None
             move_weights = np.zeros(self.current_node.child_predictions.size)

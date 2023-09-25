@@ -47,22 +47,24 @@ class NeuralNet(Heuristic):
                          activation='relu',
                          input_shape=(self.board_height, self.board_width, 1),
                          activity_regularizer=regularizer))
-        model.add(Conv2D(num_channels,
-                         kernel_size,
-                         padding='same',
-                         activation='relu',
-                         activity_regularizer=regularizer))
-        model.add(Conv2D(num_channels,
-                         kernel_size,
-                         activation='relu',
-                         activity_regularizer=regularizer))
-        model.add(Conv2D(num_channels,
-                         kernel_size,
-                         activation='relu',
-                         activity_regularizer=regularizer))
-        model.add(Dropout(dropout))
-        model.add(Dropout(dropout))
+        # model.add(Conv2D(num_channels,
+        #                  kernel_size,
+        #                  padding='same',
+        #                  activation='relu',
+        #                  activity_regularizer=regularizer))
+        # model.add(Conv2D(num_channels,
+        #                  kernel_size,
+        #                  activation='relu',
+        #                  activity_regularizer=regularizer))
+        # model.add(Conv2D(num_channels,
+        #                  kernel_size,
+        #                  activation='relu',
+        #                  activity_regularizer=regularizer))
+        # model.add(Dropout(dropout))
+        # model.add(Dropout(dropout))
         model.add(Flatten())
+        model.add(Dense(64))  # Remove to match paper?
+        model.add(Dense(64))  # Remove to match paper?
         model.add(Dense(self.action_size + 1))
         model.compile('adam', 'mean_squared_error')
         self.model = model
@@ -126,7 +128,6 @@ class NeuralNet(Heuristic):
             verbose=0,
             initial_epoch=self.epochs_completed,
             epochs=self.epochs_completed+self.epochs_to_train,
-            validation_split=0.2,
-            callbacks=callbacks)
+            validation_split=0.2)  # TODO: Add callbacks?
         self.epochs_completed += self.epochs_to_train
         return history

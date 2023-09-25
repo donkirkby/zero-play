@@ -19,9 +19,9 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
 from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDoubleSpinBox,
     QGridLayout, QHeaderView, QLabel, QLineEdit,
     QMainWindow, QMenu, QMenuBar, QPushButton,
-    QSizePolicy, QSpacerItem, QStackedWidget, QStatusBar,
-    QTableWidget, QTableWidgetItem, QTextBrowser, QVBoxLayout,
-    QWidget)
+    QSizePolicy, QSpacerItem, QSpinBox, QStackedWidget,
+    QStatusBar, QTableWidget, QTableWidgetItem, QTextBrowser,
+    QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -36,9 +36,6 @@ class Ui_MainWindow(object):
         self.action_comparison.setVisible(False)
         self.action_plot = QAction(MainWindow)
         self.action_plot.setObjectName(u"action_plot")
-        self.action_training_session = QAction(MainWindow)
-        self.action_training_session.setObjectName(u"action_training_session")
-        self.action_training_session.setVisible(False)
         self.action_game = QAction(MainWindow)
         self.action_game.setObjectName(u"action_game")
         self.action_save = QAction(MainWindow)
@@ -58,6 +55,8 @@ class Ui_MainWindow(object):
         self.action_open_db.setObjectName(u"action_open_db")
         self.action_strength_test = QAction(MainWindow)
         self.action_strength_test.setObjectName(u"action_strength_test")
+        self.action_training = QAction(MainWindow)
+        self.action_training.setObjectName(u"action_training")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout_2 = QVBoxLayout(self.centralwidget)
@@ -370,6 +369,96 @@ class Ui_MainWindow(object):
         self.gridLayout_5.addWidget(self.strength_test_max, 4, 1, 1, 2)
 
         self.stacked_widget.addWidget(self.plot_strength_page)
+        self.training_page = QWidget()
+        self.training_page.setObjectName(u"training_page")
+        self.gridLayout_8 = QGridLayout(self.training_page)
+        self.gridLayout_8.setObjectName(u"gridLayout_8")
+        self.label_10 = QLabel(self.training_page)
+        self.label_10.setObjectName(u"label_10")
+
+        self.gridLayout_8.addWidget(self.label_10, 5, 0, 1, 1)
+
+        self.label_7 = QLabel(self.training_page)
+        self.label_7.setObjectName(u"label_7")
+
+        self.gridLayout_8.addWidget(self.label_7, 2, 0, 1, 1)
+
+        self.label_8 = QLabel(self.training_page)
+        self.label_8.setObjectName(u"label_8")
+
+        self.gridLayout_8.addWidget(self.label_8, 3, 0, 1, 1)
+
+        self.label_6 = QLabel(self.training_page)
+        self.label_6.setObjectName(u"label_6")
+
+        self.gridLayout_8.addWidget(self.label_6, 1, 0, 1, 1)
+
+        self.label_9 = QLabel(self.training_page)
+        self.label_9.setObjectName(u"label_9")
+
+        self.gridLayout_8.addWidget(self.label_9, 4, 0, 1, 1)
+
+        self.training_path = QLineEdit(self.training_page)
+        self.training_path.setObjectName(u"training_path")
+        self.training_path.setReadOnly(True)
+
+        self.gridLayout_8.addWidget(self.training_path, 5, 1, 1, 1)
+
+        self.label_5 = QLabel(self.training_page)
+        self.label_5.setObjectName(u"label_5")
+
+        self.gridLayout_8.addWidget(self.label_5, 0, 0, 1, 1)
+
+        self.training_open = QPushButton(self.training_page)
+        self.training_open.setObjectName(u"training_open")
+
+        self.gridLayout_8.addWidget(self.training_open, 5, 2, 1, 1)
+
+        self.training_win_rate = QSpinBox(self.training_page)
+        self.training_win_rate.setObjectName(u"training_win_rate")
+        self.training_win_rate.setMaximum(100)
+        self.training_win_rate.setValue(60)
+
+        self.gridLayout_8.addWidget(self.training_win_rate, 4, 1, 1, 2)
+
+        self.training_comparison = QSpinBox(self.training_page)
+        self.training_comparison.setObjectName(u"training_comparison")
+        self.training_comparison.setMaximum(9999999)
+        self.training_comparison.setValue(200)
+
+        self.gridLayout_8.addWidget(self.training_comparison, 3, 1, 1, 2)
+
+        self.training_size = QSpinBox(self.training_page)
+        self.training_size.setObjectName(u"training_size")
+        self.training_size.setMaximum(9999999)
+        self.training_size.setValue(200)
+
+        self.gridLayout_8.addWidget(self.training_size, 2, 1, 1, 2)
+
+        self.training_time = QDoubleSpinBox(self.training_page)
+        self.training_time.setObjectName(u"training_time")
+        self.training_time.setDecimals(1)
+        self.training_time.setValue(0.100000000000000)
+
+        self.gridLayout_8.addWidget(self.training_time, 1, 1, 1, 2)
+
+        self.training_game = QComboBox(self.training_page)
+        self.training_game.setObjectName(u"training_game")
+
+        self.gridLayout_8.addWidget(self.training_game, 0, 1, 1, 2)
+
+        self.training_start = QPushButton(self.training_page)
+        self.training_start.setObjectName(u"training_start")
+
+        self.gridLayout_8.addWidget(self.training_start, 6, 2, 1, 1)
+
+        self.training_message = QLabel(self.training_page)
+        self.training_message.setObjectName(u"training_message")
+        self.training_message.setAlignment(Qt.AlignCenter)
+
+        self.gridLayout_8.addWidget(self.training_message, 6, 0, 1, 2)
+
+        self.stacked_widget.addWidget(self.training_page)
         self.plot_strength_display_page = QWidget()
         self.plot_strength_display_page.setObjectName(u"plot_strength_display_page")
         self.gridLayout_7 = QGridLayout(self.plot_strength_display_page)
@@ -413,6 +502,41 @@ class Ui_MainWindow(object):
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
+        QWidget.setTabOrder(self.training_game, self.training_time)
+        QWidget.setTabOrder(self.training_time, self.training_size)
+        QWidget.setTabOrder(self.training_size, self.training_comparison)
+        QWidget.setTabOrder(self.training_comparison, self.training_win_rate)
+        QWidget.setTabOrder(self.training_win_rate, self.training_path)
+        QWidget.setTabOrder(self.training_path, self.training_open)
+        QWidget.setTabOrder(self.training_open, self.training_start)
+        QWidget.setTabOrder(self.training_start, self.shuffle_players)
+        QWidget.setTabOrder(self.shuffle_players, self.start)
+        QWidget.setTabOrder(self.start, self.search_seconds1)
+        QWidget.setTabOrder(self.search_seconds1, self.search_seconds2)
+        QWidget.setTabOrder(self.search_seconds2, self.close_humans)
+        QWidget.setTabOrder(self.close_humans, self.new_human)
+        QWidget.setTabOrder(self.new_human, self.players_table)
+        QWidget.setTabOrder(self.players_table, self.rules_text)
+        QWidget.setTabOrder(self.rules_text, self.rules_close)
+        QWidget.setTabOrder(self.rules_close, self.toggle_review)
+        QWidget.setTabOrder(self.toggle_review, self.move_history)
+        QWidget.setTabOrder(self.move_history, self.choices)
+        QWidget.setTabOrder(self.choices, self.resume_here)
+        QWidget.setTabOrder(self.resume_here, self.strength_test_game)
+        QWidget.setTabOrder(self.strength_test_game, self.reset_strength_test)
+        QWidget.setTabOrder(self.reset_strength_test, self.start_strength_test)
+        QWidget.setTabOrder(self.start_strength_test, self.strength_test_strengths)
+        QWidget.setTabOrder(self.strength_test_strengths, self.strength_test_min)
+        QWidget.setTabOrder(self.strength_test_min, self.strength_test_max)
+        QWidget.setTabOrder(self.strength_test_max, self.history_game)
+        QWidget.setTabOrder(self.history_game, self.connect4)
+        QWidget.setTabOrder(self.connect4, self.tic_tac_toe)
+        QWidget.setTabOrder(self.tic_tac_toe, self.othello)
+        QWidget.setTabOrder(self.othello, self.searches_lock2)
+        QWidget.setTabOrder(self.searches_lock2, self.player1)
+        QWidget.setTabOrder(self.player1, self.searches_lock1)
+        QWidget.setTabOrder(self.searches_lock1, self.cancel)
+        QWidget.setTabOrder(self.cancel, self.player2)
 
         self.menubar.addAction(self.menu_file.menuAction())
         self.menubar.addAction(self.menu_view.menuAction())
@@ -426,15 +550,15 @@ class Ui_MainWindow(object):
         self.menu_new.addAction(self.action_game)
         self.menu_new.addAction(self.action_comparison)
         self.menu_new.addAction(self.action_plot)
-        self.menu_new.addAction(self.action_training_session)
         self.menu_new.addAction(self.action_strength_test)
+        self.menu_new.addAction(self.action_training)
         self.menu_view.addAction(self.action_coordinates)
         self.menu_help.addAction(self.action_about)
         self.menu_help.addAction(self.menu_rules.menuAction())
 
         self.retranslateUi(MainWindow)
 
-        self.stacked_widget.setCurrentIndex(5)
+        self.stacked_widget.setCurrentIndex(6)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -445,7 +569,6 @@ class Ui_MainWindow(object):
         self.action_open.setText(QCoreApplication.translate("MainWindow", u"&Open...", None))
         self.action_comparison.setText(QCoreApplication.translate("MainWindow", u"&Comparison", None))
         self.action_plot.setText(QCoreApplication.translate("MainWindow", u"&Plot", None))
-        self.action_training_session.setText(QCoreApplication.translate("MainWindow", u"&Training Session", None))
         self.action_game.setText(QCoreApplication.translate("MainWindow", u"&Game", None))
         self.action_save.setText(QCoreApplication.translate("MainWindow", u"&Save...", None))
         self.action_save_log.setText(QCoreApplication.translate("MainWindow", u"Save &Log...", None))
@@ -454,6 +577,7 @@ class Ui_MainWindow(object):
         self.action_new_db.setText(QCoreApplication.translate("MainWindow", u"New Player &Database...", None))
         self.action_open_db.setText(QCoreApplication.translate("MainWindow", u"&Open Player Database...", None))
         self.action_strength_test.setText(QCoreApplication.translate("MainWindow", u"&Strength Test", None))
+        self.action_training.setText(QCoreApplication.translate("MainWindow", u"&Training", None))
         self.connect4.setText(QCoreApplication.translate("MainWindow", u"Connect 4", None))
         self.tic_tac_toe.setText(QCoreApplication.translate("MainWindow", u"Tic Tac Toe", None))
         self.othello.setText(QCoreApplication.translate("MainWindow", u"Othello", None))
@@ -491,6 +615,20 @@ class Ui_MainWindow(object):
         self.strength_test_strengths.setText(QCoreApplication.translate("MainWindow", u"1 8 64", None))
         self.strength_test_min.setSuffix(QCoreApplication.translate("MainWindow", u" seconds", None))
         self.strength_test_max.setSuffix(QCoreApplication.translate("MainWindow", u" seconds", None))
+        self.label_10.setText(QCoreApplication.translate("MainWindow", u"Data folder:", None))
+        self.label_7.setText(QCoreApplication.translate("MainWindow", u"Training size:", None))
+        self.label_8.setText(QCoreApplication.translate("MainWindow", u"Comparison size:", None))
+        self.label_6.setText(QCoreApplication.translate("MainWindow", u"Search time:", None))
+        self.label_9.setText(QCoreApplication.translate("MainWindow", u"Successful win rate:", None))
+        self.label_5.setText(QCoreApplication.translate("MainWindow", u"Game:", None))
+        self.training_open.setText(QCoreApplication.translate("MainWindow", u"...", None))
+        self.training_win_rate.setSuffix(QCoreApplication.translate("MainWindow", u"%", None))
+#if QT_CONFIG(tooltip)
+        self.training_time.setToolTip("")
+#endif // QT_CONFIG(tooltip)
+        self.training_time.setSuffix(QCoreApplication.translate("MainWindow", u" seconds", None))
+        self.training_start.setText(QCoreApplication.translate("MainWindow", u"Start", None))
+        self.training_message.setText(QCoreApplication.translate("MainWindow", u"Message", None))
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"Game:", None))
         self.menu_file.setTitle(QCoreApplication.translate("MainWindow", u"&File", None))
         self.menu_new.setTitle(QCoreApplication.translate("MainWindow", u"&New", None))

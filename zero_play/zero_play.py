@@ -1,7 +1,9 @@
+import logging
 import math
 import os
 import sys
 import typing
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from datetime import datetime
 from functools import partial
 from itertools import chain
@@ -43,6 +45,7 @@ from zero_play import zero_play_rules_rc
 from zero_play import zero_play_images_rc
 from zero_play.strength_history_plot import StrengthHistoryPlot
 from zero_play.strength_plot import StrengthPlot
+from zero_play.trainer import train
 
 assert zero_play_rules_rc  # Need to import this module to load resources.
 assert zero_play_images_rc  # Need to import this module to load resources.
@@ -53,6 +56,8 @@ except ImportError:
     from zero_play.plot_canvas_dummy import PlotCanvasDummy as PlotCanvas  # type: ignore
 
 DEFAULT_SEARCH_MILLISECONDS = 500
+logging.basicConfig(level=logging.INFO,
+                    format="%(asctime)s %(levelname)s:%(name)s: %(message)s")
 
 
 class AboutDialog(QDialog):
@@ -167,6 +172,9 @@ class ZeroPlayWindow(QMainWindow):
             'strength_test_max',
             ui.strength_test_max.value(),
             type=float))
+        ui.action_training.triggered.connect(self.on_new_training)
+        ui.training_start.clicked.connect(self.on_start_training)
+        ui.training_open.clicked.connect(self.on_choose_training_path)
         self.on_toggle_review()
 
     @staticmethod
@@ -241,6 +249,7 @@ class ZeroPlayWindow(QMainWindow):
 
             self.ui.history_game.addItem(game_name, userData=display)
             self.ui.strength_test_game.addItem(game_name, userData=display)
+            self.ui.training_game.addItem(game_name, userData=display)
 
             if display.rules_path is not None:
                 game_rules_action = self.ui.menu_rules.addAction(game_name)
@@ -464,10 +473,14 @@ class ZeroPlayWindow(QMainWindow):
         if self.game_display is not None:
             self.game_display.show_coordinates = is_checked
 
+    def on_new_training(self):
+        self.stop_workers()
+        self.ui.training_message.clear()
+        self.ui.stacked_widget.setCurrentWidget(self.ui.training_page)
+
     def on_new_strength_test(self):
         self.stop_workers()
-        self.ui.stacked_widget.setCurrentWidget(
-            self.ui.plot_strength_page)
+        self.ui.stacked_widget.setCurrentWidget(self.ui.plot_strength_page)
 
     def on_start_strength_test(self) -> None:
         settings = get_settings()
@@ -517,6 +530,37 @@ class ZeroPlayWindow(QMainWindow):
             settings.remove('game_count')
             settings.remove('last_score')
             settings.remove('streak_length')
+
+    def on_choose_training_path(self) -> None:
+        settings = get_settings()
+        data_path = settings.value('training_data_path')
+        if data_path:
+            parent = Path(str(data_path)).parent
+        else:
+            parent = None
+        kwargs = get_file_dialog_options()
+        file_name = QFileDialog.getExistingDirectory(
+            self,
+            "Open Data Folder",
+            dir=str(parent),
+            **kwargs)
+        if not file_name:
+            return
+        data_path = Path(file_name).absolute()
+        settings.setValue('training_data_path', str(data_path))
+        self.ui.training_path.setText(file_name)
+
+    def on_start_training(self) -> None:
+        ui = self.ui
+        if not ui.training_path.text():
+            ui.training_message.setText('Choose a data folder.')
+            return
+        ui.training_message.clear()
+        train(ui.training_time.value()*1000,
+              ui.training_size.value(),
+              ui.training_comparison.value(),
+              ui.training_win_rate.value() / 100,
+              ui.training_path.text())
 
     def on_game_ended(self, game_state: GameState):
         if (self.is_history_dirty or
@@ -660,11 +704,29 @@ def get_file_dialog_options():
     return kwargs
 
 
+def parse_args():
+    parser = ArgumentParser(description='Play any board game.',
+                            formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--train',
+                        action='store_true',
+                        help='Start a training session for Connect 4.')
+    parser.add_argument('--data',
+                        type=Path,
+                        default='.',
+                        help='Data folder to store training data.')
+    return parser.parse_args()
+
+
 def main():
+    args = parse_args()
     app = QApplication(sys.argv)
     window = ZeroPlayWindow()
-    window.show()
-    return app.exec()
+    if args.train:
+        window.ui.training_path.setText(str(args.data.expanduser()))
+        window.on_start_training()
+    else:
+        window.show()
+        return app.exec()
 
 
 if __name__ == "__main__":
