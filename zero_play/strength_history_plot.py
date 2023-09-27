@@ -54,4 +54,6 @@ class StrengthHistoryPlot(PlotCanvas):
         self.axes.set_ylabel('Search seconds')
         self.axes.set_xlabel('Number of games played')
         self.axes.legend(loc='lower right')
-        self.axes.figure.canvas.draw()
+        figure = self.axes.figure
+        assert figure is not None
+        figure.canvas.draw()

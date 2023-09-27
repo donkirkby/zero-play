@@ -20,4 +20,6 @@ class PlotCanvas(QWidget):
 
     def resizeEvent(self, event: QResizeEvent) -> None:
         super().resizeEvent(event)
-        self.axes.figure.tight_layout()
+        figure = self.axes.figure
+        assert isinstance(figure, Figure)
+        figure.tight_layout()

@@ -35,9 +35,14 @@ def train(search_milliseconds: int,
     if not history_file.tell():
         writer.writeheader()
     best_net = NeuralNet(start_state)
-    neural_net = NeuralNet(start_state)
-    training_player = MctsPlayer(start_state, heuristic=neural_net)
-    best_player = MctsPlayer(start_state, start_state.O_PLAYER, heuristic=best_net)
+    training_net = NeuralNet(start_state)
+    training_player = MctsPlayer(start_state,
+                                 milliseconds=search_milliseconds,
+                                 heuristic=training_net)
+    best_player = MctsPlayer(start_state,
+                             start_state.O_PLAYER,
+                             milliseconds=search_milliseconds,
+                             heuristic=best_net)
     base_player = MctsPlayer(start_state,
                              start_state.O_PLAYER,
                              milliseconds=search_milliseconds,
@@ -46,6 +51,7 @@ def train(search_milliseconds: int,
     best_file_name = 'best.h5'
     try:
         best_net.load_checkpoint(checkpoint_path, best_file_name)
+        training_net.load_checkpoint(checkpoint_path, best_file_name)
     except OSError:
         best_net.save_checkpoint(checkpoint_path, best_file_name)
 
@@ -53,7 +59,7 @@ def train(search_milliseconds: int,
                                      players=[training_player, base_player])
     best_controller = PlayController(start_state=start_state,
                                      players=[training_player, best_player])
-    search_manager = SearchManager(start_state, neural_net)
+    search_manager = SearchManager(start_state, training_net)
     for i in count():
         logger.info('Creating training data.')
         boards, outputs = search_manager.create_training_data(
@@ -69,7 +75,7 @@ def train(search_milliseconds: int,
 
         filename = f'checkpoint-{i:02d}.h5'
         logger.info('Training for %s.', filename)
-        neural_net.train(boards, outputs, './logs')
+        training_net.train(boards, outputs, './logs')
 
         logger.info('Testing.')
         wins_vs_base, base_ties, base_wins = base_controller.play(
@@ -88,10 +94,10 @@ def train(search_milliseconds: int,
         win_rate_vs_best = calculate_win_rate(wins_vs_best, best_wins)
         if win_rate_vs_best < min_win_rate:
             decision = 'Rejected'
-            neural_net.load_checkpoint(checkpoint_path, best_file_name)
+            training_net.load_checkpoint(checkpoint_path, best_file_name)
         else:
             decision = 'Accepted'
-            neural_net.save_checkpoint(checkpoint_path, filename)
+            training_net.save_checkpoint(checkpoint_path, filename)
             best_net.load_checkpoint(checkpoint_path, filename)
             best_net.save_checkpoint(checkpoint_path, best_file_name)
         logger.info('%s %s with wins %f over base (%d/%d/%d) and %f over best (%d/%d/%d).',

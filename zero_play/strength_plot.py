@@ -283,7 +283,9 @@ class StrengthPlot(PlotCanvas):
         self.artists.clear()
 
         self.create_plot()
-        self.axes.figure.canvas.draw()
+        figure = self.axes.figure
+        assert figure is not None
+        figure.canvas.draw()
         # logger.debug('Plotter.update() done.')
         # return self.artists
 

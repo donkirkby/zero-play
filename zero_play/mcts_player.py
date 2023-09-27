@@ -286,7 +286,7 @@ class SearchManager:
             self,
             iterations: int | None = None,
             milliseconds: int | None = None,
-            data_size: int = 1) -> typing.Tuple[np.array, np.array]:
+            data_size: int = 1) -> typing.Tuple[np.ndarray, np.ndarray]:
         """ Play several games, then return game states and analysis.
 
         Specify iterations or milliseconds to control the amount of search.

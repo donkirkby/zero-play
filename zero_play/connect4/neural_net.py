@@ -4,10 +4,14 @@ from argparse import Namespace
 from pathlib import Path
 
 import numpy as np
-from tensorflow.python.keras import Sequential, regularizers
-from tensorflow.python.keras.callbacks import TensorBoard
-from tensorflow.python.keras.layers import Dense, Conv2D, Dropout, Flatten
-from tensorflow.python.keras.models import load_model
+# noinspection PyUnresolvedReferences
+from tensorflow.keras import Sequential, regularizers
+# noinspection PyUnresolvedReferences
+from tensorflow.keras.callbacks import TensorBoard
+# noinspection PyUnresolvedReferences
+from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten
+# noinspection PyUnresolvedReferences
+from tensorflow.keras.models import load_model
 
 from zero_play.game_state import GridGameState, GameState
 from zero_play.heuristic import Heuristic
@@ -76,11 +80,8 @@ class NeuralNet(Heuristic):
         if board.is_ended():
             return self.analyse_end_game(board)
 
-        outputs = self.model.predict(board.get_spaces().reshape(
-            (1,
-             self.board_height,
-             self.board_width,
-             1)))
+        outputs = self.model(board.get_spaces().reshape(
+            (1, self.board_height, self.board_width, 1))).numpy()
 
         policy = outputs[0, :-1]
         value = outputs[0, -1]
@@ -117,6 +118,7 @@ class NeuralNet(Heuristic):
         :param log_dir: Directory for TensorBoard logs. None disables logging.
         """
 
+        self.checkpoint_name += ' + training'
         if log_dir is None:
             callbacks = None
         else:
