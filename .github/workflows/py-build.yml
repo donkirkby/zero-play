@@ -32,7 +32,7 @@ jobs:
       - name: Test with pytest
         id: test
         run: |
-          pipenv run mypy zero_play
+          pipenv run mypy --install-types --non-interactive zero_play
           # Add QT_DEBUG_PLUGINS=1 before xvfb-run to debug Qt library problems.
           xvfb-run -a pipenv run coverage run --source=zero_play -m pytest
       - name: Upload coverage to Codecov
