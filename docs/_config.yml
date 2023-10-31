@@ -9,3 +9,6 @@ defaults:
     values:
       hero_image: /zero-play/images/index_hero.jpg
       hero_darken: true
+      twitter:
+        card: summary_large_image
+      image: /zero-play/images/index_hero.jpg
