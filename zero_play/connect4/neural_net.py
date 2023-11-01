@@ -5,6 +5,8 @@ from pathlib import Path
 
 import numpy as np
 # noinspection PyUnresolvedReferences
+from tensorflow.keras import optimizers
+# noinspection PyUnresolvedReferences
 from tensorflow.keras import Sequential, regularizers
 # noinspection PyUnresolvedReferences
 from tensorflow.keras.callbacks import TensorBoard
@@ -12,6 +14,7 @@ from tensorflow.keras.callbacks import TensorBoard
 from tensorflow.keras.layers import Dense, Conv2D, Dropout, Flatten
 # noinspection PyUnresolvedReferences
 from tensorflow.keras.models import load_model
+from tensorflow.python.keras.callbacks import EarlyStopping
 
 from zero_play.game_state import GridGameState, GameState
 from zero_play.heuristic import Heuristic
@@ -20,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 class NeuralNet(Heuristic):
-    def __init__(self, start_state: GameState):
+    def __init__(self, start_state: GameState) -> None:
         if not isinstance(start_state, GridGameState):
             raise ValueError(f'{start_state.__class__} is not a subclass of GridGameState.')
         super().__init__()
@@ -39,38 +42,23 @@ class NeuralNet(Heuristic):
         self.checkpoint_name = 'random weights'
         self.args = args
 
-        num_channels = 512
+        num_channels = 64
         kernel_size = [3, 3]
-        dropout = 0.3
-        model = Sequential()
-        # regularizer = regularizers.l2(0.00006)
         regularizer = regularizers.l2(0.0001)
-        model.add(Conv2D(num_channels,
-                         kernel_size,
-                         padding='same',
-                         activation='relu',
-                         input_shape=(self.board_height, self.board_width, 1),
-                         activity_regularizer=regularizer))
-        # model.add(Conv2D(num_channels,
-        #                  kernel_size,
-        #                  padding='same',
-        #                  activation='relu',
-        #                  activity_regularizer=regularizer))
-        # model.add(Conv2D(num_channels,
-        #                  kernel_size,
-        #                  activation='relu',
-        #                  activity_regularizer=regularizer))
-        # model.add(Conv2D(num_channels,
-        #                  kernel_size,
-        #                  activation='relu',
-        #                  activity_regularizer=regularizer))
-        # model.add(Dropout(dropout))
-        # model.add(Dropout(dropout))
-        model.add(Flatten())
-        model.add(Dense(64))  # Remove to match paper?
-        model.add(Dense(64))  # Remove to match paper?
-        model.add(Dense(self.action_size + 1))
-        model.compile('adam', 'mean_squared_error')
+        input_shape = (self.board_height, self.board_width, 1)
+        model = Sequential(
+            [Conv2D(num_channels,
+                    kernel_size,
+                    padding='same',
+                    activation='relu',
+                    input_shape=input_shape,
+                    activity_regularizer=regularizer),
+             Flatten(),
+             Dense(64, activation='relu'),
+             Dense(64, activation='relu'),
+             Dense(self.action_size + 1)])
+        model.compile(loss='mean_absolute_error',
+                      optimizer=optimizers.Adam(0.001))
         self.model = model
 
     def get_summary(self) -> typing.Sequence[str]:
@@ -109,20 +97,17 @@ class NeuralNet(Heuristic):
         file_path = folder_path / filename
         self.model = load_model(file_path)
 
-    def train(self, boards: np.ndarray, outputs: np.ndarray, log_dir=None):
+    def train(self, boards: np.ndarray, outputs: np.ndarray):
         """ Train the model on some sample data.
 
         :param boards: Each entry is a board position.
         :param outputs: Each entry is an array of policy values for the moves,
             as well as the estimated value of the board position.
-        :param log_dir: Directory for TensorBoard logs. None disables logging.
         """
 
         self.checkpoint_name += ' + training'
-        if log_dir is None:
-            callbacks = None
-        else:
-            callbacks = [TensorBoard(log_dir)]
+
+        callbacks = [EarlyStopping(patience=5)]
 
         history = self.model.fit(
             np.expand_dims(boards, -1),
@@ -130,6 +115,7 @@ class NeuralNet(Heuristic):
             verbose=0,
             initial_epoch=self.epochs_completed,
             epochs=self.epochs_completed+self.epochs_to_train,
-            validation_split=0.2)  # TODO: Add callbacks?
+            validation_split=0.2,
+            callbacks=callbacks)
         self.epochs_completed += self.epochs_to_train
         return history

@@ -3,8 +3,11 @@ from csv import DictWriter
 from datetime import datetime
 from itertools import count
 from pathlib import Path
+from statistics import mean
 
+import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
 
 from zero_play.connect4.game import Connect4State
 from zero_play.connect4.neural_net import NeuralNet
@@ -16,11 +19,43 @@ from zero_play.playout import Playout
 logger = logging.getLogger(__name__)
 
 
+def plot_loss(history):
+    plt.plot(history.history['loss'], label='loss')
+    plt.plot(history.history['val_loss'], label='val_loss')
+    average_loss = mean(history.history['val_loss'][-10:])
+    print(f'Final average validation loss: {average_loss}')
+    plt.ylim(bottom=0)
+    plt.title('Loss Function During Training on 100,000 Positions')
+    plt.xlabel('Epoch')
+    plt.ylabel('Error [angle]')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+
+def convert_one_hot(boards_path: Path, boards_hot_path: Path):
+    boards_df = pd.read_csv(boards_path)
+    np_boards = boards_df.to_numpy()
+    np_boards = np_boards[:, 1:]
+    board_count, column_count = np_boards.shape
+    hot_column_count = 2*column_count
+    np_hot = np.zeros((board_count, hot_column_count), np_boards.dtype)
+    np_hot[:, :column_count] = np_hot[:, column_count:] = np_boards
+    pos_hot = np_hot[:, :column_count]
+    neg_hot = np_hot[:, column_count:]
+    pos_hot[pos_hot < 0] = 0
+    neg_hot[neg_hot > 0] = 0
+    neg_hot *= -1
+    one_hot_df = pd.DataFrame.from_records(np_hot)
+    one_hot_df.to_csv(boards_hot_path)
+
+
 def train(search_milliseconds: int,
           training_size: int,
           comparison_size: int,
           min_win_rate: float,
-          data_folder: str):
+          data_folder: str,
+          is_reprocessing: bool = False):
     start_state = Connect4State()
     data_path = Path(data_folder)
     checkpoint_path = data_path / f'{start_state.game_name}-nn'
@@ -61,21 +96,37 @@ def train(search_milliseconds: int,
                                      players=[training_player, best_player])
     search_manager = SearchManager(start_state, training_net)
     for i in count():
-        logger.info('Creating training data.')
-        boards, outputs = search_manager.create_training_data(
-            milliseconds=search_milliseconds,
-            data_size=training_size)
-
         boards_path = data_path / 'boards.csv'
         outputs_path = data_path / 'outputs.csv'
-        boards_df = pd.DataFrame(boards.reshape(training_size, 6*7))
-        outputs_df = pd.DataFrame(outputs)
-        boards_df.to_csv(boards_path)
-        outputs_df.to_csv(outputs_path)
 
+        if is_reprocessing:
+            boards_df = pd.read_csv(boards_path)
+            outputs_df = pd.read_csv(outputs_path)
+            boards = boards_df.to_numpy()[:training_size, 1:]
+            outputs = outputs_df.to_numpy()[:training_size, 1:]
+        else:
+            logger.info('Creating training data.')
+            boards, outputs = search_manager.create_training_data(
+                milliseconds=search_milliseconds,
+                data_size=training_size)
+
+            boards_df = pd.DataFrame.from_records(boards)
+            outputs_df = pd.DataFrame.from_records(outputs)
+            boards_df.to_csv(boards_path)
+            outputs_df.to_csv(outputs_path)
+
+        boards = boards.reshape(training_size, 6, 7)
+
+        start = datetime.now()
         filename = f'checkpoint-{i:02d}.h5'
         logger.info('Training for %s.', filename)
-        training_net.train(boards, outputs, './logs')
+        history = training_net.train(boards, outputs)
+        training_time = datetime.now() - start
+        print(f'Trained for {training_time}.')
+
+        if is_reprocessing:
+            plot_loss(history)
+            return
 
         logger.info('Testing.')
         wins_vs_base, base_ties, base_wins = base_controller.play(

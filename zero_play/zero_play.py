@@ -21,10 +21,16 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QFileDialog,
                                QSizePolicy, QDialog, QWidget, QLabel, QComboBox)
 from alembic import command
 from alembic.config import Config
-from pkg_resources import iter_entry_points, EntryPoint
+from importlib.metadata import entry_points
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session as BaseSession
 from sqlalchemy.util import immutabledict
+
+try:
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'  # Warning and above.
+    import tensorflow as tf  # noqa Triggers Tensorflow warning messages.
+except ImportError:
+    raise
 
 import zero_play
 from zero_play.about_dialog import Ui_Dialog
@@ -182,10 +188,7 @@ class ZeroPlayWindow(QMainWindow):
         return 'Zero Play'
 
     @staticmethod
-    def filter_games(
-            entries: typing.Iterable[EntryPoint]) -> typing.Generator[EntryPoint,
-                                                                      None,
-                                                                      None]:
+    def filter_games(entries):
         yield from entries
 
     @property
@@ -225,7 +228,7 @@ class ZeroPlayWindow(QMainWindow):
             if child.widget():
                 child.widget().deleteLater()
         games = self.all_displays
-        all_entries = iter_entry_points('zero_play.game_display')
+        all_entries = entry_points(group='zero_play.game_display')
         filtered_entries = self.filter_games(all_entries)
         for game_entry in filtered_entries:
             display_class = game_entry.load()
@@ -422,6 +425,7 @@ class ZeroPlayWindow(QMainWindow):
         self.ui.stacked_widget.setCurrentWidget(self.ui.game_page)
 
     def on_network1(self):
+        # noinspection PyUnresolvedReferences
         file_name, _ = QFileDialog.getOpenFileName(
             self.ui.players_page,
             "Open a file for player 1's neural network.",
@@ -550,7 +554,7 @@ class ZeroPlayWindow(QMainWindow):
         settings.setValue('training_data_path', str(data_path))
         self.ui.training_path.setText(file_name)
 
-    def on_start_training(self) -> None:
+    def on_start_training(self, is_reprocessing: bool = False) -> None:
         ui = self.ui
         if not ui.training_path.text():
             ui.training_message.setText('Choose a data folder.')
@@ -560,7 +564,8 @@ class ZeroPlayWindow(QMainWindow):
               ui.training_size.value(),
               ui.training_comparison.value(),
               ui.training_win_rate.value() / 100,
-              ui.training_path.text())
+              ui.training_path.text(),
+              is_reprocessing)
 
     def on_game_ended(self, game_state: GameState):
         if (self.is_history_dirty or
@@ -700,6 +705,7 @@ def get_file_dialog_options():
     kwargs = {}
     if 'SNAP' in os.environ:
         # Native dialog restricts paths for snap processes to /run/user.
+        # noinspection PyUnresolvedReferences
         kwargs['options'] = QFileDialog.DontUseNativeDialog
     return kwargs
 
@@ -723,7 +729,9 @@ def main():
     window = ZeroPlayWindow()
     if args.train:
         window.ui.training_path.setText(str(args.data.expanduser()))
-        window.on_start_training()
+        window.ui.training_size.setValue(50_000)
+        window.ui.training_comparison.setValue(200)
+        window.on_start_training(is_reprocessing=False)
     else:
         window.show()
         return app.exec()
