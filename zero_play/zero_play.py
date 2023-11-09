@@ -1,4 +1,4 @@
-import logging
+import logging.config
 import math
 import os
 import sys
@@ -64,6 +64,10 @@ except ImportError:
 DEFAULT_SEARCH_MILLISECONDS = 500
 logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s %(levelname)s:%(name)s: %(message)s")
+logging.config.dictConfig(dict(
+    version=1,
+    incremental=True,
+    loggers={'zero_play.mcts_player': dict(level=logging.INFO)}))
 
 
 class AboutDialog(QDialog):

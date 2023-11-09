@@ -85,6 +85,10 @@ positive / negative position data, as well as the one-hot position data.
 It looks like we don't get much improvement past 50,000 positions, and I don't
 see much difference between the two different data formats.
 
+I tried changing the think time for each move from 0.1s to 2.0s and generated
+50,000 positions. It took 28 hours, and the model had a validation loss of
+0.161 - worse than the quick searches!
+
 [Training with positive/negative]: 2023/training-pos-neg.png
 [Training with one hot]: 2023/training-one-hot.png
 [Training +/- on 100,000]: 2023/training-100_000-pos-neg.png

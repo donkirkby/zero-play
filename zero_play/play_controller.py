@@ -98,9 +98,6 @@ class PlayController:
         original_o.player_number = o_number
         self.players[x_number] = original_x
         self.players[o_number] = original_o
-        for player_results in self.results:
-            print(player_results.get_summary())
-        print(ties, 'ties')
         x_results = self.get_player_results(original_x)
         o_results = self.get_player_results(original_o)
 

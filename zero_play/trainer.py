@@ -110,19 +110,24 @@ def train(search_milliseconds: int,
                 milliseconds=search_milliseconds,
                 data_size=training_size)
 
-            boards_df = pd.DataFrame.from_records(boards)
+            flattened_boards = boards.reshape(
+                training_size,
+                start_state.board_height*start_state.board_width)
+            boards_df = pd.DataFrame.from_records(flattened_boards)
             outputs_df = pd.DataFrame.from_records(outputs)
             boards_df.to_csv(boards_path)
             outputs_df.to_csv(outputs_path)
 
-        boards = boards.reshape(training_size, 6, 7)
+        boards = boards.reshape(training_size,
+                                start_state.board_height,
+                                start_state.board_width)
 
         start = datetime.now()
         filename = f'checkpoint-{i:02d}.h5'
         logger.info('Training for %s.', filename)
         history = training_net.train(boards, outputs)
         training_time = datetime.now() - start
-        print(f'Trained for {training_time}.')
+        logger.info(f'Trained for {training_time}.')
 
         if is_reprocessing:
             plot_loss(history)

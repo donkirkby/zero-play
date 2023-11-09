@@ -107,7 +107,7 @@ class NeuralNet(Heuristic):
 
         self.checkpoint_name += ' + training'
 
-        callbacks = [EarlyStopping(patience=5)]
+        callbacks = [EarlyStopping(patience=10)]
 
         history = self.model.fit(
             np.expand_dims(boards, -1),
