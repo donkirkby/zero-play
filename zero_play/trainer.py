@@ -136,10 +136,12 @@ def train(search_milliseconds: int,
         logger.info('Testing.')
         wins_vs_base, base_ties, base_wins = base_controller.play(
             comparison_size,
-            flip=True)
+            flip=True,
+            display_summary=False)
         wins_vs_best, best_ties, best_wins = best_controller.play(
             comparison_size,
-            flip=True)
+            flip=True,
+            display_summary=False)
         writer.writerow(dict(wins_vs_base=wins_vs_base/comparison_size,
                              ties_vs_base=base_ties/comparison_size,
                              wins_vs_best=wins_vs_best/comparison_size,

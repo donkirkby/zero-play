@@ -65,7 +65,11 @@ class PlayController:
                 return player_results
         raise ValueError('Player not found.')
 
-    def play(self, games: int = 1, flip: bool = False, display: bool = False):
+    def play(self,
+             games: int = 1,
+             flip: bool = False,
+             display: bool = False,
+             display_summary: bool = True):
         x_number = self.start_state.players[0]
         o_number = self.start_state.players[1]
         current_x = original_x = self.players[x_number]
@@ -98,6 +102,10 @@ class PlayController:
         original_o.player_number = o_number
         self.players[x_number] = original_x
         self.players[o_number] = original_o
+        if display_summary:
+            for player_results in self.results:
+                print(player_results.get_summary())
+            print(ties, 'ties')
         x_results = self.get_player_results(original_x)
         o_results = self.get_player_results(original_o)
 

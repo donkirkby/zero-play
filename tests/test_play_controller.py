@@ -168,6 +168,26 @@ def test_display(capsys):
         assert line.startswith(expected_line)
 
 
+def test_no_display(capsys):
+    game = SecondPlayerWinsGame()
+    heuristic = FirstChoiceHeuristic()
+    players = [MctsPlayer(game,
+                          game.X_PLAYER,
+                          iteration_count=10,
+                          heuristic=heuristic),
+               MctsPlayer(game,
+                          game.O_PLAYER,
+                          iteration_count=20,
+                          heuristic=heuristic)]
+    controller = PlayController(game, players)
+    expected_output = ""
+
+    controller.play(games=2, flip=True, display_summary=False)
+
+    out, err = capsys.readouterr()
+    assert out == expected_output
+
+
 def test_player_results():
     player = MctsPlayer(FirstPlayerWinsGame(), iteration_count=100)
     player_results = PlayerResults(player)
