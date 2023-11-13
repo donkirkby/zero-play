@@ -1,6 +1,6 @@
+import math
 import typing
 from abc import ABC, abstractmethod
-from io import StringIO
 
 import numpy as np
 
@@ -66,12 +66,21 @@ class GameState(ABC):
     def get_move_count(self) -> int:
         """ The number of moves that have already been made in the game. """
 
+    @property
     @abstractmethod
-    def get_spaces(self) -> np.ndarray:
+    def spaces(self) -> np.ndarray:
         """ Extract the board spaces from the complete game state.
 
         Useful for teaching machine learning models.
         """
+
+    @spaces.setter
+    @abstractmethod
+    def spaces(self, spaces: np.ndarray):
+        """ Set pieces on the board spaces. """
+
+    def get_spaces(self) -> np.ndarray:
+        return self.spaces
 
     @abstractmethod
     def parse_move(self, text: str) -> int:
@@ -97,8 +106,8 @@ class GameState(ABC):
             PLAYER_O.
         """
         board = self.get_spaces()
-        x_count = (board == self.X_PLAYER).sum()
-        y_count = (board == self.O_PLAYER).sum()
+        x_count = board[0].sum()
+        y_count = board[1].sum()
         return self.X_PLAYER if x_count == y_count else self.O_PLAYER
 
     @abstractmethod
@@ -132,23 +141,35 @@ class GameState(ABC):
 
 # noinspection PyAbstractClass
 class GridGameState(GameState):
+    """ Game state for a simple grid with pieces on it. """
     def __init__(self,
                  board_height: int,
                  board_width: int,
                  text: str | None = None,
                  lines: typing.Sequence[str] | None = None,
-                 spaces: np.ndarray | None = None,
-                 extra_count: int = 0):
+                 spaces: np.ndarray | None = None):
+        """ Initialize a new instance.
+
+        :param board_height: number of rows in the grid
+        :param board_width: number of columns in the grid
+        :param text: text representation of the game state, like that returned
+            by display()
+        :param lines: equivalent to text, but already split into lines
+        :param spaces: 3-dimensional boolean array 1 when a piece type is
+            in a grid space, 0 when it isn't, with shape
+            (piece_type_count, board_height, board_width)
+        """
         self.board_height = board_height
         self.board_width = board_width
-        if spaces is None:
-            self.board = np.zeros(self.board_height*self.board_width + extra_count,
-                                  dtype=int)
-        else:
-            self.board = spaces
-        spaces = self.get_spaces()
-        if extra_count == 0:
-            self.board = spaces
+        if spaces is not None:
+            assert text is None
+            assert lines is None
+            self.spaces = spaces
+            return
+        type_count = len(self.piece_types)
+        packed = np.zeros(math.ceil(board_height*board_width*type_count/8),
+                          dtype=np.uint8)
+        self.packed = packed
         if text:
             lines = text.splitlines()
         if lines:
@@ -156,47 +177,72 @@ class GridGameState(GameState):
                 # Trim off coordinates.
                 lines = lines[1:]
                 lines = [line[2:] for line in lines]
-            for i, line in enumerate(lines):
-                spaces[i] = [self.DISPLAY_CHARS.index(c) - 1 for c in line]
+            line_array = np.array(lines, dtype=str)
+            chars = line_array.view('U1').reshape(self.board_height,
+                                                  self.board_width)
+            spaces = self.get_spaces()
+            for layer, display_char in enumerate(self.piece_displays):
+                spaces[layer] = chars == display_char
+        if spaces is not None:
+            self.spaces = spaces
 
     def __repr__(self):
-        board_repr = " ".join(repr(self.board).split())
-        board_repr = board_repr.replace('[ ', '[')
-        return f'{self.__class__.__name__}(spaces={board_repr})'
+        board_text = self.display()
+        return f'{self.__class__.__name__}({board_text!r})'
 
     def __eq__(self, other):
         if not isinstance(other, GridGameState):
             return False
-        return np.array_equal(self.board, other.board)
+        return np.array_equal(self.spaces, other.spaces)
+
+    @property
+    def piece_types(self):
+        return self.X_PLAYER, self.O_PLAYER
+
+    @property
+    def piece_displays(self):
+        return 'XO'
 
     def get_move_count(self) -> int:
-        return int((self.get_spaces() != GameState.NO_PLAYER).sum())
+        return self.spaces.sum()
 
-    def get_spaces(self) -> np.ndarray:
-        return self.board[:self.board_height*self.board_width].reshape(
-            self.board_height,
-            self.board_width)
+    @property
+    def spaces(self) -> np.ndarray:
+        type_count = len(self.piece_types)
+        trimmed_size = self.board_height * self.board_width * type_count
+        trimmed = np.unpackbits(self.packed)[:trimmed_size]
+        return trimmed.reshape(type_count,
+                               self.board_height,
+                               self.board_width)
+
+    @spaces.setter
+    def spaces(self, spaces):
+        self.packed = np.packbits(spaces)
 
     def get_valid_moves(self) -> np.ndarray:
         spaces = self.get_spaces()
-        return spaces.reshape(self.board_height *
-                              self.board_width) == GameState.NO_PLAYER
+        full_spaces = np.logical_or.accumulate(spaces)[-1]
+        empty_spaces = np.logical_not(full_spaces)
+        return empty_spaces.reshape(self.board_height * self.board_width)
 
     def display(self, show_coordinates: bool = False) -> str:
-        result = StringIO()
+        spaces = self.get_spaces().astype(bool)
+        display_grid = np.full((self.board_height, self.board_width), '.')
+        for level, char in enumerate(self.piece_displays):
+            np.copyto(display_grid, char, where=spaces[level])
+        lines = np.full(self.board_height, '')
         if show_coordinates:
-            result.write('  ')
-            for i in range(65, 65+self.board_width):
-                result.write(chr(i))
-            result.write('\n')
-        spaces = self.get_spaces()
-        for i in range(self.board_height):
-            if show_coordinates:
-                result.write(chr(49+i) + ' ')
-            for j in range(self.board_width):
-                result.write(self.DISPLAY_CHARS[spaces[i, j]+1])
-            result.write('\n')
-        return result.getvalue()
+            lines = np.char.add(lines,
+                                [chr(49+i) + ' '
+                                 for i in range(self.board_height)])
+        for j in range(self.board_width):
+            lines = np.char.add(lines, display_grid[:, j])
+        text = '\n'.join(lines) + '\n'
+        if show_coordinates:
+            header = '  ' + ''.join(chr(i)
+                                    for i in range(65, 65 + self.board_width))
+            text = header + '\n' + text
+        return text
 
     def display_move(self, move: int) -> str:
         row = move // self.board_width
@@ -221,10 +267,11 @@ class GridGameState(GameState):
 
     def make_move(self, move: int) -> 'GridGameState':
         moving_player = self.get_active_player()
-        new_board: np.ndarray = self.board.copy()
+        piece_type = self.piece_types.index(moving_player)
+        new_spaces = self.get_spaces()  # always an unpacked copy
         i, j = move // self.board_width, move % self.board_width
-        new_board[i, j] = moving_player
+        new_spaces[piece_type, i, j] = 1
 
         return self.__class__(board_height=self.board_height,
                               board_width=self.board_width,
-                              spaces=new_board)
+                              spaces=new_spaces)

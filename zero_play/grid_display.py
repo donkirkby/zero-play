@@ -1,6 +1,7 @@
 import itertools
 import typing
 
+import numpy as np
 from PySide6.QtGui import QColor, QBrush, QFont, QResizeEvent, QPixmap, Qt, QPainter, QPen
 from PySide6.QtWidgets import QGraphicsEllipseItem, \
     QGraphicsSceneHoverEvent, QGraphicsSceneMouseEvent, QGraphicsScene
@@ -155,12 +156,16 @@ class GridDisplay(GameDisplay):
         self.current_state = state
         self.valid_moves = self.current_state.get_valid_moves()
         is_ended = self.current_state.is_ended()
-        spaces = self.current_state.get_spaces()
+        state_spaces = self.current_state.spaces
         for i in range(self.current_state.board_height):
             for j in range(self.current_state.board_width):
-                player = spaces[i][j]
+                piece_types = np.nonzero(state_spaces[:, i, j])[0]
+                if piece_types.size:
+                    piece_type = piece_types[0]
+                else:
+                    piece_type = None
                 piece = self.spaces[i][j]
-                if player == self.current_state.NO_PLAYER:
+                if piece_type is None:
                     if is_ended:
                         piece.setVisible(False)
                     else:
@@ -168,6 +173,7 @@ class GridDisplay(GameDisplay):
                         piece.setBrush(self.background_colour)
                         piece.setPen(self.background_colour)
                 else:
+                    player = self.current_state.piece_types[piece_type]
                     piece.setVisible(True)
                     piece.setBrush(self.get_player_brush(player))
                     piece.setPen(self.line_colour)
@@ -240,9 +246,9 @@ class GridDisplay(GameDisplay):
         return move
 
     def is_piece_played(self, piece_item):
-        current_spaces = self.current_state.get_spaces()
-        hovered_player = current_spaces[piece_item.row][piece_item.column]
-        return hovered_player != self.start_state.NO_PLAYER
+        current_spaces = self.current_state.spaces
+        hovered_space = current_spaces[:, piece_item.row, piece_item.column]
+        return bool(hovered_space.sum())
 
     def close(self):
         super().close()

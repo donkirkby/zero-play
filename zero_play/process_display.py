@@ -15,6 +15,7 @@ class ProcessDisplay(QWidget):
 
     def close(self):
         self.stop_workers()
+        super().close()
 
     def stop_workers(self):
         if self.worker_thread is not None:

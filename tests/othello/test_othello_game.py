@@ -1,3 +1,5 @@
+from textwrap import dedent
+
 import numpy as np
 import pytest
 
@@ -8,23 +10,34 @@ from zero_play.playout import Playout
 
 
 def test_create_board():
-    x, o = OthelloState.X_PLAYER, OthelloState.O_PLAYER
-    # 6x6 grid of spaces, plus next player.
-    expected_board = [0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0,
-                      0, 0, o, x, 0, 0,
-                      0, 0, x, o, 0, 0,
-                      0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0,
-                      x]
+    expected_spaces = np.array([[[0, 0, 0, 0, 0, 0],  # X pieces
+                                 [0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 1, 0, 0],
+                                 [0, 0, 1, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0]],
+                                [[0, 0, 0, 0, 0, 0],  # O pieces
+                                 [0, 0, 0, 0, 0, 0],
+                                 [0, 0, 1, 0, 0, 0],
+                                 [0, 0, 0, 1, 0, 0],
+                                 [0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0]]])
     board = OthelloState()
 
-    assert board.board.tolist() == expected_board
+    assert np.array_equal(board.get_spaces(), expected_spaces)
+    assert board.get_active_player() == board.X_PLAYER
+
+
+def test_repr():
+    expected_repr = (r"OthelloState("
+                     r"'......\n......\n..OX..\n..XO..\n......\n......\n>X\n')")
+    board = OthelloState()
+
+    assert repr(board) == expected_repr
 
 
 # noinspection DuplicatedCode
 def test_create_board_from_text():
-    x, o = OthelloState.X_PLAYER, OthelloState.O_PLAYER
     text = """\
 ......
 ......
@@ -34,21 +47,26 @@ def test_create_board_from_text():
 ...XO.
 >O
 """
-    expected_board = [0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, x, 0,
-                      0, 0, 0, x, o, 0,
-                      o]
+    expected_spaces = np.array([[[0, 0, 0, 0, 0, 0],  # X pieces
+                                 [0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 1, 0],
+                                 [0, 0, 0, 1, 0, 0]],
+                                [[0, 0, 0, 0, 0, 0],  # O pieces
+                                 [0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 1, 0]]])
     board = OthelloState(text)
 
-    assert board.board.tolist() == expected_board
+    assert np.array_equal(board.spaces, expected_spaces)
+    assert board.get_active_player() == board.O_PLAYER
 
 
 # noinspection DuplicatedCode
 def test_create_board_with_coordinates():
-    x, o = OthelloState.X_PLAYER, OthelloState.O_PLAYER
     text = """\
   ABCDEF
 1 ......
@@ -59,28 +77,26 @@ def test_create_board_with_coordinates():
 6 ...XO.
 >X
 """
-    expected_board = [0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, x, 0,
-                      0, 0, 0, x, o, 0,
-                      x]
+    expected_spaces = np.array([[[0, 0, 0, 0, 0, 0],  # X pieces
+                                 [0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 1, 0],
+                                 [0, 0, 0, 1, 0, 0]],
+                                [[0, 0, 0, 0, 0, 0],  # O pieces
+                                 [0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 1, 0]]])
     board = OthelloState(text)
 
-    assert board.board.tolist() == expected_board
+    assert np.array_equal(board.spaces, expected_spaces)
+    assert board.get_active_player() == board.X_PLAYER
 
 
 # noinspection DuplicatedCode
 def test_display():
-    x, o = OthelloState.X_PLAYER, OthelloState.O_PLAYER
-    board = np.array([0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, x, 0,
-                      0, 0, 0, x, o, 0,
-                      x])
     expected_text = """\
 ......
 ......
@@ -90,21 +106,13 @@ def test_display():
 ...XO.
 >X
 """
-    text = OthelloState(spaces=board).display()
+    text = OthelloState(expected_text).display()
 
     assert text == expected_text
 
 
 # noinspection DuplicatedCode
 def test_display_coordinates():
-    x, o = OthelloState.X_PLAYER, OthelloState.O_PLAYER
-    board = np.array([0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, x, 0,
-                      0, 0, 0, x, o, 0,
-                      x])
     expected_text = """\
   ABCDEF
 1 ......
@@ -115,7 +123,7 @@ def test_display_coordinates():
 6 ...XO.
 >X
 """
-    text = OthelloState(spaces=board).display(show_coordinates=True)
+    text = OthelloState(expected_text).display(show_coordinates=True)
 
     assert text == expected_text
 
@@ -457,12 +465,6 @@ X.....
     assert board.get_winner() == board.O_PLAYER
 
 
-def test_create_from_array():
-    board = OthelloState(spaces=np.zeros(65, dtype=np.int8))
-
-    assert board.board_width == 8
-
-
 def test_training_data():
     state = OthelloState()
     neural_net = NeuralNet(state)
@@ -472,3 +474,26 @@ def test_training_data():
         iterations=10,
         data_size=10)
     neural_net.train(boards, outputs)
+
+
+def test_equality():
+    state1 = OthelloState(dedent("""\
+        ......
+        ..O...
+        ..OO..
+        ..OX..
+        ......
+        ......
+        >X
+        """))
+    state2 = OthelloState(dedent("""\
+        ......
+        ..O...
+        ..OO..
+        ..OX..
+        ......
+        ......
+        >O
+        """))
+
+    assert not state1 == state2

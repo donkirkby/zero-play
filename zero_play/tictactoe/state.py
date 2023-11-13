@@ -18,13 +18,14 @@ class TicTacToeState(GridGameState):
 
     def is_win(self, player: int) -> bool:
         """ Has the given player collected a triplet in any direction? """
+        piece_type = self.piece_types.index(player)
         size = self.board_width
-        spaces = self.get_spaces()
+        player_pieces = self.get_spaces()[piece_type]
         # check horizontal lines
         for i in range(size):
             count = 0
             for j in range(size):
-                if spaces[i, j] == player:
+                if player_pieces[i, j]:
                     count += 1
             if count == size:
                 return True
@@ -32,16 +33,16 @@ class TicTacToeState(GridGameState):
         for j in range(size):
             count = 0
             for i in range(size):
-                if spaces[i, j] == player:
+                if player_pieces[i, j]:
                     count += 1
             if count == size:
                 return True
         # check two diagonal strips
         count1 = count2 = 0
         for d in range(size):
-            if spaces[d, d] == player:
+            if player_pieces[d, d]:
                 count1 += 1
-            if spaces[d, size-d-1] == player:
+            if player_pieces[d, size - d - 1]:
                 count2 += 1
         if count1 == size or count2 == size:
             return True

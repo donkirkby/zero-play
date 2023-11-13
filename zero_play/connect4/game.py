@@ -1,3 +1,5 @@
+from copy import copy
+
 import numpy as np
 
 from zero_play.game_state import GridGameState
@@ -24,7 +26,7 @@ class Connect4State(GridGameState):
         if self.get_winner() != self.NO_PLAYER:
             return np.zeros(self.board_width, dtype=bool)
         # Any zero value in top row is a valid move
-        return self.board[0] == 0
+        return self.spaces[:, 0].sum(axis=0) == 0
 
     def display(self, show_coordinates: bool = False) -> str:
         header = '1234567\n' if show_coordinates else ''
@@ -38,17 +40,23 @@ class Connect4State(GridGameState):
 
     def make_move(self, move: int) -> 'Connect4State':
         moving_player = self.get_active_player()
-        new_board: np.ndarray = self.board.copy()
-        available_idx, = np.where(new_board[:, move] == 0)
+        new_board = copy(self)
+        spaces = new_board.spaces
+        empty_spaces = spaces.sum(axis=0) == 0
+        available_idx, = np.where(empty_spaces[:, move])
 
-        new_board[available_idx[-1]][move] = moving_player
-        return Connect4State(spaces=new_board)
+        piece_type = self.piece_types.index(moving_player)
+        spaces[piece_type, available_idx[-1], move] = 1
+        new_board.spaces = spaces
+        return new_board
 
     def is_win(self, player: int) -> bool:
         """ Has the given player collected four in a row in any direction? """
-        row_count, column_count = self.board.shape
+        row_count, column_count = self.board_height, self.board_width
         win_count = 4
-        player_pieces = self.board == player
+        spaces = self.spaces
+        piece_type = self.piece_types.index(player)
+        player_pieces = spaces[piece_type]
         if self.is_horizontal_win(player_pieces, win_count):
             return True
         if self.is_horizontal_win(player_pieces.transpose(), win_count):
@@ -58,10 +66,10 @@ class Connect4State(GridGameState):
             for start_column in range(column_count - win_count + 1):
                 count1 = count2 = 0
                 for d in range(win_count):
-                    if self.board[start_row + d, start_column + d] == player:
+                    if player_pieces[start_row + d, start_column + d]:
                         count1 += 1
-                    if self.board[start_row + d,
-                                  start_column + win_count - d - 1] == player:
+                    if player_pieces[start_row + d,
+                                     start_column + win_count - d - 1]:
                         count2 += 1
                 if count1 == win_count or count2 == win_count:
                     return True

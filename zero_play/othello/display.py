@@ -16,10 +16,9 @@ class OthelloDisplay(GridDisplay):
     # noinspection DuplicatedCode
     def update_count_text(self):
         assert isinstance(self.current_state, OthelloState)
-        black_count = self.current_state.get_piece_count(
-            self.current_state.X_PLAYER)
-        white_count = self.current_state.get_piece_count(
-            self.current_state.O_PLAYER)
+        spaces = self.current_state.spaces
+        black_count = spaces[0].sum()
+        white_count = spaces[1].sum()
         self.ui.black_count.setText(f'{black_count}')
         self.ui.white_count.setText(f'{white_count}')
 

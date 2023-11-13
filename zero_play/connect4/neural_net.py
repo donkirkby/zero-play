@@ -45,7 +45,7 @@ class NeuralNet(Heuristic):
         num_channels = 64
         kernel_size = [3, 3]
         regularizer = regularizers.l2(0.0001)
-        input_shape = (self.board_height, self.board_width, 1)
+        input_shape = (2, self.board_height, self.board_width, 1)
         model = Sequential(
             [Conv2D(num_channels,
                     kernel_size,
@@ -68,8 +68,8 @@ class NeuralNet(Heuristic):
         if board.is_ended():
             return self.analyse_end_game(board)
 
-        outputs = self.model(board.get_spaces().reshape(
-            (1, self.board_height, self.board_width, 1))).numpy()
+        outputs = self.model(board.spaces.reshape(
+            (1, 2, self.board_height, self.board_width, 1))).numpy()
 
         policy = outputs[0, :-1]
         value = outputs[0, -1]

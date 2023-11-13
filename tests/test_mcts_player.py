@@ -59,7 +59,7 @@ def test_repr():
 ...
 """
     board = TicTacToeState(board_text)
-    expected_repr = "SearchNode(TicTacToeState(spaces=array([[0, -1, 0], [0, 1, 0], [0, 0, 0]])))"
+    expected_repr = r"SearchNode(TicTacToeState('.O.\n.X.\n...\n'))"
 
     node = SearchNode(board)
     node_repr = repr(node)
@@ -358,38 +358,38 @@ def test_create_training_data():
     start_state = TicTacToeState()
     manager = SearchManager(start_state, FirstChoiceHeuristic())
     expected_boards, expected_outputs = zip(*[
-        [start_state.get_spaces(),
+        [start_state.spaces,
          np.array([1., 0., 0., 0., 0., 0., 0., 0., 0., -1.])],
         [TicTacToeState("""\
 X..
 ...
 ...
-""").get_spaces(), np.array([0., 1., 0., 0., 0., 0., 0., 0., 0., 1.])],
+""").spaces, np.array([0., 1., 0., 0., 0., 0., 0., 0., 0., 1.])],
         [TicTacToeState("""\
 XO.
 ...
 ...
-""").get_spaces(), np.array([0., 0., 1., 0., 0., 0., 0., 0., 0., -1.])],
+""").spaces, np.array([0., 0., 1., 0., 0., 0., 0., 0., 0., -1.])],
         [TicTacToeState("""\
 XOX
 ...
 ...
-""").get_spaces(), np.array([0., 0., 0., 1., 0., 0., 0., 0., 0., 1.])],
+""").spaces, np.array([0., 0., 0., 1., 0., 0., 0., 0., 0., 1.])],
         [TicTacToeState("""\
 XOX
 O..
 ...
-""").get_spaces(), np.array([0., 0., 0., 0., 1., 0., 0., 0., 0., -1.])],
+""").spaces, np.array([0., 0., 0., 0., 1., 0., 0., 0., 0., -1.])],
         [TicTacToeState("""\
 XOX
 OX.
 ...
-""").get_spaces(), np.array([0., 0., 0., 0., 0., 1., 0., 0., 0., 1.])],
+""").spaces, np.array([0., 0., 0., 0., 0., 1., 0., 0., 0., 1.])],
         [TicTacToeState("""\
 XOX
 OXO
 ...
-""").get_spaces(), np.array([0., 0., 0., 0., 0., 0., 1., 0., 0., -1.])]])
+""").spaces, np.array([0., 0., 0., 0., 0., 0., 1., 0., 0., -1.])]])
     expected_boards = np.stack(expected_boards)
     expected_outputs = np.stack(expected_outputs)
 
@@ -397,6 +397,15 @@ OXO
 
     assert repr(boards) == repr(expected_boards)
     assert repr(outputs) == repr(expected_outputs)
+
+
+def test_create_more_training_data():
+    start_state = TicTacToeState()
+    manager = SearchManager(start_state, FirstChoiceHeuristic())
+
+    boards, outputs = manager.create_training_data(iterations=1, data_size=11)
+
+    assert boards.shape == (11, 2, 3, 3)
 
 
 def test_win_scores_one():

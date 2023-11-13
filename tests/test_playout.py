@@ -41,7 +41,7 @@ class TakeOneTwiceGame(GameState):
     def get_move_count(self) -> int:
         return self.move_count
 
-    def get_spaces(self) -> np.ndarray:
+    def spaces(self) -> np.ndarray:
         return np.ndarray([self.value, self.move_count+1])
 
     def parse_move(self, text: str) -> int:

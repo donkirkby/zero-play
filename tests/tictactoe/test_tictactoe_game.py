@@ -1,3 +1,5 @@
+from textwrap import dedent
+
 import numpy as np
 import pytest
 
@@ -5,28 +7,47 @@ from zero_play.tictactoe.state import TicTacToeState
 
 
 def test_create_board():
-    expected_spaces = np.array([[0, 0, 0],
-                                [0, 0, 0],
-                                [0, 0, 0]])
+    expected_spaces = np.array([[[0, 0, 0],
+                                 [0, 0, 0],
+                                 [0, 0, 0]],
+                                [[0, 0, 0],
+                                 [0, 0, 0],
+                                 [0, 0, 0]]])
     board = TicTacToeState()
 
     assert np.array_equal(board.get_spaces(), expected_spaces)
 
 
+# noinspection DuplicatedCode
 def test_create_board_from_text():
     text = """\
 X..
 .O.
 ...
 """
-    expected_spaces = np.array([[1, 0, 0],
-                                [0, -1, 0],
-                                [0, 0, 0]])
+    expected_spaces = np.array([[[1, 0, 0],
+                                 [0, 0, 0],
+                                 [0, 0, 0]],
+                                [[0, 0, 0],
+                                 [0, 1, 0],
+                                 [0, 0, 0]]])
     board = TicTacToeState(text)
 
     assert np.array_equal(board.get_spaces(), expected_spaces)
 
 
+def test_repr():
+    text = dedent("""\
+        X..
+        .O.
+        ...
+        """)
+    state = TicTacToeState(text)
+
+    assert repr(state) == r"TicTacToeState('X..\n.O.\n...\n')"
+
+
+# noinspection DuplicatedCode
 def test_create_board_with_coordinates():
     text = """\
   ABC
@@ -34,38 +55,37 @@ def test_create_board_with_coordinates():
 2 .O.
 3 ...
 """
-    expected_spaces = np.array([[1, 0, 0],
-                                [0, -1, 0],
-                                [0, 0, 0]])
+    expected_spaces = np.array([[[1, 0, 0],
+                                 [0, 0, 0],
+                                 [0, 0, 0]],
+                                [[0, 0, 0],
+                                 [0, 1, 0],
+                                 [0, 0, 0]]])
     board = TicTacToeState(text)
 
     assert np.array_equal(board.get_spaces(), expected_spaces)
 
 
 def test_display():
-    board = TicTacToeState(spaces=np.array([[1, 0, 0],
-                                            [0, -1, 0],
-                                            [0, 0, 0]]))
-    expected_text = """\
-X..
-.O.
-...
-"""
+    expected_text = dedent("""\
+        X..
+        .O.
+        ...
+        """)
+    board = TicTacToeState(expected_text)
     text = board.display()
 
     assert text == expected_text
 
 
 def test_display_coordinates():
-    board = TicTacToeState(spaces=np.array([[1, 0, 0],
-                                            [0, -1, 0],
-                                            [0, 0, 0]]))
-    expected_text = """\
-  ABC
-1 X..
-2 .O.
-3 ...
-"""
+    expected_text = dedent("""\
+          ABC
+        1 X..
+        2 .O.
+        3 ...
+        """)
+    board = TicTacToeState(expected_text)
     text = board.display(show_coordinates=True)
 
     assert text == expected_text
@@ -154,7 +174,7 @@ XO.
     board2 = board1.make_move(move)
     display = board2.display()
 
-    assert expected_display == display
+    assert display == expected_display
 
 
 def test_make_move_o():

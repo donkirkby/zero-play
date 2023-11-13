@@ -5,15 +5,10 @@ from zero_play.connect4.game import Connect4State
 
 
 def test_create_board():
-    expected_spaces = np.array([[0, 0, 0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0, 0, 0]])
+    expected_spaces = np.zeros((2, 6, 7))
     board = Connect4State()
 
-    assert np.array_equal(board.get_spaces(), expected_spaces)
+    assert np.array_equal(board.spaces, expected_spaces)
 
 
 # noinspection DuplicatedCode
@@ -26,15 +21,22 @@ def test_create_board_from_text():
 ....X..
 ...XO..
 """
-    expected_spaces = np.array([[0, 0, 0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 1, 0, 0],
-                                [0, 0, 0, 1, -1, 0, 0]])
+    expected_spaces = np.array([[[0, 0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 1, 0, 0],
+                                 [0, 0, 0, 1, 0, 0, 0]],
+                                [[0, 0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 1, 0, 0]]
+                                ])
     board = Connect4State(text)
 
-    assert np.array_equal(board.get_spaces(), expected_spaces)
+    assert np.array_equal(board.spaces, expected_spaces)
 
 
 # noinspection DuplicatedCode
@@ -48,25 +50,26 @@ def test_create_board_with_coordinates():
 ....X..
 ...XO..
 """
-    expected_board = np.array([[0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 1, 0, 0],
-                               [0, 0, 0, 1, -1, 0, 0]])
+    expected_spaces = np.array([[[0, 0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 1, 0, 0],
+                                 [0, 0, 0, 1, 0, 0, 0]],
+                                [[0, 0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 0, 0, 0],
+                                 [0, 0, 0, 0, 1, 0, 0]]
+                                ])
     board = Connect4State(text)
 
-    assert np.array_equal(board.get_spaces(), expected_board)
+    assert np.array_equal(board.spaces, expected_spaces)
 
 
 # noinspection DuplicatedCode
 def test_display():
-    spaces = np.array([[0, 0, 0, 0, 0, 0, 0],
-                       [0, 0, 0, 0, 0, 0, 0],
-                       [0, 0, 0, 0, 0, 0, 0],
-                       [0, 0, 0, 0, 0, 0, 0],
-                       [0, 0, 0, 0, 1, 0, 0],
-                       [0, 0, 0, 1, -1, 0, 0]])
     expected_text = """\
 .......
 .......
@@ -75,19 +78,13 @@ def test_display():
 ....X..
 ...XO..
 """
-    text = Connect4State(spaces=spaces).display()
+    text = Connect4State(expected_text).display()
 
     assert text == expected_text
 
 
 # noinspection DuplicatedCode
 def test_display_coordinates():
-    spaces = np.array([[0, 0, 0, 0, 0, 0, 0],
-                       [0, 0, 0, 0, 0, 0, 0],
-                       [0, 0, 0, 0, 0, 0, 0],
-                       [0, 0, 0, 0, 0, 0, 0],
-                       [0, 0, 0, 0, 1, 0, 0],
-                       [0, 0, 0, 1, -1, 0, 0]])
     expected_text = """\
 1234567
 .......
@@ -97,7 +94,7 @@ def test_display_coordinates():
 ....X..
 ...XO..
 """
-    text = Connect4State(spaces=spaces).display(show_coordinates=True)
+    text = Connect4State(expected_text).display(show_coordinates=True)
 
     assert expected_text == text
 
@@ -306,6 +303,7 @@ XXXXXO.
 def test_vertical_winner():
     text = """\
 .......
+.......
 .....O.
 .....O.
 ....XO.
@@ -321,6 +319,7 @@ def test_vertical_winner():
 def test_diagonal1_winner():
     text = """\
 .......
+.......
 ..O....
 ..XO...
 ..OXO..
@@ -335,6 +334,7 @@ def test_diagonal1_winner():
 
 def test_diagonal2_winner():
     text = """\
+.......
 ......X
 .....XO
 ..XOXOX

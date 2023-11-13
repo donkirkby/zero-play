@@ -239,6 +239,7 @@ class SearchManager:
 
     def get_best_move(self) -> int:
         best_children = self.current_node.find_best_children()
+        # noinspection PyTypeChecker
         self.current_node = child = np.random.choice(best_children)
         assert child.move is not None
         return child.move
@@ -301,10 +302,10 @@ class SearchManager:
         the final value of this position for the active player.
         """
         game_states: typing.List[typing.Tuple[GameState, np.ndarray]] = []
-        self.search(self.current_node.game_state, milliseconds=1)  # One extra to start.
+        self.search(self.current_node.game_state, iterations=1)  # One extra to start.
         report_size = 0
-        board_shape = self.current_node.game_state.get_spaces().shape
-        boards = np.zeros((data_size,) + board_shape, int)
+        board_shape = self.current_node.game_state.spaces.shape
+        boards = np.zeros((data_size,) + board_shape, np.uint8)
         move_count = self.current_node.game_state.get_valid_moves().size
         outputs = np.zeros((data_size, move_count + 1))
         data_count = 0
@@ -346,6 +347,9 @@ class SearchManager:
                     report_size = data_count * 2
                 game_states.clear()
                 self.reset()
+
+                # One extra to start the next game.
+                self.search(self.current_node.game_state, iterations=1)
 
 
 class MctsPlayer(Player):

@@ -16,13 +16,17 @@ class FirstPlayerWinsGame(GridGameState):
         super().__init__(board_height, board_width, spaces=spaces)
 
     def is_win(self, player: int) -> bool:
-        if (self.board == 0).sum() != 0:
+        spaces = self.spaces
+        empty_spaces = spaces.sum(axis=0) == 0
+        if empty_spaces.sum() != 0:
             return False
-        x_count = (self.board == self.X_PLAYER).sum()
-        o_count = (self.board == self.O_PLAYER).sum()
+        piece_type = self.piece_types.index(player)
+        opponent_type = 1 - piece_type
+        player_count = spaces[piece_type].sum()
+        opponent_count = spaces[opponent_type].sum()
         if player == self.X_PLAYER:
-            return o_count < x_count
-        return x_count <= o_count
+            return opponent_count < player_count
+        return opponent_count <= player_count
 
 
 class SecondPlayerWinsGame(FirstPlayerWinsGame):
