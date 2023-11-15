@@ -192,8 +192,8 @@ class ZeroPlayWindow(QMainWindow):
         return 'Zero Play'
 
     @staticmethod
-    def filter_games(entries):
-        yield from entries
+    def filter_games(entries: list) -> list:
+        return entries
 
     @property
     def db_session(self) -> typing.Optional[BaseSession]:
