@@ -1058,11 +1058,11 @@
         },
         "space-tracer": {
             "hashes": [
-                "sha256:79403aa4d612b43698a97f6039dcb88a762d7ba33a5b2c48fa3707c271327138",
-                "sha256:b39c60968f3d4e710eb345eb21fbccf6238b38bcc0c45881b297aeefd9ff2858"
+                "sha256:be9e81ae0ee9e77a387ebd6e429e19a6f51a31b59e5ea84c870941180da4f82f",
+                "sha256:fd938bc13640032c1ded6663bb71c3559340f1e481ffcee8444a5d194ab61581"
             ],
             "index": "pypi",
-            "version": "==4.10.1"
+            "version": "==4.11.0"
         },
         "sqlalchemy": {
             "hashes": [
