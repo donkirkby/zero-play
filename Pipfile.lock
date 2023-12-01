@@ -26,12 +26,12 @@
         },
         "alembic": {
             "hashes": [
-                "sha256:47d52e3dfb03666ed945becb723d6482e52190917fdb47071440cfdba05d92cb",
-                "sha256:bca5877e9678b454706347bc10b97cb7d67f300320fa5c3a94423e8266e2823f"
+                "sha256:a23974ea301c3ee52705db809c7413cecd165290c6679b9998dd6c74342ca23a",
+                "sha256:ab4b3b94d2e1e5f81e34be8a9b7b7575fc9dd5398fccb0bef351ec9b14872623"
             ],
             "index": "pypi",
-            "markers": "python_version >= '3.7'",
-            "version": "==1.12.1"
+            "markers": "python_version >= '3.8'",
+            "version": "==1.13.0"
         },
         "astunparse": {
             "hashes": [
