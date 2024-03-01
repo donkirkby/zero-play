@@ -36,9 +36,8 @@ The default installation generates some errors about `bdist_wheel` that don't
 seem to actually cause any problems. You can either ignore them, or install
 `wheel` before installing Zero Play.
 
-    pip install wheel
-    pip install zero-play
-    zero_play
+>   pip install -r requirements.txt
+>   zero_play
 
 Known bug on Ubuntu 20.04:
 
