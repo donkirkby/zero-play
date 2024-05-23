@@ -1938,12 +1938,12 @@
         },
         "types-setuptools": {
             "hashes": [
-                "sha256:275fb72048b0203d3fbef268298ea78a0913cd114a74872d93f8638ccc5b7c63",
-                "sha256:52b264eff8913b5d85848d83bd98efea935fc6129d681d370eb957783880b720"
+                "sha256:1828c1e2bc93cdb371fd0955fa51e27c3143490fe40a650db3fca22ea44233b3",
+                "sha256:268c782f9d657bb0447a97bb9d50debd3a48721bb9d1d8194548d4835798beac"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==69.5.0.20240519"
+            "version": "==70.0.0.20240523"
         },
         "typing-extensions": {
             "hashes": [
