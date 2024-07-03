@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "86f1faceabc1e4ce80aa3b6186bfa09abcf7315a0155ce801ffd373205723129"
+            "sha256": "8eb8e513edf09ac9457b45b422006d1682312a74f54761d19482a55e494f7255"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -797,12 +797,11 @@
         },
         "nvidia-cudnn-cu11": {
             "hashes": [
-                "sha256:85edb789550a0d303a8d6ae5abe5b8df3ad2b07b61ee51bd40be4b27be7eb676",
-                "sha256:ea41fb5c7542bfa068d13c4d6ec88f4bb20e6c672bff8a0787edb964ddd8b998"
+                "sha256:af6599814e34fc1a4bcf8bc488818c869246ab048c39de47136b3069031054ad"
             ],
             "index": "pypi",
             "markers": "python_version >= '3'",
-            "version": "==9.1.1.17"
+            "version": "==9.2.0.82"
         },
         "oauthlib": {
             "hashes": [
