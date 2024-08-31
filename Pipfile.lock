@@ -1983,12 +1983,12 @@
         },
         "types-setuptools": {
             "hashes": [
-                "sha256:3a060681098eb3fbc2fea0a86f7f6af6aa1ca71906039d88d891ea2cecdd4dbf",
-                "sha256:b9eba9b68546031317a0fa506d4973641d987d74f79e7dd8369ad4f7a93dea17"
+                "sha256:2019cb0ef0fc11c3550946057e1fe78cb934284b856cec5f4ab45b43d9288685",
+                "sha256:3ccb05f218012b6d1643f15c3395fced6a290a32bc49338b0e93ece73585a5a2"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==73.0.0.20240822"
+            "version": "==74.0.0.20240830"
         },
         "typing-extensions": {
             "hashes": [
