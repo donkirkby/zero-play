@@ -1142,11 +1142,11 @@
         },
         "space-tracer": {
             "hashes": [
-                "sha256:be9e81ae0ee9e77a387ebd6e429e19a6f51a31b59e5ea84c870941180da4f82f",
-                "sha256:fd938bc13640032c1ded6663bb71c3559340f1e481ffcee8444a5d194ab61581"
+                "sha256:755beb512bd9a4086b164010b875766dba8f8881e09fadcb90a0f1d038f9398a",
+                "sha256:76f285012ca829a2ff4839f2fa4bf3df3a084efcfbe5208c6b1531ea6ee28d58"
             ],
             "index": "pypi",
-            "version": "==4.11.0"
+            "version": "==4.12.0"
         },
         "sqlalchemy": {
             "hashes": [
