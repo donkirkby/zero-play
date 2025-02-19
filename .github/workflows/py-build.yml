@@ -13,9 +13,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # 4.2.2
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38  # 5.4.0
         with:
           # Sync with Pipfile
           python-version: "3.10"
@@ -36,9 +36,9 @@ jobs:
           # Add QT_DEBUG_PLUGINS=1 before xvfb-run to debug Qt library problems.
           xvfb-run -a pipenv run coverage run --source=zero_play -m pytest
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3  # 5.3.1
       - name: Upload image diffs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08  # 4.6.0
         if: ${{ always() && steps.test.outcome == 'failure' }}
         with:
           name: image-diffs
