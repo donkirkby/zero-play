@@ -18,7 +18,7 @@ tensorflow = "*"
 markdown = "*"
 alembic = "*"
 sqlalchemy = "*"
-pyside6 = "<6.5"  # 6.5.0 causes fatal Python error. Try 6.5.1 when released.
+pyside6 = "<6.9"  # 6.5.0 causes fatal Python error. Try 6.5.1 when released.
 space-tracer = "*"
 nvidia-cudnn-cu11 = "==9.7.*"
 pandas = "*"
