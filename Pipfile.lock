@@ -2010,6 +2010,14 @@
             "markers": "python_version >= '3.8'",
             "version": "==0.13.2"
         },
+        "setuptools": {
+            "hashes": [
+                "sha256:4880473a969e5f23f2a2be3646b2dfd84af9028716d398e46192f84bc36900d2",
+                "sha256:558e47c15f1811c1fa7adbd0096669bf76c1d3f433f58324df69f3f5ecac4e8f"
+            ],
+            "markers": "python_version >= '3.9'",
+            "version": "==75.8.2"
+        },
         "six": {
             "hashes": [
                 "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926",
@@ -2066,12 +2074,12 @@
         },
         "types-setuptools": {
             "hashes": [
-                "sha256:96f7ec8bbd6e0a54ea180d66ad68ad7a1d7954e7281a710ea2de75e355545271",
-                "sha256:a9f12980bbf9bcdc23ecd80755789085bad6bfce4060c2275bc2b4ca9f2bc480"
+                "sha256:a987269b49488f21961a1d99aa8d281b611625883def6392a93855b31544e405",
+                "sha256:ba80953fd1f5f49e552285c024f75b5223096a38a5138a54d18ddd3fa8f6a2d4"
             ],
             "index": "pypi",
-            "markers": "python_version >= '3.8'",
-            "version": "==75.8.0.20250110"
+            "markers": "python_version >= '3.9'",
+            "version": "==75.8.2.20250305"
         },
         "typing-extensions": {
             "hashes": [
