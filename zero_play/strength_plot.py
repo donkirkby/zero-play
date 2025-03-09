@@ -405,9 +405,7 @@ class GameRunner(QObject):
         self.request_queue = request_queue
         self.result_queue = result_queue
 
-    @Slot(PlayController,
-          WinCounter,
-          int)  # type: ignore
+    @Slot(PlayController, WinCounter, int)  # type: ignore
     def run_games(self,
                   controller: PlayController,
                   win_counter: WinCounter,
