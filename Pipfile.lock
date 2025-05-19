@@ -837,12 +837,12 @@
         },
         "nvidia-cudnn-cu11": {
             "hashes": [
-                "sha256:069b7888c8a1e12f935bbe71e8dd4db38d4d265c8ff9bb09852947b4c0cc45e6",
-                "sha256:0805b6287bb522a9dc74281e5ce549ecbdcf50b5ecbdb99d180b72caa0ffae89"
+                "sha256:a0e9fd1d9c1035580caf797943a99eb38d7a5f58cd4d4dceb7c3c3d9fd26fb5a",
+                "sha256:c983164d1291d3a0b7d185c68b2ae74ab0967a22a6c1e743b8befb7657f1cb64"
             ],
             "index": "pypi",
             "markers": "python_version >= '3'",
-            "version": "==9.10.0.56"
+            "version": "==9.10.1.4"
         },
         "oauthlib": {
             "hashes": [
