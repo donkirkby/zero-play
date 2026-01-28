@@ -1219,11 +1219,11 @@
         },
         "space-tracer": {
             "hashes": [
-                "sha256:755beb512bd9a4086b164010b875766dba8f8881e09fadcb90a0f1d038f9398a",
-                "sha256:76f285012ca829a2ff4839f2fa4bf3df3a084efcfbe5208c6b1531ea6ee28d58"
+                "sha256:56f59ab64baeb93e7a9142d074ba7b0e5de0699241ee907cb190ab2a46ba60fa",
+                "sha256:ff1ddc6f3b61f19c623b16783bdf638a380a9e3fc36645997b7b7e26ad3e2918"
             ],
             "index": "pypi",
-            "version": "==4.12.0"
+            "version": "==4.13.0"
         },
         "sqlalchemy": {
             "hashes": [
@@ -1290,6 +1290,14 @@
             "index": "pypi",
             "markers": "python_version >= '3.7'",
             "version": "==2.0.46"
+        },
+        "svgwrite": {
+            "hashes": [
+                "sha256:a8fbdfd4443302a6619a7f76bc937fc683daf2628d9b737c891ec08b8ce524c3",
+                "sha256:bb6b2b5450f1edbfa597d924f9ac2dd099e625562e492021d7dd614f65f8a22d"
+            ],
+            "markers": "python_version >= '3.6'",
+            "version": "==1.4.3"
         },
         "tensorboard": {
             "hashes": [
